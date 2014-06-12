@@ -132,11 +132,11 @@ Developers can use these filter hooks to modify some eWAY invoice properties. Ea
 
 == Changelog ==
 
-= 1.3.1 [2014-05-12] =
+= 1.3.1 [2014-06-12] =
 * fixed: admin scripts / stylesheet not loading, feed admin broken
 * fixed: don't attempt to make a payment when the total is 0, so form entry can still be submitted
 
-= 1.3.0 [2014-05-07] =
+= 1.3.0 [2014-06-07] =
 * fixed: hidden products are now correctly handled
 * fixed: shipping is now correctly handled
 * fixed: RGFormsModel::update_lead() is deprecated in Gravity Forms v1.8.8
