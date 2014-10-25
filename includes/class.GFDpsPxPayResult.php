@@ -84,7 +84,7 @@ class GFDpsPxPayResult {
 			$responseXML = GFDpsPxPayPlugin::curlSendRequest(GFDPSPXPAY_API_URL, $xml, $this->sslVerifyPeer);
 		}
 		catch (GFDpsPxPayCurlException $e) {
-			throw new GFDpsPxPayException("Error posting DPS PxPay result request to $url: " . $e->getMessage());
+			throw new GFDpsPxPayException("Error posting DPS PxPay result request: " . $e->getMessage());
 		}
 
 		$response = new GFDpsPxPayResultResponse();

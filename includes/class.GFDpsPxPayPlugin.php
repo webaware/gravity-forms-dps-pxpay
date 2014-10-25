@@ -99,27 +99,27 @@ class GFDpsPxPayPlugin {
 		// register the post type
 		register_post_type(GFDPSPXPAY_TYPE_FEED, array(
 			'labels' => array (
-				'name' => 'DPS PxPay Feeds',
-				'singular_name' => 'DPS PxPay Feed',
-				'add_new_item' => 'Add New DPS PxPay Feed',
-				'edit_item' => 'Edit DPS PxPay Feed',
-				'new_item' => 'New DPS PxPay Feed',
-				'view_item' => 'View DPS PxPay Feed',
-				'search_items' => 'Search DPS PxPay Feeds',
-				'not_found' => 'No DPS PxPay feeds found',
-				'not_found_in_trash' => 'No DPS PxPay feeds found in Trash',
-				'parent_item_colon' => 'Parent DPS PxPay feed',
+				'name'					=> 'DPS PxPay Feeds',
+				'singular_name'			=> 'DPS PxPay Feed',
+				'add_new_item'			=> 'Add New DPS PxPay Feed',
+				'edit_item'				=> 'Edit DPS PxPay Feed',
+				'new_item'				=> 'New DPS PxPay Feed',
+				'view_item'				=> 'View DPS PxPay Feed',
+				'search_items'			=> 'Search DPS PxPay Feeds',
+				'not_found'				=> 'No DPS PxPay feeds found',
+				'not_found_in_trash'	=> 'No DPS PxPay feeds found in Trash',
+				'parent_item_colon'		=> 'Parent DPS PxPay feed',
 			),
-			'description' => 'DPS PxPay Feeds, as a custom post type',
-			'public' => false,
-			'show_ui' => true,
-			'show_in_menu' => false,
-			'hierarchical' => false,
-			'has_archive' => false,
-			//~ 'capabilities' => array (
+			'description'				=> 'DPS PxPay Feeds, as a custom post type',
+			'public'					=> false,
+			'show_ui'					=> true,
+			'show_in_menu'				=> false,
+			'hierarchical'				=> false,
+			'has_archive'				=> false,
+			//~ 'capabilities'				=> array (
 			//~ ),
-			'supports' => array('null'),
-			'rewrite' => false,
+			'supports'					=> array('null'),
+			'rewrite'					=> false,
 		));
 	}
 
@@ -263,6 +263,7 @@ class GFDpsPxPayPlugin {
 	public function gformValidationMessage($msg, $form) {
 		if ($this->validationMessage) {
 			$msg = "<div class='validation_error'>" . nl2br($this->validationMessage) . "</div>";
+			$this->validationMessage = false;
 		}
 
 		return $msg;
@@ -310,28 +311,25 @@ class GFDpsPxPayPlugin {
 		// build a payment request and execute on API
 		list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
 		$paymentReq = new GFDpsPxPayPayment($userID, $userKey);
-		$paymentReq->txnType = 'Purchase';
-		$paymentReq->amount = $formData->total;
-		$paymentReq->currency = GFCommon::get_currency();
-		$paymentReq->transactionNumber = $transactionID;
-		$paymentReq->invoiceReference = $formData->MerchantReference;
-		$paymentReq->option1 = $formData->TxnData1;
-		$paymentReq->option2 = $formData->TxnData2;
-		$paymentReq->option3 = $formData->TxnData3;
-		$paymentReq->invoiceDescription = $feed->Opt;
-		$paymentReq->emailAddress = $formData->EmailAddress;
-		$paymentReq->urlSuccess = home_url(GFDPSPXPAY_RETURN);
-		$paymentReq->urlFail = home_url(GFDPSPXPAY_RETURN);			// NB: redirection will happen after transaction status is updated
+		$paymentReq->txnType			= 'Purchase';
+		$paymentReq->amount				= $formData->total;
+		$paymentReq->currency			= GFCommon::get_currency();
+		$paymentReq->transactionNumber	= $transactionID;
+		$paymentReq->invoiceReference	= $formData->MerchantReference;
+		$paymentReq->option1			= $formData->TxnData1;
+		$paymentReq->option2			= $formData->TxnData2;
+		$paymentReq->option3			= $formData->TxnData3;
+		$paymentReq->invoiceDescription	= $feed->Opt;
+		$paymentReq->emailAddress		= $formData->EmailAddress;
+		$paymentReq->urlSuccess			= home_url(GFDPSPXPAY_RETURN);
+		$paymentReq->urlFail			= home_url(GFDPSPXPAY_RETURN);			// NB: redirection will happen after transaction status is updated
 
 		// allow plugins/themes to modify invoice description and reference, and set option fields
-		$paymentReq->invoiceDescription = apply_filters('gfdpspxpay_invoice_desc', $paymentReq->invoiceDescription, $form);
-		$paymentReq->invoiceReference = apply_filters('gfdpspxpay_invoice_ref', $paymentReq->invoiceReference, $form);
-		$paymentReq->option1 = apply_filters('gfdpspxpay_invoice_txndata1', $paymentReq->option1, $form);
-		$paymentReq->option2 = apply_filters('gfdpspxpay_invoice_txndata2', $paymentReq->option2, $form);
-		$paymentReq->option3 = apply_filters('gfdpspxpay_invoice_txndata3', $paymentReq->option3, $form);
-
-//~ error_log(__METHOD__ . "\n" . print_r($paymentReq,1));
-//~ error_log(__METHOD__ . "\n" . $paymentReq->getPaymentXML());
+		$paymentReq->invoiceDescription	= apply_filters('gfdpspxpay_invoice_desc', $paymentReq->invoiceDescription, $form);
+		$paymentReq->invoiceReference	= apply_filters('gfdpspxpay_invoice_ref', $paymentReq->invoiceReference, $form);
+		$paymentReq->option1			= apply_filters('gfdpspxpay_invoice_txndata1', $paymentReq->option1, $form);
+		$paymentReq->option2			= apply_filters('gfdpspxpay_invoice_txndata2', $paymentReq->option2, $form);
+		$paymentReq->option3			= apply_filters('gfdpspxpay_invoice_txndata3', $paymentReq->option3, $form);
 
 		self::log_debug(sprintf('%s gateway, invoice ref: %s, transaction: %s, amount: %s',
 			$this->options['useTest'] ? 'test' : 'live',
@@ -339,8 +337,6 @@ class GFDpsPxPayPlugin {
 
 		try {
 			$response = $paymentReq->processPayment();
-
-//~ error_log(__METHOD__ . "\n" . print_r($response,1));
 
 			if ($response->isValid) {
 				// set lead payment status to Processing
@@ -388,13 +384,8 @@ class GFDpsPxPayPlugin {
 			$resultReq = new GFDpsPxPayResult($userID, $userKey);
 			$resultReq->result = stripslashes($args['result']);
 
-//~ error_log(__METHOD__ . "\n" . print_r($resultReq,1));
-//~ error_log(__METHOD__ . "\n" . $resultReq->getResultXML());
-
 			try {
 				$response = $resultReq->processResult();
-
-//~ error_log(__METHOD__ . "\n" . print_r($response,1));
 
 				if ($response->isValid) {
 					global $wpdb;
@@ -406,11 +397,11 @@ class GFDpsPxPayPlugin {
 
 					// update lead entry, with success/fail details
 					if ($response->success) {
-						$lead['payment_status'] = 'Approved';
-						$lead['payment_date'] = date('Y-m-d H:i:s');
-						$lead['payment_amount'] = $response->amount;
-						$lead['transaction_id'] = $response->txnRef;
-						$lead['transaction_type'] = 1;	// order
+						$lead['payment_status']		= 'Approved';
+						$lead['payment_date']		= date('Y-m-d H:i:s');
+						$lead['payment_amount']		= $response->amount;
+						$lead['transaction_id']		= $response->txnRef;
+						$lead['transaction_type']	= 1;	// order
 
 						// update the entry
 						if (class_exists('GFAPI')) {
@@ -431,9 +422,9 @@ class GFDpsPxPayPlugin {
 							$lead['payment_amount'], $response->authCode));
 					}
 					else {
-						$lead['payment_status'] = 'Failed';
-						$lead['transaction_id'] = $response->txnRef;
-						$lead['transaction_type'] = 1;	// order
+						$lead['payment_status']		= 'Failed';
+						$lead['transaction_id']		= $response->txnRef;
+						$lead['transaction_type']	= 1;	// order
 
 						// update the entry
 						if (class_exists('GFAPI')) {
@@ -478,8 +469,6 @@ class GFDpsPxPayPlugin {
 			// decode the encoded form and lead parameters
 			parse_str(base64_decode($_GET[GFDPSPXPAY_RETURN]), $query);
 
-//~ error_log(__METHOD__ . "\n" . print_r($query,1));
-
 			// make sure we have a match
 			if (wp_hash("form_id={$query['form_id']}&lead_id={$query['lead_id']}") == $query['hash']) {
 
@@ -500,10 +489,10 @@ class GFDpsPxPayPlugin {
 
 				// preload the GF submission, ready for processing the confirmation message
 				GFFormDisplay::$submission[$form['id']] = array(
-					'is_confirmation' => true,
-					'confirmation_message' => $confirmation,
-					'form' => $form,
-					'lead' => $lead,
+					'is_confirmation'		=> true,
+					'confirmation_message'	=> $confirmation,
+					'form'					=> $form,
+					'lead'					=> $lead,
 				);
 
 				// if order hasn't been fulfilled, and have defered actions, act now!
@@ -645,7 +634,7 @@ class GFDpsPxPayPlugin {
 	* @return array
 	*/
 	protected function getDpsCredentials($useTest) {
-		if ($this->options['useTest']) {
+		if ($useTest) {
 			return array($this->options['testID'], $this->options['testKey']);
 		}
 		else {
@@ -740,14 +729,12 @@ class GFDpsPxPayPlugin {
 	public static function curlSendRequest($url, $data, $sslVerifyPeer = true) {
 		// send data via HTTPS and receive response
 		$response = wp_remote_post($url, array(
-			'user-agent' => 'Gravity Forms DPS PxPay ' . GFDPSPXPAY_PLUGIN_VERSION,
-			'sslverify' => $sslVerifyPeer,
-			'timeout' => 60,
-			'headers' => array('Content-Type' => 'text/xml; charset=utf-8'),
-			'body' => $data,
+			'user-agent'	=> 'Gravity Forms DPS PxPay ' . GFDPSPXPAY_PLUGIN_VERSION,
+			'sslverify'		=> $sslVerifyPeer,
+			'timeout'		=> 60,
+			'headers'		=> array('Content-Type' => 'text/xml; charset=utf-8'),
+			'body'			=> $data,
 		));
-
-//~ error_log(__METHOD__ . "\n" . print_r($response,1));
 
 		if (is_wp_error($response)) {
 			throw new GFDpsPxPayCurlException($response->get_error_message());
