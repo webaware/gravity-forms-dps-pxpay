@@ -208,7 +208,7 @@ class GFDpsPxPayPayment {
 	protected function sendPaymentRequest($xml) {
 		// execute the cURL request, and retrieve the response
 		try {
-			$responseXML = GFDpsPxPayPlugin::curlSendRequest(GFDPSPXPAY_API_URL, $xml, $this->sslVerifyPeer);
+			$responseXML = GFDpsPxPayPlugin::curlSendRequest($xml, $this->sslVerifyPeer);
 		}
 		catch (GFDpsPxPayCurlException $e) {
 			throw new GFDpsPxPayException("Error posting DPS PxPay payment request: " . $e->getMessage());

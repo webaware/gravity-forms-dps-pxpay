@@ -17,6 +17,10 @@ class GFDpsPxPayPlugin {
 	private $feed = null;								// current feed mapping form fields to payment fields
 	private $formData = null;							// current form data collected from form
 
+	// end points for the DPS PxPay API
+	const PXPAY_APIV1_URL	= 'https://sec.paymentexpress.com/pxpay/pxaccess.aspx';
+	const PXPAY_APIV2_URL	= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
+
 	/**
 	* static method for getting the instance of this singleton object
 	* @return self
@@ -42,28 +46,47 @@ class GFDpsPxPayPlugin {
 		$this->urlBase = plugin_dir_url(GFDPSPXPAY_PLUGIN_FILE);
 
 		add_action('init', array($this, 'init'));
-		add_action('parse_request',  array($this, 'processDpsReturn'));		// process DPS PxPay return
-		add_action('wp',  array($this, 'processFormConfirmation'), 5);		// process redirect to GF confirmation
+		add_action('parse_request', array($this, 'processDpsReturn'));		// process DPS PxPay return
+		add_action('wp', array($this, 'processFormConfirmation'), 5);		// process redirect to GF confirmation
 	}
 
 	/**
 	* initialise plug-in options, handling undefined options by setting defaults
 	*/
 	private function initOptions() {
-		$defaults = array (
-			'userID' => '',
-			'userKey' => '',
-			'testID' => '',
-			'testKey' => '',
-			'useTest' => false,
-			'sslVerifyPeer' => true,
-		);
+		$this->options = get_option(GFDPSPXPAY_PLUGIN_OPTIONS);
+		if (!is_array($this->options)) {
+			$this->options = array();
+		}
 
-		$this->options = (array) get_option(GFDPSPXPAY_PLUGIN_OPTIONS);
+		$defaults = array (
+			'userID'			=> '',
+			'userKey'			=> '',
+			'testID'			=> '',
+			'testKey'			=> '',
+			'useTest'			=> false,
+			'sslVerifyPeer'		=> true,
+			'apiVersion'		=> isset($this->options['userID']) ? 1 : 2,	// default API version 2 for new installs, 1 for old
+		);
 
 		if (count(array_diff(array_keys($defaults), array_keys($this->options))) > 0) {
 			$this->options = array_merge($defaults, $this->options);
+			unset($this->options[0]);
 			update_option(GFDPSPXPAY_PLUGIN_OPTIONS, $this->options);
+		}
+	}
+
+	/**
+	* get PxPay API end-point for selected API version
+	* @return string
+	*/
+	public function getApiUrl() {
+		switch ($this->options['apiVersion']) {
+			case 2:
+				return self::PXPAY_APIV2_URL;
+
+			default:
+				return self::PXPAY_APIV1_URL;
 		}
 	}
 
@@ -753,14 +776,16 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
-	* send data via cURL (or similar if cURL is unavailable) and return response
-	* @param string $url
+	* send data via HTTP and return response
 	* @param string $data
 	* @param bool $sslVerifyPeer whether to validate the SSL certificate
 	* @return string $response
 	* @throws GFDpsPxPayCurlException
 	*/
-	public static function curlSendRequest($url, $data, $sslVerifyPeer = true) {
+	public static function curlSendRequest($data, $sslVerifyPeer = true) {
+		$plugin = self::getInstance();
+		$url = $plugin->getApiUrl();
+
 		// send data via HTTPS and receive response
 		$response = wp_remote_post($url, array(
 			'user-agent'	=> 'Gravity Forms DPS PxPay ' . GFDPSPXPAY_PLUGIN_VERSION,

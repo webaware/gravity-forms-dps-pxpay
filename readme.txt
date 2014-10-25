@@ -133,6 +133,7 @@ Developers can use these filter hooks to modify some eWAY invoice properties. Ea
 == Changelog ==
 
 = 1.3.4, soon... =
+* added: support for PxPay API v2.0, via option (default is v2.0 for new installs)
 * added: custom entry meta `authcode` and `payment_gateway` which can be added to listings, used in notification conditions
 * changed: code formatting, removed some unused variables
 

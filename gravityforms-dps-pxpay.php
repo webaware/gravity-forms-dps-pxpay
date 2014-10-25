@@ -40,9 +40,6 @@ if (!defined('GFDPSPXPAY_PLUGIN_ROOT')) {
 	// custom post types
 	define('GFDPSPXPAY_TYPE_FEED', 'gfdpspxpay_feed');
 
-	// end point for the DPS PxPay API
-	define('GFDPSPXPAY_API_URL', 'https://sec.paymentexpress.com/pxpay/pxaccess.aspx');
-
 	// end point for return to website
 	define('GFDPSPXPAY_RETURN', 'gfdpspxpay_return');
 }
