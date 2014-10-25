@@ -82,6 +82,7 @@ class GFDpsPxPayPlugin {
 		add_filter('gform_disable_notification', array($this, 'gformDelayNotification'), 10, 4);
 		add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
 		add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
+		add_filter('gform_entry_meta', array($this, 'gformEntryMeta'), 10, 2);
 
 		// register custom post types
 		$this->registerTypeFeed();
@@ -434,6 +435,9 @@ class GFDpsPxPayPlugin {
 							GFFormsModel::update_lead($lead);
 						}
 
+						// record empty bank authorisation code, so that we can test for it
+						gform_update_meta($lead['id'], 'authcode', '');
+
 						self::log_debug(sprintf('failed; %s', $response->statusText));
 
 						// redirect to failure page if set, otherwise fall through to redirect back to confirmation page
@@ -483,8 +487,9 @@ class GFDpsPxPayPlugin {
 				$lead = GFFormsModel::get_lead($query['lead_id']);
 
 				// get confirmation page
-				if (!class_exists('GFFormDisplay'))
+				if (!class_exists('GFFormDisplay')) {
 					require_once(GFCommon::get_base_path() . '/form_display.php');
+				}
 				$confirmation = GFFormDisplay::handle_confirmation($form, $lead, false);
 
 				// preload the GF submission, ready for processing the confirmation message
@@ -626,6 +631,35 @@ class GFDpsPxPayPlugin {
 		}
 
 		return $text;
+	}
+
+	/**
+	* activate and configure custom entry meta
+	* @param array $entry_meta
+	* @param int $form_id
+	* @return array
+	*/
+	public function gformEntryMeta($entry_meta, $form_id) {
+
+		$entry_meta['payment_gateway'] = array(
+			'label'					=> 'Payment Gateway',
+			'is_numeric'			=> false,
+			'is_default_column'		=> false,
+			'filter'				=> array(
+											'operators' => array('is', 'isnot')
+										),
+		);
+
+		$entry_meta['authcode'] = array(
+			'label'					=> 'AuthCode',
+			'is_numeric'			=> false,
+			'is_default_column'		=> false,
+			'filter'				=> array(
+											'operators' => array('is', 'isnot')
+										),
+		);
+
+		return $entry_meta;
 	}
 
 	/**
