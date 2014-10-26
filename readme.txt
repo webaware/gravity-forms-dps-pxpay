@@ -133,8 +133,10 @@ Developers can use these filter hooks to modify some eWAY invoice properties. Ea
 == Changelog ==
 
 = 1.3.4, soon... =
+* added: delay user registration until payment is processed
 * added: support for PxPay API v2.0, via option (default is v2.0 for new installs)
 * added: custom entry meta `authcode` and `payment_gateway` which can be added to listings, used in notification conditions
+* changed: **IMPORTANT**: defaults to only processing delayed notifications, post creation, user rego, on successful payment
 * changed: code formatting, removed some unused variables
 
 = 1.3.3, 2014-08-15 =
@@ -182,3 +184,8 @@ Developers can use these filter hooks to modify some eWAY invoice properties. Ea
 
 = 1.0.0, 2013-01-25 =
 * initial public release
+
+== Upgrade Notice ==
+
+= 1.3.4 =
+* **IMPORTANT**: defaults to only processing delayed notifications, post creation, user rego, on successful payment

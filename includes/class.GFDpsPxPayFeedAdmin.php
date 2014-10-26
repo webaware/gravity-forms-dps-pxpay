@@ -219,6 +219,8 @@ class GFDpsPxPayFeedAdmin {
 				'_gfdpspxpay_delay_post',
 				'_gfdpspxpay_delay_notify',
 				'_gfdpspxpay_delay_autorespond',
+				'_gfdpspxpay_delay_userrego',
+				'_gfdpspxpay_delay_exec_always',
 			);
 
 			if (isset($_POST['_gfdpspxpay_form'])) {

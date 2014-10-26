@@ -30,19 +30,18 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
-if (!defined('GFDPSPXPAY_PLUGIN_ROOT')) {
-	define('GFDPSPXPAY_PLUGIN_ROOT', dirname(__FILE__) . '/');
-	define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__FILE__));
-	define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
-	define('GFDPSPXPAY_PLUGIN_OPTIONS', 'gfdpspxpay_plugin');
-	define('GFDPSPXPAY_PLUGIN_VERSION', '1.3.4-dev');
+define('GFDPSPXPAY_PLUGIN_ROOT', dirname(__FILE__) . '/');
+define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__FILE__));
+define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
+define('GFDPSPXPAY_PLUGIN_OPTIONS', 'gfdpspxpay_plugin');
+define('GFDPSPXPAY_PLUGIN_VERSION', '1.3.4-dev');
 
-	// custom post types
-	define('GFDPSPXPAY_TYPE_FEED', 'gfdpspxpay_feed');
+// custom post types
+define('GFDPSPXPAY_TYPE_FEED', 'gfdpspxpay_feed');
 
-	// end point for return to website
-	define('GFDPSPXPAY_RETURN', 'gfdpspxpay_return');
-}
+// end point for return to website
+define('GFDPSPXPAY_RETURN', 'gfdpspxpay_return');
+
 
 /**
 * autoload classes as/when needed

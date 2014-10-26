@@ -103,6 +103,7 @@ class GFDpsPxPayPlugin {
 		add_filter('gform_disable_user_notification', array($this, 'gformDelayUserNotification'), 10, 3);
 		add_filter('gform_disable_admin_notification', array($this, 'gformDelayAdminNotification'), 10, 3);
 		add_filter('gform_disable_notification', array($this, 'gformDelayNotification'), 10, 4);
+		add_action('gform_after_submission', array($this, 'gformDelayUserRego'), 9, 2);
 		add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
 		add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
 		add_filter('gform_entry_meta', array($this, 'gformEntryMeta'), 10, 2);
@@ -196,7 +197,7 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
-	* filter whether form triggers admin notification (yet)
+	* filter whether form triggers notifications (yet)
 	* @param bool $is_disabled
 	* @param array $notification
 	* @param array $form
@@ -242,6 +243,22 @@ class GFDpsPxPayPlugin {
 			$form['id'], $lead['id'], $notification['name']));
 
 		return $is_disabled;
+	}
+
+	/**
+	* filter whether form triggers User Registration (yet)
+	* @param bool $is_disabled
+	* @param array $lead
+	* @param array $form
+	* @return array
+	*/
+	public function gformDelayUserRego($lead, $form) {
+		$feed = $this->getFeed($form['id']);
+		$is_disabled = !empty($feed->DelayUserrego);
+
+		if ($is_disabled) {
+			remove_action('gform_after_submission', array('GFUser', 'gf_create_user'), 10, 2);
+		}
 	}
 
 	/**
@@ -418,6 +435,7 @@ class GFDpsPxPayPlugin {
 
 					$lead = GFFormsModel::get_lead($lead_id);
 					$form = GFFormsModel::get_form_meta($lead['form_id']);
+					$feed = $this->getFeed($form['id']);
 
 					// update lead entry, with success/fail details
 					if ($response->success) {
@@ -426,14 +444,6 @@ class GFDpsPxPayPlugin {
 						$lead['payment_amount']		= $response->amount;
 						$lead['transaction_id']		= $response->txnRef;
 						$lead['transaction_type']	= 1;	// order
-
-						// update the entry
-						if (class_exists('GFAPI')) {
-							GFAPI::update_entry($lead);
-						}
-						else {
-							GFFormsModel::update_lead($lead);
-						}
 
 						// record bank authorisation code
 						gform_update_meta($lead['id'], 'authcode', $response->authCode);
@@ -450,21 +460,25 @@ class GFDpsPxPayPlugin {
 						$lead['transaction_id']		= $response->txnRef;
 						$lead['transaction_type']	= 1;	// order
 
-						// update the entry
-						if (class_exists('GFAPI')) {
-							GFAPI::update_entry($lead);
-						}
-						else {
-							GFFormsModel::update_lead($lead);
-						}
-
 						// record empty bank authorisation code, so that we can test for it
 						gform_update_meta($lead['id'], 'authcode', '');
 
 						self::log_debug(sprintf('failed; %s', $response->statusText));
+					}
 
-						// redirect to failure page if set, otherwise fall through to redirect back to confirmation page
-						$feed = $this->getFeed($form['id']);
+					// update the entry
+					if (class_exists('GFAPI')) {
+						GFAPI::update_entry($lead);
+					}
+					else {
+						GFFormsModel::update_lead($lead);
+					}
+
+					// if order hasn't been fulfilled, and have defered actions, act now!
+					$this->processDelayed($feed, $lead, $form);
+
+					// on failure, redirect to failure page if set, otherwise fall through to redirect back to confirmation page
+					if ($lead['payment_status']	== 'Failed') {
 						if ($feed->UrlFail) {
 							wp_redirect($feed->UrlFail);
 							exit;
@@ -523,21 +537,6 @@ class GFDpsPxPayPlugin {
 					'lead'					=> $lead,
 				);
 
-				// if order hasn't been fulfilled, and have defered actions, act now!
-				if (!$lead['is_fulfilled']) {
-					$feed = $this->getFeed($form['id']);
-
-					if ($feed->DelayPost) {
-						GFFormsModel::create_post($form, $lead);
-					}
-
-					if ($feed->DelayNotify || $feed->DelayAutorespond) {
-						$this->sendDeferredNotifications($feed, $form, $lead);
-					}
-
-					GFFormsModel::update_lead_property($lead['id'], 'is_fulfilled', true);
-				}
-
 				// if it's a redirection (page or other URL) then do the redirect now
 				if (is_array($confirmation) && isset($confirmation['redirect'])) {
 					header('Location: ' . $confirmation['redirect']);
@@ -548,19 +547,62 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
+	* process any delayed actions
+	* @param GFDpsPxPayFeed $feed
+	* @param array $lead
+	* @param array $form
+	*/
+	protected function processDelayed($feed, $lead, $form) {
+		// go no further if we've already done this
+		if ($lead['is_fulfilled']) {
+			return;
+		}
+
+		// default to only performing delayed actions if payment was successful, unless feed opts to always execute
+		// can filter each delayed action to permit / deny execution
+		$execute_delayed = ($lead['payment_status'] == 'Approved') || $feed->ExecDelayedAlways;
+
+		if ($feed->DelayPost) {
+			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $lead, $form, $feed)) {
+				$this->log_debug(sprintf('executing delayed post creation; form id %s, lead id %s', $form['id'], $lead['id']));
+				GFFormsModel::create_post($form, $lead);
+			}
+		}
+
+		if ($feed->DelayNotify || $feed->DelayAutorespond) {
+			$this->sendDeferredNotifications($feed, $form, $lead, $execute_delayed);
+		}
+
+		// record that basic delayed actions have been fulfilled, before attempting things that might fail
+		GFFormsModel::update_lead_property($lead['id'], 'is_fulfilled', true);
+
+		if ($feed->DelayUserrego && class_exists('GFUser')) {
+			if (apply_filters('gfdpspxpay_delayed_user_create', $execute_delayed, $lead, $form, $feed)) {
+				$this->log_debug(sprintf('executing delayed user creation; form id %s, lead id %s', $form['id'], $lead['id']));
+				GFUser::gf_create_user($lead, $form, true);
+			}
+		}
+	}
+
+	/**
 	* send deferred notifications, handling pre- and post-1.7.0 worlds
-	* @param array $feed
+	* @param GFDpsPxPayFeed $feed
 	* @param array $form the form submission data
 	* @param array $lead the form entry
+	* @param bool $execute_delayed
 	*/
-	protected function sendDeferredNotifications($feed, $form, $lead) {
+	protected function sendDeferredNotifications($feed, $form, $lead, $execute_delayed) {
 		if (self::versionCompareGF('1.7.0', '<')) {
 			// pre-1.7.0 notifications
 			if ($feed->DelayNotify) {
-				GFCommon::send_admin_notification($form, $lead);
+				if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, 'admin', $lead, $form, $feed)) {
+					GFCommon::send_admin_notification($form, $lead);
+				}
 			}
 			if ($feed->DelayAutorespond) {
-				GFCommon::send_user_notification($form, $lead);
+				if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, 'user', $lead, $form, $feed)) {
+					GFCommon::send_user_notification($form, $lead);
+				}
 			}
 		}
 		else {
@@ -570,14 +612,18 @@ class GFDpsPxPayPlugin {
 					// old "user" notification
 					case 'user':
 						if ($feed->DelayAutorespond) {
-							GFCommon::send_notification($notification, $form, $lead);
+							if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+								GFCommon::send_notification($notification, $form, $lead);
+							}
 						}
 						break;
 
 					// old "admin" notification
 					case 'admin':
 						if ($feed->DelayNotify) {
-							GFCommon::send_notification($notification, $form, $lead);
+							if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+								GFCommon::send_notification($notification, $form, $lead);
+							}
 						}
 						break;
 
@@ -585,12 +631,16 @@ class GFDpsPxPayPlugin {
 					default:
 						if (trim($notification['to']) == '{admin_email}') {
 							if ($feed->DelayNotify) {
-								GFCommon::send_notification($notification, $form, $lead);
+								if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+									GFCommon::send_notification($notification, $form, $lead);
+								}
 							}
 						}
 						else {
 							if ($feed->DelayAutorespond) {
-								GFCommon::send_notification($notification, $form, $lead);
+								if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+									GFCommon::send_notification($notification, $form, $lead);
+								}
 							}
 						}
 						break;
