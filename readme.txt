@@ -117,7 +117,7 @@ The plugin will run in shared hosting environments, but requires PHP 5 with the 
 
 == Filter hooks ==
 
-Developers can use these filter hooks to modify some eWAY invoice properties. Each filter receives a string for the field value, and the Gravity Forms form array.
+Developers can use these filter hooks to modify some invoice properties. Each filter receives a string for the field value, and the Gravity Forms form array.
 
 * `gfdpspxpay_invoice_desc` for modifying the invoice description
 * `gfdpspxpay_invoice_ref` for modifying the invoice reference
@@ -132,12 +132,14 @@ Developers can use these filter hooks to modify some eWAY invoice properties. Ea
 
 == Changelog ==
 
-= 1.3.4, soon... =
+= 1.4.0, soon... =
 * added: delay user registration until payment is processed
 * added: support for PxPay API v2.0, via option (default is v2.0 for new installs)
 * added: custom entry meta `authcode` and `payment_gateway` which can be added to listings, used in notification conditions
+* fixed: Gravity Forms 1.9 compatibility
 * changed: **IMPORTANT**: defaults to only processing delayed notifications, post creation, user rego, on successful payment
 * changed: code formatting, removed some unused variables
+* changed: minimum requirements now WordPress 3.7.1, Gravity Forms 1.7
 
 = 1.3.3, 2014-08-15 =
 * added: basic support for Gravity Forms Logging Add-On, to assist support requests

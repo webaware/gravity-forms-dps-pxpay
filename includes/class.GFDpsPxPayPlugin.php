@@ -13,13 +13,22 @@ class GFDpsPxPayPlugin {
 	public $urlBase;									// string: base URL path to files in plugin
 	public $options;									// array of plugin options
 
-	private $validationMessage = '';					// current feed mapping form fields to payment fields
-	private $feed = null;								// current feed mapping form fields to payment fields
-	private $formData = null;							// current form data collected from form
+	protected $validationMessage = '';					// last validation message
+	protected $errorMessage = false;					// last transaction error message
+	protected $paymentURL = false;						// where to redirect browser for payment
+
+	private $feed = null;								// current feed mapping form fields to payment fields, accessed through getFeed()
+	private $formData = null;							// current form data collected from form, accessed through getFormData()
 
 	// end points for the DPS PxPay API
 	const PXPAY_APIV1_URL	= 'https://sec.paymentexpress.com/pxpay/pxaccess.aspx';
 	const PXPAY_APIV2_URL	= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
+
+	// end point for return to website
+	const PXPAY_RETURN		= 'gfdpspxpay_return';
+
+	// minimum versions required
+	const MIN_VERSION_GF	= '1.7';
 
 	/**
 	* static method for getting the instance of this singleton object
@@ -94,22 +103,26 @@ class GFDpsPxPayPlugin {
 	* handle the plugin's init action
 	*/
 	public function init() {
-		// hook into Gravity Forms
-		add_filter('gform_logging_supported', array($this, 'enableLogging'));
-		add_filter('gform_validation', array($this, 'gformValidation'));
-		add_filter('gform_validation_message', array($this, 'gformValidationMessage'), 10, 2);
-		add_filter('gform_confirmation', array($this, 'gformConfirmation'), 1000, 4);
-		add_filter('gform_disable_post_creation', array($this, 'gformDelayPost'), 10, 3);
-		add_filter('gform_disable_user_notification', array($this, 'gformDelayUserNotification'), 10, 3);
-		add_filter('gform_disable_admin_notification', array($this, 'gformDelayAdminNotification'), 10, 3);
-		add_filter('gform_disable_notification', array($this, 'gformDelayNotification'), 10, 4);
-		add_action('gform_after_submission', array($this, 'gformDelayUserRego'), 9, 2);
-		add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
-		add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
-		add_filter('gform_entry_meta', array($this, 'gformEntryMeta'), 10, 2);
+		// do nothing if Gravity Forms isn't enabled or doesn't meet required minimum version
+		if (self::versionCompareGF(self::MIN_VERSION_GF, '>=')) {
+			// hook into Gravity Forms
+			add_filter('gform_logging_supported', array($this, 'enableLogging'));
+			add_filter('gform_validation', array($this, 'gformValidation'));
+			add_filter('gform_validation_message', array($this, 'gformValidationMessage'), 10, 2);
+			add_filter('gform_confirmation', array($this, 'gformConfirmation'), 1000, 4);
+			add_filter('gform_disable_post_creation', array($this, 'gformDelayPost'), 10, 3);
+			add_filter('gform_disable_user_notification', array($this, 'gformDelayUserNotification'), 10, 3);
+			add_filter('gform_disable_admin_notification', array($this, 'gformDelayAdminNotification'), 10, 3);
+			add_filter('gform_disable_notification', array($this, 'gformDelayNotification'), 10, 4);
+			add_action('gform_after_submission', array($this, 'gformDelayUserRego'), 9, 2);
+			add_action('gform_entry_post_save', array($this, 'gformEntryPostSave'), 10, 2);
+			add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
+			add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
+			add_filter('gform_entry_meta', array($this, 'gformEntryMeta'), 10, 2);
 
-		// register custom post types
-		$this->registerTypeFeed();
+			// register custom post types
+			$this->registerTypeFeed();
+		}
 
 		if (is_admin()) {
 			// kick off the admin handling
@@ -311,19 +324,12 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
-	* on form confirmation, send user's browser to DPS PxPay with required data
-	* @param mixed $confirmation text or redirect for form submission
-	* @param array $form the form submission data
-	* @param array $entry the form entry
-	* @param bool $ajax form submission via AJAX
-	* @return mixed
+	* form entry post-submission processing
+	* @param array $entry
+	* @param array $form
+	* @return array
 	*/
-	public function gformConfirmation($confirmation, $form, $entry, $ajax) {
-
-		// run away if not for the current form
-		if (RGForms::post('gform_submit') != $form['id']) {
-			return $confirmation;
-		}
+	public function gformEntryPostSave($entry, $form) {
 
 		// get feed mapping form fields to payment request, run away if not set
 		$feed = $this->getFeed($form['id']);
@@ -345,10 +351,6 @@ class GFDpsPxPayPlugin {
 		// allow plugins/themes to modify transaction ID; NB: must remain unique for PxPay account!
 		$transactionID = apply_filters('gfdpspxpay_invoice_trans_number', $transactionID, $form);
 
-		// record payment gateway and generated transaction number, for later reference
-		gform_update_meta($entry['id'], 'payment_gateway', 'gfdpspxpay');
-		gform_update_meta($entry['id'], 'gfdpspxpay_txn_id', $transactionID);
-
 		// build a payment request and execute on API
 		list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
 		$paymentReq = new GFDpsPxPayPayment($userID, $userKey);
@@ -362,8 +364,8 @@ class GFDpsPxPayPlugin {
 		$paymentReq->option3			= $formData->TxnData3;
 		$paymentReq->invoiceDescription	= $feed->Opt;
 		$paymentReq->emailAddress		= $formData->EmailAddress;
-		$paymentReq->urlSuccess			= home_url(GFDPSPXPAY_RETURN);
-		$paymentReq->urlFail			= home_url(GFDPSPXPAY_RETURN);			// NB: redirection will happen after transaction status is updated
+		$paymentReq->urlSuccess			= home_url(self::PXPAY_RETURN);
+		$paymentReq->urlFail			= home_url(self::PXPAY_RETURN);			// NB: redirection will happen after transaction status is updated
 
 		// allow plugins/themes to modify invoice description and reference, and set option fields
 		$paymentReq->invoiceDescription	= apply_filters('gfdpspxpay_invoice_desc', $paymentReq->invoiceDescription, $form);
@@ -376,28 +378,78 @@ class GFDpsPxPayPlugin {
 			$this->options['useTest'] ? 'test' : 'live',
 			$paymentReq->invoiceReference, $paymentReq->transactionNumber, $paymentReq->amount));
 
+		// basic transaction data
+		// NB: some are custom meta registered via gform_entry_meta
+		$entry['payment_gateway'] = 'gfdpspxpay';
+		$entry['authcode'] = '';
+		gform_update_meta($entry['id'], 'gfdpspxpay_txn_id', $transactionID);
+
+		// reduce risk of double-submission
+		gform_update_meta($entry['id'], 'gfdpspxpay_unique_id', GFFormsModel::get_form_unique_id($form['id']));
+
+		$this->errorMessage = '';
+
 		try {
 			$response = $paymentReq->processPayment();
 
 			if ($response->isValid) {
-				// set lead payment status to Processing
-				GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
-
-				// NB: GF handles redirect via JavaScript if headers already sent, or AJAX
-				$confirmation = array('redirect' => $response->paymentURL);
-
-				self::log_debug('Payment Express request valid, redirecting...');
+				$entry['payment_status'] = 'Processing';
+				$this->paymentURL = $response->paymentURL;
 			}
 			else {
-				self::log_debug('Payment Express request invalid');
+				$entry['payment_status'] = 'Failed';
+				$this->errorMessage = 'Payment Express request invalid.';
 			}
 		}
 		catch (GFDpsPxPayException $e) {
-			// TODO: what now?
-			GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Failed');
-			echo nl2br(esc_html($e->getMessage()));
-			self::log_error(__METHOD__ . ": " . $e->getMessage());
-			exit;
+			$entry['payment_status'] = 'Failed';
+			$this->errorMessage = $e->getMessage();
+		}
+
+		// update the entry
+		if (class_exists('GFAPI')) {
+			GFAPI::update_entry($entry);
+		}
+		else {
+			GFFormsModel::update_lead($entry);
+		}
+
+		return $entry;
+	}
+
+	/**
+	* on form confirmation, send user's browser to DPS PxPay with required data
+	* @param mixed $confirmation text or redirect for form submission
+	* @param array $form the form submission data
+	* @param array $entry the form entry
+	* @param bool $ajax form submission via AJAX
+	* @return mixed
+	*/
+	public function gformConfirmation($confirmation, $form, $entry, $ajax) {
+		if ($this->paymentURL) {
+			// NB: GF handles redirect via JavaScript if headers already sent, or AJAX
+			$confirmation = array('redirect' => $this->paymentURL);
+			self::log_debug('Payment Express request valid, redirecting...');
+
+			$this->paymentURL = false;
+		}
+
+		elseif ($this->errorMessage) {
+			$feed = $this->getFeed($form['id']);
+			if ($feed) {
+				// create a "confirmation message" in which to display the error
+				$default_anchor = count(GFCommon::get_fields_by_type($form, array('page'))) > 0 ? 1 : 0;
+				$default_anchor = apply_filters('gform_confirmation_anchor_'.$form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
+				$anchor = $default_anchor ? "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>" : '';
+				$cssClass = rgar($form, 'cssClass');
+				$error_msg = esc_html($this->errorMessage);
+
+				ob_start();
+				include GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-failure.php';
+				$confirmation = ob_get_clean();
+			}
+
+			$this->errorMessage = false;
 		}
 
 		return $confirmation;
@@ -419,7 +471,7 @@ class GFDpsPxPayPlugin {
 		}
 
 		// check for request path containing our path element, and a result argument
-		if (strpos($path, GFDPSPXPAY_RETURN) !== false && isset($args['result'])) {
+		if (strpos($path, self::PXPAY_RETURN) !== false && isset($args['result'])) {
 			list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
 
 			$resultReq = new GFDpsPxPayResult($userID, $userKey);
@@ -444,12 +496,7 @@ class GFDpsPxPayPlugin {
 						$lead['payment_amount']		= $response->amount;
 						$lead['transaction_id']		= $response->txnRef;
 						$lead['transaction_type']	= 1;	// order
-
-						// record bank authorisation code
-						gform_update_meta($lead['id'], 'authcode', $response->authCode);
-
-						// record entry's unique ID in database
-						gform_update_meta($lead['id'], 'gfdpspxpay_unique_id', GFFormsModel::get_form_unique_id($form['id']));
+						$lead['authcode']			= $response->authCode;
 
 						self::log_debug(sprintf('success, date = %s, id = %s, status = %s, amount = %s, authcode = %s',
 							$lead['payment_date'], $lead['transaction_id'], $lead['payment_status'],
@@ -461,7 +508,7 @@ class GFDpsPxPayPlugin {
 						$lead['transaction_type']	= 1;	// order
 
 						// record empty bank authorisation code, so that we can test for it
-						gform_update_meta($lead['id'], 'authcode', '');
+						$lead['authcode'] = '';
 
 						self::log_debug(sprintf('failed; %s', $response->statusText));
 					}
@@ -488,7 +535,7 @@ class GFDpsPxPayPlugin {
 					// redirect to Gravity Forms page, passing form and lead IDs, encoded to deter simple attacks
 					$query = "form_id={$lead['form_id']}&lead_id={$lead['id']}";
 					$query .= "&hash=" . wp_hash($query);
-					wp_redirect(add_query_arg(array(GFDPSPXPAY_RETURN => base64_encode($query)), $lead['source_url']));
+					wp_redirect(add_query_arg(array(self::PXPAY_RETURN => base64_encode($query)), $lead['source_url']));
 					exit;
 				}
 			}
@@ -506,9 +553,9 @@ class GFDpsPxPayPlugin {
 	*/
 	public function processFormConfirmation() {
 		// check for redirect to Gravity Forms page with our encoded parameters
-		if (isset($_GET[GFDPSPXPAY_RETURN])) {
+		if (isset($_GET[self::PXPAY_RETURN])) {
 			// decode the encoded form and lead parameters
-			parse_str(base64_decode($_GET[GFDPSPXPAY_RETURN]), $query);
+			parse_str(base64_decode($_GET[self::PXPAY_RETURN]), $query);
 
 			// make sure we have a match
 			if (wp_hash("form_id={$query['form_id']}&lead_id={$query['lead_id']}") == $query['hash']) {
@@ -762,7 +809,11 @@ class GFDpsPxPayPlugin {
 		$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key='gfdpspxpay_unique_id' and meta_value = %s";
 		$lead_id = $wpdb->get_var($wpdb->prepare($sql, $unique_id));
 
-		return !empty($lead_id);
+		if ($lead_id) {
+			$entry = GFFormsModel::get_lead($this->txResult['lead_id']);
+		}
+
+		return !empty($entry['payment_status']);
 	}
 
 	/**

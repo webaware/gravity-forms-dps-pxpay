@@ -123,6 +123,9 @@ class GFDpsPxPayAdmin {
 		if (!self::isGfActive()) {
 			include GFDPSPXPAY_PLUGIN_ROOT . 'views/requires-gravity-forms.php';
 		}
+		elseif (GFDpsPxPayPlugin::versionCompareGF(GFDpsPxPayPlugin::MIN_VERSION_GF, '<')) {
+			include GFDPSPXPAY_PLUGIN_ROOT . 'views/requires-gravity-forms-upgrade.php';
+		}
 	}
 
 	/**
