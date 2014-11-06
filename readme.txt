@@ -190,5 +190,5 @@ Developers can use these filter hooks to modify some invoice properties. Each fi
 
 == Upgrade Notice ==
 
-= 1.3.4 =
+= 1.4.0 =
 * **IMPORTANT**: defaults to only processing delayed notifications, post creation, user rego, on successful payment
