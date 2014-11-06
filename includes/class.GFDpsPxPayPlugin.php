@@ -25,7 +25,7 @@ class GFDpsPxPayPlugin {
 	const PXPAY_APIV2_URL	= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
 
 	// end point for return to website
-	const PXPAY_RETURN		= 'gfdpspxpay_return';
+	const PXPAY_RETURN		= 'PXPAYRETURN';
 
 	// minimum versions required
 	const MIN_VERSION_GF	= '1.7';
@@ -92,9 +92,11 @@ class GFDpsPxPayPlugin {
 	public function getApiUrl() {
 		switch ($this->options['apiVersion']) {
 			case 2:
+				self::log_debug('Using PxPay 2.0 API');
 				return self::PXPAY_APIV2_URL;
 
 			default:
+				self::log_debug('Using PxPay 1.0 API');
 				return self::PXPAY_APIV1_URL;
 		}
 	}
@@ -374,9 +376,13 @@ class GFDpsPxPayPlugin {
 		$paymentReq->option2			= apply_filters('gfdpspxpay_invoice_txndata2', $paymentReq->option2, $form);
 		$paymentReq->option3			= apply_filters('gfdpspxpay_invoice_txndata3', $paymentReq->option3, $form);
 
-		self::log_debug(sprintf('%s gateway, invoice ref: %s, transaction: %s, amount: %s',
+		self::log_debug('========= initiating transaction request');
+		self::log_debug(sprintf('%s account, invoice ref: %s, transaction: %s, amount: %s',
 			$this->options['useTest'] ? 'test' : 'live',
 			$paymentReq->invoiceReference, $paymentReq->transactionNumber, $paymentReq->amount));
+
+		self::log_debug(sprintf('success URL: %s', $paymentReq->urlSuccess));
+		self::log_debug(sprintf('failure URL: %s', $paymentReq->urlFail));
 
 		// basic transaction data
 		// NB: some are custom meta registered via gform_entry_meta
@@ -475,9 +481,10 @@ class GFDpsPxPayPlugin {
 			list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
 
 			$resultReq = new GFDpsPxPayResult($userID, $userKey);
-			$resultReq->result = stripslashes($args['result']);
+			$resultReq->result = wp_unslash($args['result']);
 
 			try {
+				self::log_debug('========= requesting transaction result');
 				$response = $resultReq->processResult();
 
 				if ($response->isValid) {

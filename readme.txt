@@ -7,7 +7,7 @@ Donate link: http://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 3.7.1
 Tested up to: 4.0
-Stable tag: 1.3.3
+Stable tag: 1.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,12 +132,13 @@ Developers can use these filter hooks to modify some invoice properties. Each fi
 
 == Changelog ==
 
-= 1.4.0, soon... =
+= 1.4.0, 2014-11-06 =
 * added: delay user registration until payment is processed
 * added: support for PxPay API v2.0, via option (default is v2.0 for new installs)
 * added: custom entry meta `authcode` and `payment_gateway` which can be added to listings, used in notification conditions
 * fixed: Gravity Forms 1.9 compatibility
 * changed: **IMPORTANT**: defaults to only processing delayed notifications, post creation, user rego, on successful payment
+* changed: order feeds in admin by name, not by date created
 * changed: code formatting, removed some unused variables
 * changed: minimum requirements now WordPress 3.7.1, Gravity Forms 1.7
 
