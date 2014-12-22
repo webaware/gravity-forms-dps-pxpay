@@ -487,6 +487,8 @@ class GFDpsPxPayPlugin {
 				self::log_debug('========= requesting transaction result');
 				$response = $resultReq->processResult();
 
+				do_action('gfdpspxpay_process_return');
+
 				if ($response->isValid) {
 					global $wpdb;
 					$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key='gfdpspxpay_txn_id' and meta_value = %s";
@@ -561,6 +563,8 @@ class GFDpsPxPayPlugin {
 	public function processFormConfirmation() {
 		// check for redirect to Gravity Forms page with our encoded parameters
 		if (isset($_GET[self::PXPAY_RETURN])) {
+			do_action('gfdpspxpay_process_confirmation');
+
 			// decode the encoded form and lead parameters
 			parse_str(base64_decode($_GET[self::PXPAY_RETURN]), $query);
 

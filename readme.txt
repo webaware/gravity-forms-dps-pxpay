@@ -132,6 +132,9 @@ Developers can use these filter hooks to modify some invoice properties. Each fi
 
 == Changelog ==
 
+= 1.4.2, soon... =
+* added: hooks `gfdpspxpay_process_return` and `gfdpspxpay_process_confirmation`
+
 = 1.4.1, 2014-11-22 =
 * fixed: **IMPORTANT**: forms with no DPS PxPay feeds were sending blank notification emails (sorry Josh!)
 
