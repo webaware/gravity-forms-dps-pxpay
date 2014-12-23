@@ -506,6 +506,9 @@ class GFDpsPxPayPlugin {
 						$lead['transaction_id']		= $response->txnRef;
 						$lead['transaction_type']	= 1;	// order
 						$lead['authcode']			= $response->authCode;
+						if (!empty($response->currencySettlement)) {
+							$lead['currency']			= $response->currencySettlement;
+						}
 
 						self::log_debug(sprintf('success, date = %s, id = %s, status = %s, amount = %s, authcode = %s',
 							$lead['payment_date'], $lead['transaction_id'], $lead['payment_status'],
@@ -743,7 +746,16 @@ class GFDpsPxPayPlugin {
 			$authCode = gform_get_meta($lead['id'], 'authcode');
 
 			// format payment amount as currency
-			$payment_amount = isset($lead['payment_amount']) ? GFCommon::format_number($lead['payment_amount'], 'currency') : '';
+			if (isset($lead['payment_amount'])) {
+				if (!class_exists('RGCurrency')) {
+					require_once(GFCommon::get_base_path() . '/currency.php');
+				}
+				$currency = new RGCurrency(!empty($lead['currency']) ? $lead['currency'] : GFCommon::get_currency());
+				$payment_amount = $currency->to_money($lead['payment_amount']);
+			}
+			else {
+				$payment_amount = '';
+			}
 
 			$tags = array (
 				'{transaction_id}',
