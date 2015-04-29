@@ -25,7 +25,7 @@ Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS PxPay](http:
 
 = Sponsorships =
 
-* creation of this plugin was generously sponsored by [IstanbulMMV](http://profiles.wordpress.org/IstanbulMMV/profile/)
+* creation of this plugin was generously sponsored by [IstanbulMMV](https://profiles.wordpress.org/IstanbulMMV/profile/)
 
 Thanks for sponsoring new features on Gravity Forms DPS PxPay!
 
