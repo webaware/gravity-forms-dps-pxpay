@@ -405,11 +405,13 @@ class GFDpsPxPayPlugin {
 			else {
 				$entry['payment_status'] = 'Failed';
 				$this->errorMessage = 'Payment Express request invalid.';
+				self::log_debug($this->errorMessage);
 			}
 		}
 		catch (GFDpsPxPayException $e) {
 			$entry['payment_status'] = 'Failed';
 			$this->errorMessage = $e->getMessage();
+			self::log_debug($this->errorMessage);
 		}
 
 		// update the entry
@@ -432,15 +434,7 @@ class GFDpsPxPayPlugin {
 	* @return mixed
 	*/
 	public function gformConfirmation($confirmation, $form, $entry, $ajax) {
-		if ($this->paymentURL) {
-			// NB: GF handles redirect via JavaScript if headers already sent, or AJAX
-			$confirmation = array('redirect' => $this->paymentURL);
-			self::log_debug('Payment Express request valid, redirecting...');
-
-			$this->paymentURL = false;
-		}
-
-		elseif ($this->errorMessage) {
+		if ($this->errorMessage) {
 			$feed = $this->getFeed($form['id']);
 			if ($feed) {
 				// create a "confirmation message" in which to display the error
@@ -454,9 +448,17 @@ class GFDpsPxPayPlugin {
 				include GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-failure.php';
 				$confirmation = ob_get_clean();
 			}
-
-			$this->errorMessage = false;
 		}
+
+		elseif ($this->paymentURL) {
+			// NB: GF handles redirect via JavaScript if headers already sent, or AJAX
+			$confirmation = array('redirect' => $this->paymentURL);
+			self::log_debug('Payment Express request valid, redirecting to: ' . $this->paymentURL);
+		}
+
+		// reset transient members
+		$this->errorMessage = false;
+		$this->paymentURL = false;
 
 		return $confirmation;
 	}
