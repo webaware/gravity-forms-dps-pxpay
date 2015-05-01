@@ -541,7 +541,7 @@ class GFDpsPxPayPlugin {
 					// on failure, redirect to failure page if set, otherwise fall through to redirect back to confirmation page
 					if ($lead['payment_status']	== 'Failed') {
 						if ($feed->UrlFail) {
-							wp_redirect($feed->UrlFail);
+							wp_redirect(esc_url_raw($feed->UrlFail));
 							exit;
 						}
 					}
@@ -549,7 +549,8 @@ class GFDpsPxPayPlugin {
 					// redirect to Gravity Forms page, passing form and lead IDs, encoded to deter simple attacks
 					$query = "form_id={$lead['form_id']}&lead_id={$lead['id']}";
 					$query .= "&hash=" . wp_hash($query);
-					wp_redirect(add_query_arg(array(self::PXPAY_RETURN => base64_encode($query)), $lead['source_url']));
+					$redirect_url = esc_url_raw(add_query_arg(array(self::PXPAY_RETURN => base64_encode($query)), $lead['source_url']));
+					wp_redirect($redirect_url);
 					exit;
 				}
 			}

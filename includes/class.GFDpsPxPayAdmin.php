@@ -134,7 +134,7 @@ class GFDpsPxPayAdmin {
 	public function addPluginActionLinks($links) {
 		// add settings link, but only if GravityForms plugin is active
 		if (self::isGfActive()) {
-			$settings_link = sprintf('<a href="%s">Settings</a>', admin_url('admin.php?page=gf_settings&subview=DPS+PxPay'));
+			$settings_link = sprintf('<a href="%s">Settings</a>', esc_url(admin_url('admin.php?page=gf_settings&subview=DPS+PxPay')));
 			array_unshift($links, $settings_link);
 		}
 
@@ -217,6 +217,8 @@ class GFDpsPxPayAdmin {
 	* @return array
 	*/
 	public function settingsValidate($input) {
+		$output = array();
+
 		$output['userID']			= trim($input['userID']);
 		$output['userKey']			= trim($input['userKey']);
 		$output['testID']			= trim($input['testID']);
