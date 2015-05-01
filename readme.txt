@@ -142,6 +142,8 @@ Developers can run processes on these actions (e.g. load classes required to han
 * fixed: error reporting when initial request fails, e.g. with API key error
 * fixed: error handling logic with redirect as confirmation
 * added: some more precautionary XSS prevention steps
+* added: action `gfdpspxpay_process_return_parsed` with `$lead`, `$form`, `$feed`
+* added: action `gfdpspxpay_process_confirmation_parsed` with `$entry`, `$form`
 
 = 1.4.2, 2014-12-23 =
 * added: hooks `gfdpspxpay_process_return` and `gfdpspxpay_process_confirmation`

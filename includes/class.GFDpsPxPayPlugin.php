@@ -500,6 +500,8 @@ class GFDpsPxPayPlugin {
 					$form = GFFormsModel::get_form_meta($lead['form_id']);
 					$feed = $this->getFeed($form['id']);
 
+					do_action('gfdpspxpay_process_return_parsed', $lead, $form, $feed);
+
 					// update lead entry, with success/fail details
 					if ($response->success) {
 						$lead['payment_status']		= 'Approved';
@@ -586,6 +588,8 @@ class GFDpsPxPayPlugin {
 				// load form and lead data
 				$form = GFFormsModel::get_form_meta($query['form_id']);
 				$lead = GFFormsModel::get_lead($query['lead_id']);
+
+				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
 				// get confirmation page
 				if (!class_exists('GFFormDisplay')) {
