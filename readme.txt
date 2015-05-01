@@ -137,6 +137,11 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Changelog ==
 
+= 1.4.3, soon... =
+
+* fixed: error reporting when initial request fails, e.g. with API key error
+* fixed: error handling logic with redirect as confirmation
+
 = 1.4.2, 2014-12-23 =
 * added: hooks `gfdpspxpay_process_return` and `gfdpspxpay_process_confirmation`
 * changed: merge tags use currency of transaction for amount display
