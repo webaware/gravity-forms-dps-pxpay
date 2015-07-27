@@ -8,4 +8,4 @@ Integrate [Gravity Forms](http://webaware.com.au/get-gravity-forms) with the DPS
 * [Download](https://wordpress.org/plugins/gravity-forms-dps-pxpay/)
 * [Documentation](https://wordpress.org/plugins/gravity-forms-dps-pxpay/faq/)
 * [Support](https://wordpress.org/support/plugin/gravity-forms-dps-pxpay)
-* [Donate](http://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/)
+* [Donate](http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay)
