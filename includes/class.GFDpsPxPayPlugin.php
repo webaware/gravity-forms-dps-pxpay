@@ -522,8 +522,10 @@ class GFDpsPxPayPlugin {
 						GFFormsModel::update_lead($lead);
 					}
 
-					// if order hasn't been fulfilled, process any defered actions
+					// if order hasn't been fulfilled, process any deferred actions
 					if (!$lead['is_fulfilled']) {
+						self::log_debug('processing deferred actions');
+
 						$this->processDelayed($feed, $lead, $form);
 
 						// allow hookers to trigger their own actions
