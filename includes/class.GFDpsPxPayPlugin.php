@@ -48,6 +48,8 @@ class GFDpsPxPayPlugin {
 	* initialise plugin
 	*/
 	private function __construct() {
+		spl_autoload_register(array(__CLASS__, 'autoload'));
+
 		// grab options, setting new defaults for any that are missing
 		$this->initOptions();
 
@@ -128,6 +130,7 @@ class GFDpsPxPayPlugin {
 
 		if (is_admin()) {
 			// kick off the admin handling
+			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayAdmin.php';
 			new GFDpsPxPayAdmin($this);
 		}
 	}
@@ -945,6 +948,24 @@ class GFDpsPxPayPlugin {
 		}
 
 		return false;
+	}
+
+	/**
+	* autoload classes as/when needed
+	*
+	* @param string $class_name name of class to attempt to load
+	*/
+	public static function autoload($class_name) {
+		static $classMap = array (
+			'GFDpsPxPayFeed'						=> 'includes/class.GFDpsPxPayFeed.php',
+			'GFDpsPxPayFormData'					=> 'includes/class.GFDpsPxPayFormData.php',
+			'GFDpsPxPayPayment'						=> 'includes/class.GFDpsPxPayPayment.php',
+			'GFDpsPxPayResult'						=> 'includes/class.GFDpsPxPayResult.php',
+		);
+
+		if (isset($classMap[$class_name])) {
+			require GFDPSPXPAY_PLUGIN_ROOT . $classMap[$class_name];
+		}
 	}
 
 }

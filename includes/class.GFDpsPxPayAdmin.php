@@ -72,6 +72,7 @@ class GFDpsPxPayAdmin {
 		}
 
 		if ($typenow && $typenow == GFDPSPXPAY_TYPE_FEED) {
+			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayFeedAdmin.php';
 			new GFDpsPxPayFeedAdmin($this->plugin);
 		}
 
