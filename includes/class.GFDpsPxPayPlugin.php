@@ -959,6 +959,7 @@ class GFDpsPxPayPlugin {
 	public static function autoload($class_name) {
 		static $classMap = array (
 			'GFDpsPxPayFeed'						=> 'includes/class.GFDpsPxPayFeed.php',
+			'GFDpsPxPayFeedAdmin'					=> 'includes/class.GFDpsPxPayFeedAdmin.php',
 			'GFDpsPxPayFormData'					=> 'includes/class.GFDpsPxPayFormData.php',
 			'GFDpsPxPayPayment'						=> 'includes/class.GFDpsPxPayPayment.php',
 			'GFDpsPxPayResult'						=> 'includes/class.GFDpsPxPayResult.php',
