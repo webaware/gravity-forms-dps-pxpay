@@ -540,8 +540,14 @@ class GFDpsPxPayPlugin {
 						GFFormsModel::update_lead($lead);
 					}
 
-					// if order hasn't been fulfilled, and have defered actions, act now!
-					$this->processDelayed($feed, $lead, $form);
+					// if order hasn't been fulfilled, process any defered actions
+					if (!$lead['is_fulfilled']) {
+						$this->processDelayed($feed, $lead, $form);
+
+						// allow hookers to trigger their own actions
+						$hook_status = $response->success ? 'approved' : 'failed';
+						do_action("gfdpspxpay_process_{$hook_status}", $lead, $form, $feed);
+					}
 
 					// on failure, redirect to failure page if set, otherwise fall through to redirect back to confirmation page
 					if ($lead['payment_status']	== 'Failed') {
@@ -624,11 +630,6 @@ class GFDpsPxPayPlugin {
 	* @param array $form
 	*/
 	protected function processDelayed($feed, $lead, $form) {
-		// go no further if we've already done this
-		if ($lead['is_fulfilled']) {
-			return;
-		}
-
 		// default to only performing delayed actions if payment was successful, unless feed opts to always execute
 		// can filter each delayed action to permit / deny execution
 		$execute_delayed = ($lead['payment_status'] == 'Approved') || $feed->ExecDelayedAlways;
