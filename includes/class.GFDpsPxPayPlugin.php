@@ -485,6 +485,9 @@ class GFDpsPxPayPlugin {
 					$form = GFFormsModel::get_form_meta($lead['form_id']);
 					$feed = $this->getFeed($form['id']);
 
+					// capture current state of lead
+					$initial_status = $lead['payment_status'];
+
 					do_action('gfdpspxpay_process_return_parsed', $lead, $form, $feed);
 
 					// update lead entry, with success/fail details
@@ -523,7 +526,7 @@ class GFDpsPxPayPlugin {
 					}
 
 					// if order hasn't been fulfilled, process any deferred actions
-					if (!$lead['is_fulfilled']) {
+					if ($initial_status === 'Processing') {
 						self::log_debug('processing deferred actions');
 
 						$this->processDelayed($feed, $lead, $form);
