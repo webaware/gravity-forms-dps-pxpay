@@ -21,7 +21,6 @@ class GFDpsPxPayPlugin {
 	private $formData = null;							// current form data collected from form, accessed through getFormData()
 
 	// end points for the DPS PxPay API
-	const PXPAY_APIV1_URL	= 'https://sec.paymentexpress.com/pxpay/pxaccess.aspx';
 	const PXPAY_APIV2_URL	= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
 
 	// end point for return to website
@@ -77,29 +76,12 @@ class GFDpsPxPayPlugin {
 			'testKey'			=> '',
 			'useTest'			=> false,
 			'sslVerifyPeer'		=> true,
-			'apiVersion'		=> isset($this->options['userID']) ? 1 : 2,	// default API version 2 for new installs, 1 for old
 		);
 
 		if (count(array_diff(array_keys($defaults), array_keys($this->options))) > 0) {
 			$this->options = array_merge($defaults, $this->options);
 			unset($this->options[0]);
 			update_option(GFDPSPXPAY_PLUGIN_OPTIONS, $this->options);
-		}
-	}
-
-	/**
-	* get PxPay API end-point for selected API version
-	* @return string
-	*/
-	public function getApiUrl() {
-		switch ($this->options['apiVersion']) {
-			case 2:
-				self::log_debug('Using PxPay 2.0 API');
-				return self::PXPAY_APIV2_URL;
-
-			default:
-				self::log_debug('Using PxPay 1.0 API');
-				return self::PXPAY_APIV1_URL;
 		}
 	}
 
@@ -919,7 +901,7 @@ class GFDpsPxPayPlugin {
 	*/
 	public static function curlSendRequest($data, $sslVerifyPeer = true) {
 		$plugin = self::getInstance();
-		$url = $plugin->getApiUrl();
+		$url    = self::PXPAY_APIV2_URL;
 
 		// send data via HTTPS and receive response
 		$response = wp_remote_post($url, array(

@@ -5,6 +5,7 @@
 ### 1.5.0, soon...
 
 * added: actions `gfdpspxpay_process_approved` and `gfdpspxpay_process_failed` for hookers adding custom actions upon return from Payment Express
+* changed: removed PxPay v1.0 API, only uses PxPay v2.0 now
 
 ### 1.4.3, 2015-05-01
 

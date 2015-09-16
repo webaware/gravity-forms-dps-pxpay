@@ -224,7 +224,6 @@ class GFDpsPxPayAdmin {
 		$output['testID']			= trim($input['testID']);
 		$output['testKey']			= trim($input['testKey']);
 		$output['useTest']			= empty($input['useTest']) ? 0 : 1;
-		$output['apiVersion']		= empty($input['apiVersion']) ? 1 : absint($input['apiVersion']);
 		$output['sslVerifyPeer']	= 1;		// always set (for now anyway!)
 
 		if (empty($output['userID'])) {

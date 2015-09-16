@@ -1,12 +1,9 @@
 <?php
 // settings form
-
-global $wp_version;
 ?>
 
 <?php settings_errors(); ?>
 
-<?php if (version_compare($wp_version, '3.8', '<')) screen_icon(); ?>
 <h3>DPS PxPay Settings</h3>
 
 <form action="<?php echo admin_url('options.php'); ?>" method="POST">
@@ -51,15 +48,6 @@ global $wp_version;
 		<th>Test Key</th>
 		<td>
 			<input type="text" class="large-text" name="gfdpspxpay_plugin[testKey]" value="<?php echo esc_attr($options['testKey']); ?>" />
-		</td>
-	</tr>
-
-	<tr valign="top">
-		<th>PxPay API version</th>
-		<td>
-			<label><input type="radio" name="gfdpspxpay_plugin[apiVersion]" value="1" <?php checked($options['apiVersion'], '1'); ?> />&nbsp;version 1</label>
-			<br />
-			<label><input type="radio" name="gfdpspxpay_plugin[apiVersion]" value="2" <?php checked($options['apiVersion'], '2'); ?> />&nbsp;version 2</label>
 		</td>
 	</tr>
 
