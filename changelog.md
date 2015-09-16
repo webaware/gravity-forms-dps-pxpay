@@ -2,8 +2,9 @@
 
 ## Changelog
 
-### 1.5.0, soon...
+### 1.5.0, 2015-09-16
 
+* fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
 * added: actions `gfdpspxpay_process_approved` and `gfdpspxpay_process_failed` for hookers adding custom actions upon return from Payment Express
 * changed: removed PxPay v1.0 API, only uses PxPay v2.0 now
 
