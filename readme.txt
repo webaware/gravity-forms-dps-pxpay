@@ -6,7 +6,7 @@ Author URI: http://webaware.com.au/
 Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 3.7.1
-Tested up to: 4.3
+Tested up to: 4.3.1
 Stable tag: 1.4.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -132,12 +132,18 @@ Developers can run processes on these actions (e.g. load classes required to han
 * `gfdpspxpay_process_return_parsed`
 * `gfdpspxpay_process_confirmation`
 * `gfdpspxpay_process_confirmation_parsed`
+* `gfdpspxpay_process_approved`
+* `gfdpspxpay_process_failed`
 
 == Contributions ==
 
 * [Fork me on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/)
 
 == Changelog ==
+
+= 1.5.0, soon... =
+
+* added: actions `gfdpspxpay_process_approved` and `gfdpspxpay_process_failed` for hookers adding custom actions upon return from Payment Express
 
 = 1.4.3, 2015-05-01 =
 
