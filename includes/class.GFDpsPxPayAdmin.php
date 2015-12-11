@@ -23,6 +23,9 @@ class GFDpsPxPayAdmin {
 		// only if Gravity Forms is activated
 		if (class_exists('GFCommon')) {
 
+			// let Gravity Forms determine who has access to settings
+			add_filter('option_page_capability_' . GFDPSPXPAY_PLUGIN_OPTIONS, array($this, 'optionPageCapability'));
+
 			// GravityForms hooks
 			add_filter('gform_addon_navigation', array($this, 'gformAddonNavigation'));
 			add_action('forms_page_gf_settings', array($this, 'adminPageGfSettings'));
@@ -152,6 +155,15 @@ class GFDpsPxPayAdmin {
 		}
 
 		return $links;
+	}
+
+	/**
+	* let Gravity Forms determine who can save settings
+	* @param string $capability
+	* @return string
+	*/
+	public function optionPageCapability($capability) {
+		return 'gravityforms_edit_settings';
 	}
 
 	/**
