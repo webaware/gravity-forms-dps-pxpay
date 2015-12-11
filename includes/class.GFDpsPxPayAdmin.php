@@ -238,26 +238,32 @@ class GFDpsPxPayAdmin {
 		$output['useTest']			= empty($input['useTest']) ? 0 : 1;
 		$output['sslVerifyPeer']	= 1;		// always set (for now anyway!)
 
+		$msg = '';
+
 		if (empty($output['userID'])) {
-			$msg = "Please enter the DPS user ID.";
+			$msg = 'Please enter the DPS user ID.';
 			add_settings_error(GFDPSPXPAY_PLUGIN_OPTIONS, '', $msg);
 		}
 
 		if (empty($output['userKey'])) {
-			$msg = "Please enter the DPS user key.";
+			$msg = 'Please enter the DPS user key.';
 			add_settings_error(GFDPSPXPAY_PLUGIN_OPTIONS, '', $msg);
 		}
 
 		if ($output['useTest']) {
 			if (empty($output['testID'])) {
-				$msg = "Please enter the DPS test ID.";
+				$msg = 'Please enter the DPS test ID.';
 				add_settings_error(GFDPSPXPAY_PLUGIN_OPTIONS, '', $msg);
 			}
 
 			if (empty($output['testKey'])) {
-				$msg = "Please enter the DPS test key.";
+				$msg = 'Please enter the DPS test key.';
 				add_settings_error(GFDPSPXPAY_PLUGIN_OPTIONS, '', $msg);
 			}
+		}
+
+		if (empty($msg)) {
+			add_settings_error(GFDPSPXPAY_PLUGIN_OPTIONS, 'settings_updated', 'Settings saved.', 'updated');
 		}
 
 		return $output;
