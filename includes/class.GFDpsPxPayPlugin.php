@@ -480,6 +480,21 @@ class GFDpsPxPayPlugin {
 					global $wpdb;
 					$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key='gfdpspxpay_txn_id' and meta_value = %s";
 					$lead_id = $wpdb->get_var($wpdb->prepare($sql, $response->transactionNumber));
+					$lock_id = 'gfdpspxpay_elock_' . $lead_id;
+
+					// must have a lead ID, or nothing to do
+					if (empty($lead_id)) {
+						throw new GFDpsPxPayException('Invalid entry ID: ' . $lead_id);
+					}
+
+					// attempt to lock entry
+					$entry_was_locked = get_transient($lock_id);
+					if (!$entry_was_locked) {
+						set_transient($lock_id, time(), 90);
+					}
+					else {
+						self::log_debug("entry $lead_id was locked");
+					}
 
 					$lead = GFFormsModel::get_lead($lead_id);
 					$form = GFFormsModel::get_form_meta($lead['form_id']);
@@ -517,23 +532,33 @@ class GFDpsPxPayPlugin {
 						self::log_debug(sprintf('failed; %s', $response->statusText));
 					}
 
-					// update the entry
-					if (class_exists('GFAPI')) {
-						GFAPI::update_entry($lead);
+					if (!$entry_was_locked) {
+
+						// update the entry
+						self::log_debug(sprintf('updating entry %d', $lead_id));
+						if (class_exists('GFAPI')) {
+							GFAPI::update_entry($lead);
+						}
+						else {
+							GFFormsModel::update_lead($lead);
+						}
+
+						// if order hasn't been fulfilled, process any deferred actions
+						if ($initial_status === 'Processing') {
+							self::log_debug('processing deferred actions');
+
+							$this->processDelayed($feed, $lead, $form);
+
+							// allow hookers to trigger their own actions
+							$hook_status = $response->success ? 'approved' : 'failed';
+							do_action("gfdpspxpay_process_{$hook_status}", $lead, $form, $feed);
+						}
+
 					}
-					else {
-						GFFormsModel::update_lead($lead);
-					}
 
-					// if order hasn't been fulfilled, process any deferred actions
-					if ($initial_status === 'Processing') {
-						self::log_debug('processing deferred actions');
-
-						$this->processDelayed($feed, $lead, $form);
-
-						// allow hookers to trigger their own actions
-						$hook_status = $response->success ? 'approved' : 'failed';
-						do_action("gfdpspxpay_process_{$hook_status}", $lead, $form, $feed);
+					// clear lock if we set one
+					if (!$entry_was_locked) {
+						delete_transient($lock_id);
 					}
 
 					// on failure, redirect to failure page if set, otherwise fall through to redirect back to confirmation page

@@ -5,6 +5,7 @@
 ### 1.5.1, soon...
 
 * fixed: permission to save settings now only requires 'gravityforms_edit_settings', not 'manage_options'
+* _really_ fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
 
 ### 1.5.0, 2015-09-16
 
