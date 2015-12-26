@@ -143,7 +143,7 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 = 1.5.1 =
 
-_really_ fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
+_really_ fixed: race condition when Skip Page 2 enabled; save settings now only requires 'gravityforms_edit_settings'
 
 == Changelog ==
 
