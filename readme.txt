@@ -7,7 +7,7 @@ Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+D
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 3.7.1
 Tested up to: 4.4
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -141,13 +141,18 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 1.5.0 =
+= 1.5.1 =
 
-fixed: race condition when Skip Page 2 enabled; changed: removed PxPay v1.0 API, only uses PxPay v2.0 now
+_really_ fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
+
+### 1.5.1, 2015-12-27
+
+* fixed: permission to save settings now only requires 'gravityforms_edit_settings', not 'manage_options'
+* _really_ fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
 
 ### 1.5.0, 2015-09-16
 
@@ -162,23 +167,3 @@ The full changelog can be found [on GitHub](https://github.com/webaware/gravity-
 * added: some more precautionary XSS prevention steps
 * added: action `gfdpspxpay_process_return_parsed` with `$lead`, `$form`, `$feed`
 * added: action `gfdpspxpay_process_confirmation_parsed` with `$entry`, `$form`
-
-### 1.4.2, 2014-12-23
-
-* added: hooks `gfdpspxpay_process_return` and `gfdpspxpay_process_confirmation`
-* changed: merge tags use currency of transaction for amount display
-
-### 1.4.1, 2014-11-22
-
-* fixed: **IMPORTANT**: forms with no DPS PxPay feeds were sending blank notification emails (sorry Josh!)
-
-### 1.4.0, 2014-11-06
-
-* added: delay user registration until payment is processed
-* added: support for PxPay API v2.0, via option (default is v2.0 for new installs)
-* added: custom entry meta `authcode` and `payment_gateway` which can be added to listings, used in notification conditions
-* fixed: Gravity Forms 1.9 compatibility
-* changed: **IMPORTANT**: defaults to only processing delayed notifications, post creation, user rego, on successful payment
-* changed: order feeds in admin by name, not by date created
-* changed: code formatting, removed some unused variables
-* changed: minimum requirements now WordPress 3.7.1, Gravity Forms 1.7
