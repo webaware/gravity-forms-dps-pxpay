@@ -15,7 +15,7 @@ Integrate Gravity Forms with the DPS Payment Express PxPay credit card payment g
 
 == Description ==
 
-Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS PxPay](http://www.paymentexpress.com/Products/Ecommerce/DPS_Hosted) to the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin.
+Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS Payment Express PxPay](https://www.paymentexpress.com/Products/Ecommerce/Payment_Express_Hosted) to the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin.
 
 * build online donation forms
 * build online booking forms
