@@ -6,7 +6,7 @@ Author URI: http://webaware.com.au/
 Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 3.7.1
-Tested up to: 4.4
+Tested up to: 4.4.1
 Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -90,6 +90,10 @@ DPS PxPay supports two transaction types - Purchase and Auth. The Gravity Forms 
 = Can I do recurring payments? =
 
 Not yet.
+
+= Can I use Account2Account? =
+
+No. Account2Account debits a bank account directly, and Payment Express have told me that they cannot provide a full test environment for me to test in. A2A will never be integrated into the free version of this plugin. It might be integrated into the pro version sometime, but don't hold your breath.
 
 =  Where can I find dummy Credit Card details for testing purposes? =
 
