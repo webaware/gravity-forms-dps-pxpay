@@ -16,7 +16,6 @@ class GFDpsPxPayAdmin {
 		// admin hooks
 		add_action('admin_init', array($this, 'adminInit'));
 		add_action('admin_notices', array($this, 'checkPrerequisites'));
-		add_action('plugin_action_links_' . GFDPSPXPAY_PLUGIN_NAME, array($this, 'addPluginActionLinks'));
 		add_filter('plugin_row_meta', array($this, 'addPluginDetailsLinks'), 10, 2);
 		add_filter('admin_enqueue_scripts', array($this, 'enqueueScripts'));
 
@@ -89,6 +88,10 @@ class GFDpsPxPayAdmin {
 					wp_redirect(admin_url('edit.php?post_type=' . GFDPSPXPAY_TYPE_FEED));
 					break;
 			}
+		}
+
+		if (current_user_can('gform_full_access') || current_user_can('gravityforms_edit_settings')) {
+			add_action('plugin_action_links_' . GFDPSPXPAY_PLUGIN_NAME, array($this, 'addPluginActionLinks'));
 		}
 	}
 
