@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 1.5.2, soon...
+
+* fixed: T2T Toolkit breaks posted Gravity Forms total field when products have options
+
 ### 1.5.1, 2015-12-27
 
 * fixed: permission to save settings now only requires 'gravityforms_edit_settings', not 'manage_options'
