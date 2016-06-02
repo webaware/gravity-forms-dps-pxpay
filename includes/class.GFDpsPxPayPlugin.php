@@ -21,7 +21,8 @@ class GFDpsPxPayPlugin {
 	private $formData = null;							// current form data collected from form, accessed through getFormData()
 
 	// end points for the DPS PxPay API
-	const PXPAY_APIV2_URL	= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
+	const PXPAY_APIV2_URL		= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
+	const PXPAY_APIV2_TEST_URL	= 'https://uat.paymentexpress.com/pxaccess/pxpay.aspx';
 
 	// end point for return to website
 	const PXPAY_RETURN		= 'PXPAYRETURN';
@@ -340,7 +341,8 @@ class GFDpsPxPayPlugin {
 
 		// build a payment request and execute on API
 		list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
-		$paymentReq = new GFDpsPxPayPayment($userID, $userKey);
+		$endpoint = $this->options['useTest'] ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL;
+		$paymentReq = new GFDpsPxPayPayment($userID, $userKey, $endpoint);
 		$paymentReq->txnType			= 'Purchase';
 		$paymentReq->amount				= $formData->total;
 		$paymentReq->currency			= GFCommon::get_currency();
@@ -466,8 +468,9 @@ class GFDpsPxPayPlugin {
 		// check for request path containing our path element, and a result argument
 		if (strpos($path, self::PXPAY_RETURN) !== false && isset($args['result'])) {
 			list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
+			$endpoint = $this->options['useTest'] ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL;
 
-			$resultReq = new GFDpsPxPayResult($userID, $userKey);
+			$resultReq = new GFDpsPxPayResult($userID, $userKey, $endpoint);
 			$resultReq->result = wp_unslash($args['result']);
 
 			try {
@@ -923,23 +926,23 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
-	* send data via HTTP and return response
-	* @param string $data
+	* generalise an XML post request
+	* @param string $url
+	* @param string $request
 	* @param bool $sslVerifyPeer whether to validate the SSL certificate
-	* @return string $response
+	* @return string
 	* @throws GFDpsPxPayCurlException
 	*/
-	public static function curlSendRequest($data, $sslVerifyPeer = true) {
-		$plugin = self::getInstance();
-		$url    = self::PXPAY_APIV2_URL;
-
-		// send data via HTTPS and receive response
+	public static function xmlPostRequest($url, $request, $sslVerifyPeer = true) {
+		// execute the request, and retrieve the response
 		$response = wp_remote_post($url, array(
 			'user-agent'	=> 'Gravity Forms DPS PxPay ' . GFDPSPXPAY_PLUGIN_VERSION,
 			'sslverify'		=> $sslVerifyPeer,
 			'timeout'		=> 60,
-			'headers'		=> array('Content-Type' => 'text/xml; charset=utf-8'),
-			'body'			=> $data,
+			'headers'		=> array(
+									'Content-Type'		=> 'text/xml; charset=utf-8',
+							   ),
+			'body'			=> $request,
 		));
 
 		if (is_wp_error($response)) {

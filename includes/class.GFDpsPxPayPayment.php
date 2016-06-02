@@ -15,6 +15,12 @@ class GFDpsPxPayPayment {
 	*/
 	public $sslVerifyPeer;
 
+	/**
+	* Payment Express endpoint to post to
+	* @var string
+	*/
+	public $endpoint;
+
 	// payment specific members
 	/**
 	* account name / email address at DPS PxPay
@@ -117,11 +123,13 @@ class GFDpsPxPayPayment {
 	*
 	* @param string $userID DPS PxPay account ID
 	* @param string $userKey DPS PxPay encryption key
+	* @param string $endpoint Payment Express endpoint
 	*/
-	public function __construct($userID, $userKey) {
+	public function __construct($userID, $userKey, $endpoint) {
 		$this->sslVerifyPeer = true;
 		$this->userID = $userID;
 		$this->userKey = $userKey;
+		$this->endpoint = $endpoint;
 
 		// default to single payment, not recurring
 		$this->enableRecurring = false;
@@ -208,7 +216,7 @@ class GFDpsPxPayPayment {
 	protected function sendPaymentRequest($xml) {
 		// execute the cURL request, and retrieve the response
 		try {
-			$responseXML = GFDpsPxPayPlugin::curlSendRequest($xml, $this->sslVerifyPeer);
+			$responseXML = GFDpsPxPayPlugin::xmlPostRequest($this->endpoint, $xml, $this->sslVerifyPeer);
 		}
 		catch (GFDpsPxPayCurlException $e) {
 			throw new GFDpsPxPayException("Error posting DPS PxPay payment request: " . $e->getMessage());
