@@ -1,13 +1,13 @@
 <?php
 /*
 * Classes for dealing with a DPS PxPay payment request
-* copyright (c) 2013 WebAware Pty Ltd, released under GPL v2.1
 */
 
 /**
 * DPS PxPay payment request
 */
 class GFDpsPxPayPayment {
+
 	// environment / website specific members
 	/**
 	* default true, whether to validate the remote SSL certificate
@@ -218,12 +218,14 @@ class GFDpsPxPayPayment {
 		$response->loadResponseXML($responseXML);
 		return $response;
 	}
+
 }
 
 /**
 * DPS PxPay payment request response
 */
 class GFDpsPxPayPaymentResponse {
+
 	/**
 	* whether it was a successful request
 	* @var boolean
@@ -301,4 +303,5 @@ class GFDpsPxPayPaymentResponse {
 			throw new GFDpsPxPayException('Error from DPS PxPay request: ' . $this->errorMessage);
 		}
 	}
+
 }
