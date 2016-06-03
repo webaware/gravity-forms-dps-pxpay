@@ -11,45 +11,54 @@
 
 	<table class="form-table">
 
-	<tr>
-		<th>User ID</th>
-		<td>
-			<input type="text" class="regular-text" name="gfdpspxpay_plugin[userID]" value="<?php echo esc_attr($options['userID']); ?>" />
-		</td>
-	</tr>
+		<tr>
+			<th scope="row">
+				<label for="gfdpspxpay_plugin_userID">User ID</label>
+			</th>
+			<td>
+				<input type="text" class="regular-text" name="gfdpspxpay_plugin[userID]" id="gfdpspxpay_plugin_userID" value="<?php echo esc_attr($options['userID']); ?>" />
+			</td>
+		</tr>
 
-	<tr>
-		<th>User Key</th>
-		<td>
-			<input type="text" class="large-text" name="gfdpspxpay_plugin[userKey]" value="<?php echo esc_attr($options['userKey']); ?>" />
-		</td>
-	</tr>
+		<tr>
+			<th scope="row">
+				<label for="gfdpspxpay_plugin_userKey">User Key</label>
+			</th>
+			<td>
+				<input type="text" class="large-text" name="gfdpspxpay_plugin[userKey]" id="gfdpspxpay_plugin_userKey" value="<?php echo esc_attr($options['userKey']); ?>" />
+			</td>
+		</tr>
 
-	<tr valign="top">
-		<th>Use Sandbox (testing)
-			<span class="gfdpspxpay-opt-admin-test">
-				<br />Sandbox requires a separate account that has not been activated for live payments.
-			</span>
-		</th>
-		<td>
-			<label><input type="radio" name="gfdpspxpay_plugin[useTest]" value="1" <?php checked($options['useTest'], '1'); ?> />&nbsp;yes</label>
-			&nbsp;&nbsp;<label><input type="radio" name="gfdpspxpay_plugin[useTest]" value="0" <?php checked($options['useTest'], '0'); ?> />&nbsp;no</label>
-		</td>
-	</tr>
+		<tr valign="top">
+			<th scope="row">
+				Use Sandbox (testing)
+			</th>
+			<td>
+				<fieldset>
+					<input type="radio" name="gfdpspxpay_plugin[useTest]" id="gfdpspxpay_plugin_useTest_yes" value="1" <?php checked($options['useTest'], '1'); ?> />&nbsp;<label for="gfdpspxpay_plugin_useTest_yes">yes</label>
+					&nbsp;&nbsp;<input type="radio" name="gfdpspxpay_plugin[useTest]" id="gfdpspxpay_plugin_useTest_no" value="0" <?php checked($options['useTest'], '0'); ?> />&nbsp;<label for="gfdpspxpay_plugin_useTest_no">no</label>
+					<p class="gfdpspxpay-opt-admin-test">Sandbox requires a separate account that has not been activated for live payments.</p>
+				</fieldset>
+			</td>
+		</tr>
 
-	<tr class="gfdpspxpay-opt-admin-test">
-		<th>Test ID</th>
-		<td>
-			<input type="text" class="regular-text" name="gfdpspxpay_plugin[testID]" value="<?php echo esc_attr($options['testID']); ?>" />
-		</td>
-	</tr>
+		<tr class="gfdpspxpay-opt-admin-test">
+			<th scope="row">
+				<label for="gfdpspxpay_plugin_testID">Test ID</label>
+			</th>
+			<td>
+				<input type="text" class="regular-text" name="gfdpspxpay_plugin[testID]" id="gfdpspxpay_plugin_testID" value="<?php echo esc_attr($options['testID']); ?>" />
+			</td>
+		</tr>
 
-	<tr class="gfdpspxpay-opt-admin-test">
-		<th>Test Key</th>
-		<td>
-			<input type="text" class="large-text" name="gfdpspxpay_plugin[testKey]" value="<?php echo esc_attr($options['testKey']); ?>" />
-		</td>
-	</tr>
+		<tr class="gfdpspxpay-opt-admin-test">
+			<th scope="row">
+				<label for="gfdpspxpay_plugin_testKey">Test Key</label>
+			</th>
+			<td>
+				<input type="text" class="large-text" name="gfdpspxpay_plugin[testKey]" id="gfdpspxpay_plugin_testKey" value="<?php echo esc_attr($options['testKey']); ?>" />
+			</td>
+		</tr>
 
 	</table>
 
