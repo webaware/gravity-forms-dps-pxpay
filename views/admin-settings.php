@@ -4,7 +4,7 @@
 
 <?php settings_errors(); ?>
 
-<h3>DPS PxPay Settings</h3>
+<h3><span><i class="fa fa-credit-card"></i> DPS PxPay Settings</span></h3>
 
 <form action="<?php echo admin_url('options.php'); ?>" method="POST">
 	<?php settings_fields(GFDPSPXPAY_PLUGIN_OPTIONS); ?>
