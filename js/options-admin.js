@@ -1,6 +1,6 @@
 // Gravity Forms DPS PxPay options admin script
 
-jQuery(function($) {
+(function($) {
 	"use strict";
 
 	/**
@@ -22,4 +22,4 @@ jQuery(function($) {
 
 	checkSandbox();
 
-});
+})(jQuery);

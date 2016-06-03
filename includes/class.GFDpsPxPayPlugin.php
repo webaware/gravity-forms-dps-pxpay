@@ -65,25 +65,24 @@ class GFDpsPxPayPlugin {
 	* initialise plug-in options, handling undefined options by setting defaults
 	*/
 	private function initOptions() {
-		$this->options = get_option(GFDPSPXPAY_PLUGIN_OPTIONS);
-		if (!is_array($this->options)) {
-			$this->options = array();
-		}
+		$this->options = get_option(GFDPSPXPAY_PLUGIN_OPTIONS, array());
 
 		$defaults = array (
 			'userID'			=> '',
 			'userKey'			=> '',
 			'testID'			=> '',
 			'testKey'			=> '',
-			'useTest'			=> false,
+			'useTest'			=> '0',
+			'testEnv'			=> 'UAT',
 			'sslVerifyPeer'		=> true,
 		);
 
-		if (count(array_diff(array_keys($defaults), array_keys($this->options))) > 0) {
-			$this->options = array_merge($defaults, $this->options);
-			unset($this->options[0]);
-			update_option(GFDPSPXPAY_PLUGIN_OPTIONS, $this->options);
+		// if add-on was installed before test environment setting became available, set default environment to SEC for backwards compatibility
+		if (isset($this->options['userID']) && !isset($this->options['testEnv'])) {
+			$this->options['testEnv'] = 'SEC';
 		}
+
+		$this->options = wp_parse_args($this->options, $defaults);
 	}
 
 	/**
@@ -340,9 +339,8 @@ class GFDpsPxPayPlugin {
 		$transactionID = apply_filters('gfdpspxpay_invoice_trans_number', $transactionID, $form);
 
 		// build a payment request and execute on API
-		list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
-		$endpoint = $this->options['useTest'] ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL;
-		$paymentReq = new GFDpsPxPayPayment($userID, $userKey, $endpoint);
+		$creds = $this->getDpsCredentials($this->options['useTest']);
+		$paymentReq = new GFDpsPxPayPayment($creds['userID'], $creds['userKey'], $creds['endpoint']);
 		$paymentReq->txnType			= 'Purchase';
 		$paymentReq->amount				= $formData->total;
 		$paymentReq->currency			= GFCommon::get_currency();
@@ -467,10 +465,8 @@ class GFDpsPxPayPlugin {
 
 		// check for request path containing our path element, and a result argument
 		if (strpos($path, self::PXPAY_RETURN) !== false && isset($args['result'])) {
-			list($userID, $userKey) = $this->getDpsCredentials($this->options['useTest']);
-			$endpoint = $this->options['useTest'] ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL;
-
-			$resultReq = new GFDpsPxPayResult($userID, $userKey, $endpoint);
+			$creds = $this->getDpsCredentials($this->options['useTest']);
+			$resultReq = new GFDpsPxPayResult($creds['userID'], $creds['userKey'], $creds['endpoint']);
 			$resultReq->result = wp_unslash($args['result']);
 
 			try {
@@ -838,11 +834,21 @@ class GFDpsPxPayPlugin {
 	*/
 	protected function getDpsCredentials($useTest) {
 		if ($useTest) {
-			return array($this->options['testID'], $this->options['testKey']);
+			$creds = array(
+				'userID'		=> $this->options['testID'],
+				'userKey'		=> $this->options['testKey'],
+				'endpoint'		=> $this->options['testEnv'] === 'UAT' ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL,
+			);
 		}
 		else {
-			return array($this->options['userID'], $this->options['userKey']);
+			$creds = array(
+				'userID'		=> $this->options['userID'],
+				'userKey'		=> $this->options['userKey'],
+				'endpoint'		=> self::PXPAY_APIV2_URL,
+			);
 		}
+
+		return $creds;
 	}
 
 	/**

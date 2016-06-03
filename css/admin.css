@@ -29,8 +29,12 @@
 	font-weight: bold;
 }
 
-.gfdpspxpay-opt-admin-test {
+p.gfdpspxpay-opt-admin-test {
 	color: #c00;
+}
+
+#gfdpspxpay_plugin_testEnv {
+	margin-top: 1em;
 }
 
 .no-js .gfdpspxpay-opt-admin-test {

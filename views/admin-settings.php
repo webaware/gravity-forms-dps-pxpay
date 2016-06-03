@@ -39,6 +39,15 @@
 					&nbsp;&nbsp;<input type="radio" name="gfdpspxpay_plugin[useTest]" id="gfdpspxpay_plugin_useTest_no" value="0" <?php checked($options['useTest'], '0'); ?> />&nbsp;<label for="gfdpspxpay_plugin_useTest_no">no</label>
 					<p class="gfdpspxpay-opt-admin-test">Sandbox requires a separate account that has not been activated for live payments.</p>
 				</fieldset>
+
+				<fieldset class="gfdpspxpay-opt-admin-test" id="gfdpspxpay_plugin_testEnv">
+					<legend>
+						Please select which environment
+						<?php gform_tooltip('When DPS Payment Express sent you your user ID and password, they will have told you to use either SEC or UAT for your sandbox.'); ?>
+					</legend>
+					<input type="radio" name="gfdpspxpay_plugin[testEnv]" id="gfdpspxpay_plugin_testEnv_sec" value="SEC" <?php checked($options['testEnv'], 'SEC'); ?> />&nbsp;<label for="gfdpspxpay_plugin_testEnv_sec">SEC</label>
+					&nbsp;&nbsp;<input type="radio" name="gfdpspxpay_plugin[testEnv]" id="gfdpspxpay_plugin_testEnv_uat" value="UAT" <?php checked($options['testEnv'], 'UAT'); ?> />&nbsp;<label for="gfdpspxpay_plugin_testEnv_uat">UAT</label>
+				</fieldset>
 			</td>
 		</tr>
 

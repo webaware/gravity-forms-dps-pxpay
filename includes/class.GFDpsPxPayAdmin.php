@@ -245,6 +245,7 @@ class GFDpsPxPayAdmin {
 		$output['testID']			= trim($input['testID']);
 		$output['testKey']			= trim($input['testKey']);
 		$output['useTest']			= empty($input['useTest']) ? 0 : 1;
+		$output['testEnv']			= trim($input['testEnv']);
 		$output['sslVerifyPeer']	= 1;		// always set (for now anyway!)
 
 		$msg = '';
