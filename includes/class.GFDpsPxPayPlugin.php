@@ -28,7 +28,7 @@ class GFDpsPxPayPlugin {
 	const PXPAY_RETURN		= 'PXPAYRETURN';
 
 	// minimum versions required
-	const MIN_VERSION_GF	= '1.7';
+	const MIN_VERSION_GF	= '1.9';
 
 	/**
 	* static method for getting the instance of this singleton object
@@ -399,13 +399,7 @@ class GFDpsPxPayPlugin {
 			self::log_debug($this->errorMessage);
 		}
 
-		// update the entry
-		if (class_exists('GFAPI')) {
-			GFAPI::update_entry($entry);
-		}
-		else {
-			GFFormsModel::update_lead($entry);
-		}
+		GFAPI::update_entry($entry);
 
 		return $entry;
 	}
@@ -675,59 +669,46 @@ class GFDpsPxPayPlugin {
 	* @param bool $execute_delayed
 	*/
 	protected function sendDeferredNotifications($feed, $form, $lead, $execute_delayed) {
-		if (self::versionCompareGF('1.7.0', '<')) {
-			// pre-1.7.0 notifications
-			if ($feed->DelayNotify) {
-				if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, 'admin', $lead, $form, $feed)) {
-					GFCommon::send_admin_notification($form, $lead);
-				}
-			}
-			if ($feed->DelayAutorespond) {
-				if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, 'user', $lead, $form, $feed)) {
-					GFCommon::send_user_notification($form, $lead);
-				}
-			}
-		}
-		else {
-			$notifications = GFCommon::get_notifications_to_send("form_submission", $form, $lead);
-			foreach ($notifications as $notification) {
-				switch (rgar($notification, 'type')) {
-					// old "user" notification
-					case 'user':
-						if ($feed->DelayAutorespond) {
-							if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
-								GFCommon::send_notification($notification, $form, $lead);
-							}
-						}
-						break;
+		$notifications = GFCommon::get_notifications_to_send("form_submission", $form, $lead);
+		foreach ($notifications as $notification) {
+			switch (rgar($notification, 'type')) {
 
-					// old "admin" notification
-					case 'admin':
+				// old "user" notification
+				case 'user':
+					if ($feed->DelayAutorespond) {
+						if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+							GFCommon::send_notification($notification, $form, $lead);
+						}
+					}
+					break;
+
+				// old "admin" notification
+				case 'admin':
+					if ($feed->DelayNotify) {
+						if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+							GFCommon::send_notification($notification, $form, $lead);
+						}
+					}
+					break;
+
+				// new since 1.7, add any notification you like
+				default:
+					if (trim($notification['to']) == '{admin_email}') {
 						if ($feed->DelayNotify) {
 							if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
 								GFCommon::send_notification($notification, $form, $lead);
 							}
 						}
-						break;
+					}
+					else {
+						if ($feed->DelayAutorespond) {
+							if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
+								GFCommon::send_notification($notification, $form, $lead);
+							}
+						}
+					}
+					break;
 
-					// new since 1.7, add any notification you like
-					default:
-						if (trim($notification['to']) == '{admin_email}') {
-							if ($feed->DelayNotify) {
-								if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
-									GFCommon::send_notification($notification, $form, $lead);
-								}
-							}
-						}
-						else {
-							if ($feed->DelayAutorespond) {
-								if (apply_filters('gfdpspxpay_delayed_notification_send', $execute_delayed, $notification, $lead, $form, $feed)) {
-									GFCommon::send_notification($notification, $form, $lead);
-								}
-							}
-						}
-						break;
-				}
 			}
 		}
 	}

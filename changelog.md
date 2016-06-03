@@ -6,6 +6,7 @@
 
 * fixed: T2T Toolkit breaks posted Gravity Forms total field when products have options
 * changed: when Use Sandbox setting is selected, PxPay endpoint for UAT can be used instead of SEC endpoint
+* changed: minimum requirements now WordPress 4.3, Gravity Forms 1.9
 
 ### 1.5.1, 2015-12-27
 

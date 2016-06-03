@@ -5,7 +5,7 @@ Plugin URI: http://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
 Author URI: http://webaware.com.au/
 Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
-Requires at least: 3.7.1
+Requires at least: 4.3
 Tested up to: 4.4.1
 Stable tag: 1.5.1
 License: GPLv2 or later
