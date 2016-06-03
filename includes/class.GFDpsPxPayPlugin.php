@@ -529,12 +529,7 @@ class GFDpsPxPayPlugin {
 
 						// update the entry
 						self::log_debug(sprintf('updating entry %d', $lead_id));
-						if (class_exists('GFAPI')) {
-							GFAPI::update_entry($lead);
-						}
-						else {
-							GFFormsModel::update_lead($lead);
-						}
+						GFAPI::update_entry($lead);
 
 						// if order hasn't been fulfilled, process any deferred actions
 						if ($initial_status === 'Processing') {
