@@ -1,46 +1,46 @@
 
-<table class='gfdpspxpay-feed-fields gfdpspxpay-details'>
+<table class="gfdpspxpay-feed-fields gfdpspxpay-details">
 
 	<tr>
-		<th>Merchant Reference:</th>
+		<th scope="row"><label for="_gfdpspxpay_merchant_ref">Merchant Reference:</label></th>
 		<td>
-			<select size="1" name="_gfdpspxpay_merchant_ref">
+			<select size="1" name="_gfdpspxpay_merchant_ref" id="_gfdpspxpay_merchant_ref">
 				<?php if ($fields) echo self::selectFields($feed->MerchantReference, $fields); ?>
-			</select> <span class='required' title='required field'>*</span>
+			</select> <span class="required" title="required field">*</span>
 		</td>
 	</tr>
 
 	<tr>
-		<th>TxnData1:</th>
+		<th scope="row"><label for="_gfdpspxpay_txndata1">TxnData1:</label></th>
 		<td>
-			<select size="1" name="_gfdpspxpay_txndata1">
+			<select size="1" name="_gfdpspxpay_txndata1" id="_gfdpspxpay_txndata1">
 				<?php if ($fields) echo self::selectFields($feed->TxnData1, $fields); ?>
 			</select>
 		</td>
 	</tr>
 
 	<tr>
-		<th>TxnData2:</th>
+		<th scope="row"><label for="_gfdpspxpay_txndata2">TxnData2:</label></th>
 		<td>
-			<select size="1" name="_gfdpspxpay_txndata2">
+			<select size="1" name="_gfdpspxpay_txndata2" id="_gfdpspxpay_txndata2">
 				<?php if ($fields) echo self::selectFields($feed->TxnData2, $fields); ?>
 			</select>
 		</td>
 	</tr>
 
 	<tr>
-		<th>TxnData3:</th>
+		<th scope="row"><label for="_gfdpspxpay_txndata3">TxnData3:</label></th>
 		<td>
-			<select size="1" name="_gfdpspxpay_txndata3">
+			<select size="1" name="_gfdpspxpay_txndata3" id="_gfdpspxpay_txndata3">
 				<?php if ($fields) echo self::selectFields($feed->TxnData3, $fields); ?>
 			</select>
 		</td>
 	</tr>
 
 	<tr>
-		<th>Email Address:</th>
+		<th scope="row"><label for="_gfdpspxpay_email">Email Address:</label></th>
 		<td>
-			<select size="1" name="_gfdpspxpay_email">
+			<select size="1" name="_gfdpspxpay_email" id="_gfdpspxpay_email">
 				<?php if ($fields) echo self::selectFields($feed->EmailAddress, $fields); ?>
 			</select>
 		</td>
