@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 1.5.2, soon...
+### 1.6.0, 2016-06-05
 
 * fixed: T2T Toolkit breaks posted Gravity Forms total field when products have options
 * fixed: delayed user creation wasn't working with Gravity Forms User Registration v3+

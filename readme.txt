@@ -6,8 +6,8 @@ Author URI: http://webaware.com.au/
 Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 4.3
-Tested up to: 4.4.1
-Stable tag: 1.5.1
+Tested up to: 4.5.2
+Stable tag: 1.6.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -145,29 +145,18 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 1.5.1 =
+= 1.6.0 =
 
-_really_ fixed: race condition when Skip Page 2 enabled; save settings now only requires 'gravityforms_edit_settings'
+fixed delayed user creation for with Gravity Forms User Registration v3+; fixed conflict with T2T Toolkit; minimum requirements now WordPress 4.3, Gravity Forms 1.9
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 1.5.1, 2015-12-27
+### 1.6.0, 2016-06-05
 
-* fixed: permission to save settings now only requires 'gravityforms_edit_settings', not 'manage_options'
-* _really_ fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
-
-### 1.5.0, 2015-09-16
-
-* fixed: race condition creating duplicate posts etc. when Skip Page 2 enabled for PxPay custom hosted page
-* added: actions `gfdpspxpay_process_approved` and `gfdpspxpay_process_failed` for hookers adding custom actions upon return from Payment Express
-* changed: removed PxPay v1.0 API, only uses PxPay v2.0 now
-
-### 1.4.3, 2015-05-01
-
-* fixed: error reporting when initial request fails, e.g. with API key error
-* fixed: error handling logic with redirect as confirmation
-* added: some more precautionary XSS prevention steps
-* added: action `gfdpspxpay_process_return_parsed` with `$lead`, `$form`, `$feed`
-* added: action `gfdpspxpay_process_confirmation_parsed` with `$entry`, `$form`
+* fixed: T2T Toolkit breaks posted Gravity Forms total field when products have options
+* fixed: delayed user creation wasn't working with Gravity Forms User Registration v3+
+* changed: revoved filter `gfdpspxpay_delayed_user_create`, no longer functional with Gravity Forms User Registration v3+
+* changed: when Use Sandbox setting is selected, PxPay endpoint for UAT can be used instead of SEC endpoint
+* changed: minimum requirements now WordPress 4.3, Gravity Forms 1.9

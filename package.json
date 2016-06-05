@@ -1,7 +1,7 @@
 {
   "name": "gravity-forms-dps-pxpay",
-  "version": "1.5.2-dev",
-  "description": "Integrates Gravity Forms with DPS PxPay payment gateway, enabling end users to purchase goods and services through Gravity Forms.",
+  "version": "1.6.0",
+  "description": "Integrate Gravity Forms with the DPS Payment Express PxPay credit card payment gateway.",
   "main": "Gruntfile.js",
   "devDependencies": {
     "grunt": "^0.4.5",
