@@ -157,6 +157,6 @@ The full changelog can be found [on GitHub](https://github.com/webaware/gravity-
 
 * fixed: T2T Toolkit breaks posted Gravity Forms total field when products have options
 * fixed: delayed user creation wasn't working with Gravity Forms User Registration v3+
-* changed: revoved filter `gfdpspxpay_delayed_user_create`, no longer functional with Gravity Forms User Registration v3+
+* changed: removed filter `gfdpspxpay_delayed_user_create`, no longer functional with Gravity Forms User Registration v3+
 * changed: when Use Sandbox setting is selected, PxPay endpoint for UAT can be used instead of SEC endpoint
 * changed: minimum requirements now WordPress 4.3, Gravity Forms 1.9
