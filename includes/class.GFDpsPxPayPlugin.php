@@ -96,11 +96,11 @@ class GFDpsPxPayPlugin {
 			add_filter('gform_validation', array($this, 'gformValidation'));
 			add_filter('gform_validation_message', array($this, 'gformValidationMessage'), 10, 2);
 			add_filter('gform_confirmation', array($this, 'gformConfirmation'), 1000, 4);
+			add_filter('gform_is_delayed_pre_process_feed', array($this, 'gformIsDelayed'), 10, 4);
 			add_filter('gform_disable_post_creation', array($this, 'gformDelayPost'), 10, 3);
 			add_filter('gform_disable_user_notification', array($this, 'gformDelayUserNotification'), 10, 3);
 			add_filter('gform_disable_admin_notification', array($this, 'gformDelayAdminNotification'), 10, 3);
 			add_filter('gform_disable_notification', array($this, 'gformDelayNotification'), 10, 4);
-			add_action('gform_after_submission', array($this, 'gformDelayUserRego'), 9, 2);
 			add_action('gform_entry_post_save', array($this, 'gformEntryPostSave'), 10, 2);
 			add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
 			add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
@@ -146,6 +146,30 @@ class GFDpsPxPayPlugin {
 			'supports'					=> array('null'),
 			'rewrite'					=> false,
 		));
+	}
+
+	/**
+	* filter whether form delays User Registration
+	* @param bool $is_delayed
+	* @param array $form
+	* @param array $entry
+	* @param string $addon_slug
+	* @return bool
+	*/
+	public function gformIsDelayed($is_delayed, $form, $entry, $addon_slug) {
+		if ($entry['payment_status'] === 'Processing') {
+			$feed = $this->getFeed($form['id']);
+
+			if ($feed && $addon_slug === 'gravityformsuserregistration') {
+				if (!empty($feed->DelayUserrego)) {
+					$is_delayed = true;
+					self::log_debug(sprintf('delay user registration: form id %s, lead id %s', $form['id'], $entry['id']));
+				}
+			}
+
+		}
+
+		return $is_delayed;
 	}
 
 	/**
@@ -243,22 +267,6 @@ class GFDpsPxPayPlugin {
 			$form['id'], $lead['id'], $notification['name']));
 
 		return $is_disabled;
-	}
-
-	/**
-	* filter whether form triggers User Registration (yet)
-	* @param bool $is_disabled
-	* @param array $lead
-	* @param array $form
-	* @return array
-	*/
-	public function gformDelayUserRego($lead, $form) {
-		$feed = $this->getFeed($form['id']);
-		$is_disabled = !empty($feed->DelayUserrego);
-
-		if ($is_disabled) {
-			remove_action('gform_after_submission', array('GFUser', 'gf_create_user'), 10, 2);
-		}
 	}
 
 	/**
@@ -626,33 +634,31 @@ class GFDpsPxPayPlugin {
 	/**
 	* process any delayed actions
 	* @param GFDpsPxPayFeed $feed
-	* @param array $lead
+	* @param array $entry
 	* @param array $form
 	*/
-	protected function processDelayed($feed, $lead, $form) {
+	protected function processDelayed($feed, $entry, $form) {
 		// default to only performing delayed actions if payment was successful, unless feed opts to always execute
 		// can filter each delayed action to permit / deny execution
-		$execute_delayed = ($lead['payment_status'] == 'Approved') || $feed->ExecDelayedAlways;
+		$execute_delayed = ($entry['payment_status'] === 'Approved') || $feed->ExecDelayedAlways;
 
 		if ($feed->DelayPost) {
-			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $lead, $form, $feed)) {
-				$this->log_debug(sprintf('executing delayed post creation; form id %s, lead id %s', $form['id'], $lead['id']));
-				GFFormsModel::create_post($form, $lead);
+			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
+				$this->log_debug(sprintf('executing delayed post creation; form id %s, lead id %s', $form['id'], $entry['id']));
+				GFFormsModel::create_post($form, $entry);
 			}
 		}
 
 		if ($feed->DelayNotify || $feed->DelayAutorespond) {
-			$this->sendDeferredNotifications($feed, $form, $lead, $execute_delayed);
+			$this->sendDeferredNotifications($feed, $form, $entry, $execute_delayed);
 		}
 
 		// record that basic delayed actions have been fulfilled, before attempting things that might fail
-		GFFormsModel::update_lead_property($lead['id'], 'is_fulfilled', true);
+		GFFormsModel::update_lead_property($entry['id'], 'is_fulfilled', true);
 
-		if ($feed->DelayUserrego && class_exists('GFUser')) {
-			if (apply_filters('gfdpspxpay_delayed_user_create', $execute_delayed, $lead, $form, $feed)) {
-				$this->log_debug(sprintf('executing delayed user creation; form id %s, lead id %s', $form['id'], $lead['id']));
-				GFUser::gf_create_user($lead, $form, true);
-			}
+		if ($execute_delayed) {
+			$this->log_debug(sprintf('executing delayed Gravity Forms feeds; form id %s, lead id %s', $form['id'], $entry['id']));
+			do_action('gform_paypal_fulfillment', $entry, array(), $entry['transaction_id'], $entry['payment_amount']);
 		}
 	}
 
