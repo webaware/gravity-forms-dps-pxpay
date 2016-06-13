@@ -937,7 +937,7 @@ class GFDpsPxPayPlugin {
 			throw new GFDpsPxPayCurlException($response->get_error_message());
 		}
 
-		return $response['body'];
+		return wp_remote_retrieve_body($response);
 	}
 
 	/**

@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 1.6.1, soon...
+
+* changed: use `wp_remote_retrieve_body()` instead of array access to get Payment Express response (WP4.6 compatibility)
+
 ### 1.6.0, 2016-06-05
 
 * fixed: T2T Toolkit breaks posted Gravity Forms total field when products have options
