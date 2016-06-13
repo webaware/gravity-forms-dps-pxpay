@@ -57,7 +57,7 @@ class GFDpsPxPayPlugin {
 		$this->urlBase = plugin_dir_url(GFDPSPXPAY_PLUGIN_FILE);
 
 		add_action('init', array($this, 'init'));
-		add_action('parse_request', array($this, 'processDpsReturn'));		// process DPS PxPay return
+		add_filter('do_parse_request', array($this, 'processDpsReturn'));	// process DPS PxPay return
 		add_action('wp', array($this, 'processFormConfirmation'), 5);		// process redirect to GF confirmation
 	}
 
@@ -452,8 +452,10 @@ class GFDpsPxPayPlugin {
 
 	/**
 	* return from DPS PxPay website, retrieve and process payment result and redirect to form
+	* @param bool $do_parse
+	* @return bool
 	*/
-	public function processDpsReturn() {
+	public function processDpsReturn($do_parse) {
 		// must parse out query params ourselves, to prevent the result param getting dropped / filtered out
 		// [speculation: maybe it's an anti-malware filter watching for base64-encoded injection attacks?]
 		$parts = parse_url($_SERVER['REQUEST_URI']);
@@ -580,6 +582,8 @@ class GFDpsPxPayPlugin {
 				exit;
 			}
 		}
+
+		return $do_parse;
 	}
 
 	/**

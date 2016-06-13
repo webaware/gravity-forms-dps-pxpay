@@ -5,6 +5,7 @@
 ### 1.6.1, soon...
 
 * changed: use `wp_remote_retrieve_body()` instead of array access to get Payment Express response (WP4.6 compatibility)
+* changed: process Payment Express return request on the `do_parse_request` filter, which happens before the `parse_request` action
 
 ### 1.6.0, 2016-06-05
 
