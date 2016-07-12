@@ -45,10 +45,10 @@ class GFDpsPxPayFormData {
 		// pick up feed mappings, set special mappings (form ID, title)
 		$inverseMap = $feed->getGfFieldMap();
 		if (isset($inverseMap['title'])) {
-			$this->$inverseMap['title'] = $form['title'];
+			$this->{$inverseMap['title']} = $form['title'];
 		}
 		if (isset($inverseMap['form'])) {
-			$this->$inverseMap['form'] = $form['id'];
+			$this->{$inverseMap['form']} = $form['id'];
 		}
 
 		// iterate over fields to collect data
@@ -89,7 +89,7 @@ class GFDpsPxPayFormData {
 						$subID = strtr($input['id'], '.', '_');
 						$values[] = trim(rgpost("input_{$subID}"));
 					}
-					$this->$inverseMap[$id] = implode(' ', array_filter($values, 'strlen'));
+					$this->{$inverseMap[$id]} = implode(' ', array_filter($values, 'strlen'));
 				}
 				else {
 					// see if want any part-field
@@ -97,7 +97,7 @@ class GFDpsPxPayFormData {
 						$key = (string) $input['id'];
 						if (isset($inverseMap[$key])) {
 							$subID = strtr($input['id'], '.', '_');
-							$this->$inverseMap[$key] = rgpost("input_{$subID}");
+							$this->{$inverseMap[$key]} = rgpost("input_{$subID}");
 						}
 					}
 				}
@@ -105,7 +105,7 @@ class GFDpsPxPayFormData {
 			else {
 				// simple field, just take value
 				if (isset($inverseMap[$id])) {
-					$this->$inverseMap[$id] = rgpost("input_{$id}");
+					$this->{$inverseMap[$id]} = rgpost("input_{$id}");
 				}
 			}
 		}
