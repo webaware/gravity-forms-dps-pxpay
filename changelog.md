@@ -7,6 +7,7 @@
 * fixed: indirect expressions incompatible with PHP 7
 * changed: use `wp_remote_retrieve_body()` instead of array access to get Payment Express response (WP4.6 compatibility)
 * changed: process Payment Express return request on the `do_parse_request` filter, which happens before the `parse_request` action
+* changed: use Gravity Forms `get_order_total()` to calculate form total (fixes T2T Toolkit conflict with Coupons add-on)
 
 ### 1.6.0, 2016-06-05
 
