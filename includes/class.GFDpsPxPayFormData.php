@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
 * class for managing form data
 */
@@ -232,4 +236,5 @@ class GFDpsPxPayFormData {
 	public function hasPurchaseFields() {
 		return $this->hasPurchaseFieldsFlag;
 	}
+
 }

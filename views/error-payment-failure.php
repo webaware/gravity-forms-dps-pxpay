@@ -1,6 +1,10 @@
 <?php
 // error message displayed on failure of payment request
 // replaces confirmation text
+
+if (!defined('ABSPATH')) {
+	exit;
+}
 ?>
 <?php echo $anchor; ?>
 <div id='gform_confirmation_wrapper_<?php echo $form['id']; ?>' class='gform_confirmation_wrapper <?php echo $cssClass; ?>'>

@@ -1,3 +1,8 @@
+<?php
+if (!defined('ABSPATH')) {
+	exit;
+}
+?>
 
 <div style="display:none;">
 <?php submit_button( __( 'Save' ), 'button', 'save' ); ?>

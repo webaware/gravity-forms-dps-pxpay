@@ -3,6 +3,10 @@
 * Classes for dealing with a DPS PxPay payment request
 */
 
+if (!defined('ABSPATH')) {
+	exit;
+}
+
 /**
 * DPS PxPay payment request
 */

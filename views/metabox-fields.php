@@ -1,3 +1,8 @@
+<?php
+if (!defined('ABSPATH')) {
+	exit;
+}
+?>
 
 <table class="gfdpspxpay-feed-fields gfdpspxpay-details">
 

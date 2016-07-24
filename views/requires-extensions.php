@@ -1,3 +1,8 @@
+<?php
+if (!defined('ABSPATH')) {
+	exit;
+}
+?>
 
 <div class="error">
 	<p>Gravity Forms DPS PxPay requires these missing PHP extensions. Please contact your website host to have these extensions installed.</p>

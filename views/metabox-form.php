@@ -1,3 +1,8 @@
+<?php
+if (!defined('ABSPATH')) {
+	exit;
+}
+?>
 
 <select size="1" name="_gfdpspxpay_form">
 	<option value="">-- please choose --</option>
