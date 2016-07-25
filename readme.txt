@@ -6,8 +6,8 @@ Author URI: http://webaware.com.au/
 Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 4.3
-Tested up to: 4.5.2
-Stable tag: 1.6.0
+Tested up to: 4.6
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -145,13 +145,20 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 1.6.0 =
+= 1.6.1 =
 
-fixed delayed user creation for with Gravity Forms User Registration v3+; fixed conflict with T2T Toolkit; minimum requirements now WordPress 4.3, Gravity Forms 1.9
+PHP 7 compatibility; WP4.6 compatibility; fix T2T Toolkit conflict with Coupons add-on; minimum requirements are WordPress 4.3, Gravity Forms 1.9
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
+
+### 1.6.1, 2016-07-25
+
+* fixed: indirect expressions incompatible with PHP 7
+* changed: use `wp_remote_retrieve_body()` instead of array access to get Payment Express response (WP4.6 compatibility)
+* changed: process Payment Express return request on the `do_parse_request` filter, which happens before the `parse_request` action
+* changed: use Gravity Forms `get_order_total()` to calculate form total (fixes T2T Toolkit conflict with Coupons add-on)
 
 ### 1.6.0, 2016-06-05
 

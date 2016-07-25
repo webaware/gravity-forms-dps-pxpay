@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 1.6.1, soon...
+### 1.6.1, 2016-07-25
 
 * fixed: indirect expressions incompatible with PHP 7
 * changed: use `wp_remote_retrieve_body()` instead of array access to get Payment Express response (WP4.6 compatibility)
