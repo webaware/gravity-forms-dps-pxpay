@@ -158,7 +158,7 @@ class GFDpsPxPayAdmin {
 		if ($file == GFDPSPXPAY_PLUGIN_NAME) {
 			$links[] = '<a href="https://wordpress.org/support/plugin/gravity-forms-dps-pxpay">' . __('Get help') . '</a>';
 			$links[] = '<a href="https://wordpress.org/plugins/gravity-forms-dps-pxpay/">' . __('Rating') . '</a>';
-			$links[] = '<a href="http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay">' . __('Donate') . '</a>';
+			$links[] = '<a href="https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay">' . __('Donate') . '</a>';
 		}
 
 		return $links;

@@ -3,7 +3,7 @@ Contributors: webaware, IstanbulMMV
 Plugin Name: Gravity Forms DPS PxPay
 Plugin URI: http://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
 Author URI: http://webaware.com.au/
-Donate link: http://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
+Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, gravity, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 4.3
 Tested up to: 4.6
@@ -15,7 +15,7 @@ Integrate Gravity Forms with the DPS Payment Express PxPay credit card payment g
 
 == Description ==
 
-Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS Payment Express PxPay](https://www.paymentexpress.com/Products/Ecommerce/Payment_Express_Hosted) to the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin.
+Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS Payment Express PxPay](https://www.paymentexpress.com/merchant-ecommerce-pxpay) to the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin.
 
 * build online donation forms
 * build online booking forms
@@ -97,11 +97,11 @@ No. Account2Account debits a bank account directly, and Payment Express have tol
 
 =  Where can I find dummy Credit Card details for testing purposes? =
 
-[Visit this page](http://www.paymentexpress.com/knowledge_base/faq/developer_faq.html#Testing%20Details)
+[Visit this page](https://www.paymentexpress.com/support-merchant-frequently-asked-questions-testing-details)
 
 = I get an SSL error when my form attempts to connect with DPS =
 
-This is a common problem in local testing environments. Please [read this post](http://snippets.webaware.com.au/howto/stop-turning-off-curlopt_ssl_verifypeer-and-fix-your-php-config/) for more information.
+This is a common problem in local testing environments. Please [read this post](https://snippets.webaware.com.au/howto/stop-turning-off-curlopt_ssl_verifypeer-and-fix-your-php-config/) for more information.
 
 = Can I use this plugin on any shared-hosting environment? =
 
@@ -141,7 +141,7 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Contributions ==
 
-* [Fork me on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/)
+* [Fork me on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay)
 
 == Upgrade Notice ==
 
