@@ -23,6 +23,7 @@ class GFDpsPxPayPlugin {
 
 	private $feed = null;								// current feed mapping form fields to payment fields, accessed through getFeed()
 	private $formData = null;							// current form data collected from form, accessed through getFormData()
+	private $dpsReturnArgs = null;						// data returned in Payment Express callback
 
 	// end points for the DPS PxPay API
 	const PXPAY_APIV2_URL		= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
@@ -61,7 +62,7 @@ class GFDpsPxPayPlugin {
 		$this->urlBase = plugin_dir_url(GFDPSPXPAY_PLUGIN_FILE);
 
 		add_action('init', array($this, 'init'));
-		add_filter('do_parse_request', array($this, 'processDpsReturn'));	// process DPS PxPay return
+		add_action('plugins_loaded', array($this, 'maybeProcessDpsReturn'), 0);
 		add_action('wp', array($this, 'processFormConfirmation'), 5);		// process redirect to GF confirmation
 	}
 
@@ -455,13 +456,9 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
-	* return from DPS PxPay website, retrieve and process payment result and redirect to form
-	* @param bool $do_parse
-	* @return bool
+	* check for request path containing our path element, and a result argument
 	*/
-	public function processDpsReturn($do_parse) {
-		// must parse out query params ourselves, to prevent the result param getting dropped / filtered out
-		// [speculation: maybe it's an anti-malware filter watching for base64-encoded injection attacks?]
+	public function maybeProcessDpsReturn() {
 		$parts = parse_url($_SERVER['REQUEST_URI']);
 		$path = $parts['path'];
 		if (isset($parts['query'])) {
@@ -473,118 +470,133 @@ class GFDpsPxPayPlugin {
 
 		// check for request path containing our path element, and a result argument
 		if (strpos($path, self::PXPAY_RETURN) !== false && isset($args['result'])) {
-			$creds = $this->getDpsCredentials($this->options['useTest']);
-			$resultReq = new GFDpsPxPayResult($creds['userID'], $creds['userKey'], $creds['endpoint']);
-			$resultReq->result = wp_unslash($args['result']);
+			$this->dpsReturnArgs = $args;
+			add_filter('do_parse_request', array($this, 'processDpsReturn'));
 
-			try {
-				self::log_debug('========= requesting transaction result');
-				$response = $resultReq->processResult();
+			// stop WooCommerce Payment Express Gateway from intercepting other integrations' transactions!
+			unset($_GET['userid']);
+			unset($_REQUEST['userid']);
+		}
+	}
 
-				do_action('gfdpspxpay_process_return');
+	/**
+	* return from DPS PxPay website, retrieve and process payment result and redirect to form
+	* @param bool $do_parse
+	* @return bool
+	*/
+	public function processDpsReturn($do_parse) {
+		// check for request path containing our path element, and a result argument
+		$creds = $this->getDpsCredentials($this->options['useTest']);
+		$resultReq = new GFDpsPxPayResult($creds['userID'], $creds['userKey'], $creds['endpoint']);
+		$resultReq->result = wp_unslash($this->dpsReturnArgs['result']);
 
-				if ($response->isValid) {
-					global $wpdb;
-					$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key='gfdpspxpay_txn_id' and meta_value = %s";
-					$lead_id = $wpdb->get_var($wpdb->prepare($sql, $response->transactionNumber));
-					$lock_id = 'gfdpspxpay_elock_' . $lead_id;
+		try {
+			self::log_debug('========= requesting transaction result');
+			$response = $resultReq->processResult();
 
-					// must have a lead ID, or nothing to do
-					if (empty($lead_id)) {
-						throw new GFDpsPxPayException('Invalid entry ID: ' . $lead_id);
-					}
+			do_action('gfdpspxpay_process_return');
 
-					// attempt to lock entry
-					$entry_was_locked = get_transient($lock_id);
-					if (!$entry_was_locked) {
-						set_transient($lock_id, time(), 90);
-					}
-					else {
-						self::log_debug("entry $lead_id was locked");
-					}
+			if ($response->isValid) {
+				global $wpdb;
+				$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key='gfdpspxpay_txn_id' and meta_value = %s";
+				$lead_id = $wpdb->get_var($wpdb->prepare($sql, $response->transactionNumber));
+				$lock_id = 'gfdpspxpay_elock_' . $lead_id;
 
-					$lead = GFFormsModel::get_lead($lead_id);
-					$form = GFFormsModel::get_form_meta($lead['form_id']);
-					$feed = $this->getFeed($form['id']);
-
-					// capture current state of lead
-					$initial_status = $lead['payment_status'];
-
-					do_action('gfdpspxpay_process_return_parsed', $lead, $form, $feed);
-
-					// update lead entry, with success/fail details
-					if ($response->success) {
-						$lead['payment_status']		= 'Approved';
-						$lead['payment_date']		= date('Y-m-d H:i:s');
-						$lead['payment_amount']		= $response->amount;
-						$lead['transaction_id']		= $response->txnRef;
-						$lead['transaction_type']	= 1;	// order
-						$lead['authcode']			= $response->authCode;
-						if (!empty($response->currencySettlement)) {
-							$lead['currency']			= $response->currencySettlement;
-						}
-
-						self::log_debug(sprintf('success, date = %s, id = %s, status = %s, amount = %s, authcode = %s',
-							$lead['payment_date'], $lead['transaction_id'], $lead['payment_status'],
-							$lead['payment_amount'], $response->authCode));
-					}
-					else {
-						$lead['payment_status']		= 'Failed';
-						$lead['transaction_id']		= $response->txnRef;
-						$lead['transaction_type']	= 1;	// order
-
-						// record empty bank authorisation code, so that we can test for it
-						$lead['authcode'] = '';
-
-						self::log_debug(sprintf('failed; %s', $response->statusText));
-					}
-
-					if (!$entry_was_locked) {
-
-						// update the entry
-						self::log_debug(sprintf('updating entry %d', $lead_id));
-						GFAPI::update_entry($lead);
-
-						// if order hasn't been fulfilled, process any deferred actions
-						if ($initial_status === 'Processing') {
-							self::log_debug('processing deferred actions');
-
-							$this->processDelayed($feed, $lead, $form);
-
-							// allow hookers to trigger their own actions
-							$hook_status = $response->success ? 'approved' : 'failed';
-							do_action("gfdpspxpay_process_{$hook_status}", $lead, $form, $feed);
-						}
-
-					}
-
-					// clear lock if we set one
-					if (!$entry_was_locked) {
-						delete_transient($lock_id);
-					}
-
-					// on failure, redirect to failure page if set, otherwise fall through to redirect back to confirmation page
-					if ($lead['payment_status']	== 'Failed') {
-						if ($feed->UrlFail) {
-							wp_redirect(esc_url_raw($feed->UrlFail));
-							exit;
-						}
-					}
-
-					// redirect to Gravity Forms page, passing form and lead IDs, encoded to deter simple attacks
-					$query = "form_id={$lead['form_id']}&lead_id={$lead['id']}";
-					$query .= "&hash=" . wp_hash($query);
-					$redirect_url = esc_url_raw(add_query_arg(array(self::PXPAY_RETURN => base64_encode($query)), $lead['source_url']));
-					wp_redirect($redirect_url);
-					exit;
+				// must have a lead ID, or nothing to do
+				if (empty($lead_id)) {
+					throw new GFDpsPxPayException('Invalid entry ID: ' . $lead_id);
 				}
-			}
-			catch (GFDpsPxPayException $e) {
-				// TODO: what now?
-				echo nl2br(esc_html($e->getMessage()));
-				self::log_error(__METHOD__ . ': ' . $e->getMessage());
+
+				// attempt to lock entry
+				$entry_was_locked = get_transient($lock_id);
+				if (!$entry_was_locked) {
+					set_transient($lock_id, time(), 90);
+				}
+				else {
+					self::log_debug("entry $lead_id was locked");
+				}
+
+				$lead = GFFormsModel::get_lead($lead_id);
+				$form = GFFormsModel::get_form_meta($lead['form_id']);
+				$feed = $this->getFeed($form['id']);
+
+				// capture current state of lead
+				$initial_status = $lead['payment_status'];
+
+				do_action('gfdpspxpay_process_return_parsed', $lead, $form, $feed);
+
+				// update lead entry, with success/fail details
+				if ($response->success) {
+					$lead['payment_status']		= 'Approved';
+					$lead['payment_date']		= date('Y-m-d H:i:s');
+					$lead['payment_amount']		= $response->amount;
+					$lead['transaction_id']		= $response->txnRef;
+					$lead['transaction_type']	= 1;	// order
+					$lead['authcode']			= $response->authCode;
+					if (!empty($response->currencySettlement)) {
+						$lead['currency']			= $response->currencySettlement;
+					}
+
+					self::log_debug(sprintf('success, date = %s, id = %s, status = %s, amount = %s, authcode = %s',
+						$lead['payment_date'], $lead['transaction_id'], $lead['payment_status'],
+						$lead['payment_amount'], $response->authCode));
+				}
+				else {
+					$lead['payment_status']		= 'Failed';
+					$lead['transaction_id']		= $response->txnRef;
+					$lead['transaction_type']	= 1;	// order
+
+					// record empty bank authorisation code, so that we can test for it
+					$lead['authcode'] = '';
+
+					self::log_debug(sprintf('failed; %s', $response->statusText));
+				}
+
+				if (!$entry_was_locked) {
+
+					// update the entry
+					self::log_debug(sprintf('updating entry %d', $lead_id));
+					GFAPI::update_entry($lead);
+
+					// if order hasn't been fulfilled, process any deferred actions
+					if ($initial_status === 'Processing') {
+						self::log_debug('processing deferred actions');
+
+						$this->processDelayed($feed, $lead, $form);
+
+						// allow hookers to trigger their own actions
+						$hook_status = $response->success ? 'approved' : 'failed';
+						do_action("gfdpspxpay_process_{$hook_status}", $lead, $form, $feed);
+					}
+
+				}
+
+				// clear lock if we set one
+				if (!$entry_was_locked) {
+					delete_transient($lock_id);
+				}
+
+				// on failure, redirect to failure page if set, otherwise fall through to redirect back to confirmation page
+				if ($lead['payment_status']	== 'Failed') {
+					if ($feed->UrlFail) {
+						wp_redirect(esc_url_raw($feed->UrlFail));
+						exit;
+					}
+				}
+
+				// redirect to Gravity Forms page, passing form and lead IDs, encoded to deter simple attacks
+				$query = "form_id={$lead['form_id']}&lead_id={$lead['id']}";
+				$query .= "&hash=" . wp_hash($query);
+				$redirect_url = esc_url_raw(add_query_arg(array(self::PXPAY_RETURN => base64_encode($query)), $lead['source_url']));
+				wp_redirect($redirect_url);
 				exit;
 			}
+		}
+		catch (GFDpsPxPayException $e) {
+			// TODO: what now?
+			echo nl2br(esc_html($e->getMessage()));
+			self::log_error(__METHOD__ . ': ' . $e->getMessage());
+			exit;
 		}
 
 		return $do_parse;

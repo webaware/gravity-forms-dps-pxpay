@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 1.6.2, soon...
+
+* fixed: stop WooCommerce Payment Express Gateway from intercepting Gravity Forms transactions (loose!)
+
 ### 1.6.1, 2016-07-25
 
 * fixed: indirect expressions incompatible with PHP 7
