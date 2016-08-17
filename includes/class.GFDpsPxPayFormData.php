@@ -46,12 +46,9 @@ class GFDpsPxPayFormData {
 	private function loadForm(&$form, $feed) {
 		// pick up feed mappings, set special mappings (form ID, title)
 		$inverseMap = $feed->getGfFieldMap();
-		if (isset($inverseMap['title'])) {
-			$this->{$inverseMap['title']} = $form['title'];
-		}
-		if (isset($inverseMap['form'])) {
-			$this->{$inverseMap['form']} = $form['id'];
-		}
+
+		$this->setMappedFieldValue($inverseMap, 'title',	$form['title']);
+		$this->setMappedFieldValue($inverseMap, 'form',		$form['id']);
 
 		// iterate over fields to collect data
 		foreach ($form['fields'] as &$field) {
@@ -63,37 +60,46 @@ class GFDpsPxPayFormData {
 
 			// check for feed mapping
 			if (isset($field->inputs) && is_array($field->inputs)) {
-				// compound field, see if want whole field
-				if (isset($inverseMap[$id])) {
-					// want whole field, concatenate values
-					$values = array();
-					foreach($field->inputs as $input) {
-						$subID = strtr($input['id'], '.', '_');
-						$values[] = trim(rgpost("input_{$subID}"));
-					}
-					$this->{$inverseMap[$id]} = implode(' ', array_filter($values, 'strlen'));
+				// compound field
+				$values = array();
+
+				foreach($field->inputs as $input) {
+					$sub_id = strtr($input['id'], '.', '_');
+
+					// collect sub-field values in case want a compound field as one field value
+					$values[] = trim(rgpost('input_' . $sub_id));
+
+					// pass to any fields that want a sub-field
+					$this->setMappedFieldValue($inverseMap, (string) $input['id'], rgpost('input_' . $sub_id));
 				}
-				else {
-					// see if want any part-field
-					foreach($field->inputs as $input) {
-						$key = (string) $input['id'];
-						if (isset($inverseMap[$key])) {
-							$subID = strtr($input['id'], '.', '_');
-							$this->{$inverseMap[$key]} = rgpost("input_{$subID}");
-						}
-					}
+
+				// see if want the whole field as one field value
+				if (isset($inverseMap[$id])) {
+					$this->setMappedFieldValue($inverseMap, $id, implode(' ', array_filter($values, 'strlen')));
 				}
 			}
 			else {
 				// simple field, just take value
-				if (isset($inverseMap[$id])) {
-					$this->{$inverseMap[$id]} = rgpost("input_{$id}");
-				}
+				$this->setMappedFieldValue($inverseMap, $id, rgpost('input_' . $id));
 			}
 		}
 
 		$entry = GFFormsModel::get_current_lead();
 		$this->total = GFCommon::get_order_total($form, $entry);
+	}
+
+	/**
+	* set PxPay field values
+	* @param array $inverseMap inverse map of Gravity Forms fields to feed fields
+	* @param string $gfField name of field mapped from Gravity Forms
+	* @param string $value
+	*/
+	private function setMappedFieldValue($inverseMap, $gfField, $value) {
+		if (!empty($inverseMap[$gfField])) {
+			foreach ($inverseMap[$gfField] as $feedField) {
+				$this->$feedField = $value;
+			}
+		}
 	}
 
 	/**

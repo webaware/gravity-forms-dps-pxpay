@@ -103,7 +103,14 @@ class GFDpsPxPayFeed {
 
 		foreach (array('MerchantReference', 'EmailAddress', 'TxnData1', 'TxnData2', 'TxnData3') as $feedName) {
 			if (!empty($this->$feedName)) {
-				$map[(string) $this->$feedName] = $feedName;
+				$gfField = (string) $this->$feedName;
+
+				if (empty($map[$gfField])) {
+					$map[$gfField] = array($feedName);
+				}
+				else {
+					$map[$gfField][] = $feedName;
+				}
 			}
 		}
 
