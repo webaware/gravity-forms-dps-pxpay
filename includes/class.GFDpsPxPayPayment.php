@@ -192,7 +192,7 @@ class GFDpsPxPayPayment {
 		$xml->writeElement('PxPayUserId', substr($this->userID, 0, 32));
 		$xml->writeElement('PxPayKey', substr($this->userKey, 0, 64));
 		$xml->writeElement('TxnType', substr($this->txnType, 0, 8));
-		$xml->writeElement('AmountInput', number_format($this->amount, 2, '.', ''));
+		$xml->writeElement('AmountInput', self::formatCurrency($this->amount, $this->currency));
 		$xml->writeElement('CurrencyInput', substr($this->currency, 0, 4));
 		$xml->writeElement('MerchantReference', substr($this->invoiceReference, 0, 64));
 		$xml->writeElement('TxnData1', substr($this->option1, 0, 255));
@@ -209,6 +209,29 @@ class GFDpsPxPayPayment {
 		$xml->endElement();		// GenerateRequest
 
 		return $xml->outputMemory();
+	}
+
+	/**
+	* format amount per currency
+	* @param float $amount
+	* @param string $currency
+	* @return string
+	*/
+	protected static function formatCurrency($amount, $currency) {
+		switch ($currency) {
+
+			// Japanese Yen has no decimal fraction
+			case 'JPY':
+				$value = number_format($amount, 0, '', '');
+				break;
+
+			default:
+				$value = number_format($amount, 2, '.', '');
+				break;
+
+		}
+
+		return $value;
 	}
 
 	/**

@@ -5,6 +5,7 @@
 ### 1.6.2, soon...
 
 * fixed: stop WooCommerce Payment Express Gateway from intercepting Gravity Forms transactions (loose!)
+* fixed: handle no-decimals currencies correctly (i.e. just Japanese Yen, for now)
 
 ### 1.6.1, 2016-07-25
 
