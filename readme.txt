@@ -123,7 +123,6 @@ The plugin will run in shared hosting environments, but requires PHP 5 with the 
 
 Developers can use these filter hooks to modify some invoice properties. Each filter receives a string for the field value, and the Gravity Forms form array.
 
-* `gfdpspxpay_invoice_desc` for modifying the invoice description
 * `gfdpspxpay_invoice_ref` for modifying the invoice reference
 * `gfdpspxpay_invoice_trans_number` for modifying the invoice transaction reference; NB: must be unique for PxPay account!
 * `gfdpspxpay_invoice_txndata1` for setting the TxnData1 field

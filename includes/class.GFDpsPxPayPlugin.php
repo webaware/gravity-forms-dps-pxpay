@@ -362,13 +362,11 @@ class GFDpsPxPayPlugin {
 		$paymentReq->option1			= $formData->TxnData1;
 		$paymentReq->option2			= $formData->TxnData2;
 		$paymentReq->option3			= $formData->TxnData3;
-		$paymentReq->invoiceDescription	= $feed->Opt;
 		$paymentReq->emailAddress		= $formData->EmailAddress;
 		$paymentReq->urlSuccess			= home_url(self::PXPAY_RETURN);
 		$paymentReq->urlFail			= home_url(self::PXPAY_RETURN);			// NB: redirection will happen after transaction status is updated
 
 		// allow plugins/themes to modify invoice description and reference, and set option fields
-		$paymentReq->invoiceDescription	= apply_filters('gfdpspxpay_invoice_desc', $paymentReq->invoiceDescription, $form);
 		$paymentReq->invoiceReference	= apply_filters('gfdpspxpay_invoice_ref', $paymentReq->invoiceReference, $form);
 		$paymentReq->option1			= apply_filters('gfdpspxpay_invoice_txndata1', $paymentReq->option1, $form);
 		$paymentReq->option2			= apply_filters('gfdpspxpay_invoice_txndata2', $paymentReq->option2, $form);

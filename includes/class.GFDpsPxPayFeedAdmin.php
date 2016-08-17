@@ -220,7 +220,6 @@ class GFDpsPxPayFeedAdmin {
 				'_gfdpspxpay_txndata1',
 				'_gfdpspxpay_txndata2',
 				'_gfdpspxpay_txndata3',
-				'_gfdpspxpay_opt',
 				'_gfdpspxpay_delay_post',
 				'_gfdpspxpay_delay_notify',
 				'_gfdpspxpay_delay_autorespond',

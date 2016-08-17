@@ -75,12 +75,6 @@ class GFDpsPxPayPayment {
 	public $invoiceReference;
 
 	/**
-	* an optional invoice description
-	* @var string max. 64 characters
-	*/
-	public $invoiceDescription;
-
-	/**
 	* optional additional information for use in shopping carts, etc.
 	* @var string max. 255 characters
 	*/
@@ -204,7 +198,6 @@ class GFDpsPxPayPayment {
 		$xml->writeElement('EnableAddBillCard', $this->enableRecurring ? '1' : '0');
 		$xml->writeElement('UrlSuccess', substr($this->urlSuccess, 0, 255));
 		$xml->writeElement('UrlFail', substr($this->urlFail, 0, 255));
-		$xml->writeElement('Opt', substr($this->invoiceDescription, 0, 64));
 
 		$xml->endElement();		// GenerateRequest
 

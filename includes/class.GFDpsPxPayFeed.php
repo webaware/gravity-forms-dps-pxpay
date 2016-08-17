@@ -21,7 +21,6 @@ class GFDpsPxPayFeed {
 
 	// fields set in admin
 	public $UrlFail;						// URL to redirect to on transaction failure
-	public $Opt;							// optional timeout data, TO=yymmddHHmm
 
 	// field mappings to GF form
 	public $MerchantReference;				// merchant reference
@@ -38,7 +37,6 @@ class GFDpsPxPayFeed {
 		'TxnData1'				=> '_gfdpspxpay_txndata1',
 		'TxnData2'				=> '_gfdpspxpay_txndata2',
 		'TxnData3'				=> '_gfdpspxpay_txndata3',
-		'Opt'					=> '_gfdpspxpay_opt',
 		'DelayPost'				=> '_gfdpspxpay_delay_post',
 		'DelayNotify'			=> '_gfdpspxpay_delay_notify',
 		'DelayAutorespond'		=> '_gfdpspxpay_delay_autorespond',
