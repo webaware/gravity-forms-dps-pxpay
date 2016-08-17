@@ -459,24 +459,31 @@ class GFDpsPxPayPlugin {
 	* check for request path containing our path element, and a result argument
 	*/
 	public function maybeProcessDpsReturn() {
-		$parts = parse_url($_SERVER['REQUEST_URI']);
-		$path = $parts['path'];
-		if (isset($parts['query'])) {
-			parse_str($parts['query'], $args);
-		}
-		else {
-			$args = array();
+		$request_uri = parse_url($_SERVER['REQUEST_URI']);
+
+		// path must contain our callback slug
+		if (empty($request_uri['path']) || strpos($request_uri['path'], self::PXPAY_RETURN) === false) {
+			return;
 		}
 
-		// check for request path containing our path element, and a result argument
-		if (strpos($path, self::PXPAY_RETURN) !== false && isset($args['result'])) {
-			$this->dpsReturnArgs = $args;
-			add_filter('do_parse_request', array($this, 'processDpsReturn'));
-
-			// stop WooCommerce Payment Express Gateway from intercepting other integrations' transactions!
-			unset($_GET['userid']);
-			unset($_REQUEST['userid']);
+		// there must be a query string
+		if (empty($request_uri['query'])) {
+			return;
 		}
+
+		// query string must have a result element
+		parse_str($request_uri['query'], $args);
+		if (!isset($args['result'])) {
+			return;
+		}
+
+		// set up for processing the callback after everything has loaded properly
+		$this->dpsReturnArgs = $args;
+		add_filter('do_parse_request', array($this, 'processDpsReturn'));
+
+		// stop WooCommerce Payment Express Gateway from intercepting other integrations' transactions!
+		unset($_GET['userid']);
+		unset($_REQUEST['userid']);
 	}
 
 	/**
