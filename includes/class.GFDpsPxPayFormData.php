@@ -55,7 +55,7 @@ class GFDpsPxPayFormData {
 
 		// iterate over fields to collect data
 		foreach ($form['fields'] as &$field) {
-			$id = (string) $field['id'];
+			$id = (string) $field->id;
 
 			if ($field->type === 'shipping' || $field->type === 'product' || $field->type === 'total') {
 				$this->hasPurchaseFieldsFlag = true;

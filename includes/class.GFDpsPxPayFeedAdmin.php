@@ -354,13 +354,13 @@ class GFDpsPxPayFeedAdmin {
             foreach ($form['fields'] as $field) {
                 if (!rgar($field, 'displayOnly')) {
 					// pick up simple fields and selected compound fields
-					if (empty($field['inputs']) || in_array(GFFormsModel::get_input_type($field), array('name', 'address'))) {
-						$fields[(string) $field['id']] = GFCommon::get_label($field);
+					if (empty($field->inputs) || in_array(GFFormsModel::get_input_type($field), array('name', 'address'))) {
+						$fields[(string) $field->id] = GFCommon::get_label($field);
 					}
 
 					// pick up subfields
-					if (isset($field['inputs']) && is_array($field['inputs'])) {
-						foreach($field['inputs'] as $input) {
+					if (isset($field->inputs) && is_array($field->inputs)) {
+						foreach($field->inputs as $input) {
 							$fields[(string) $input['id']] = GFCommon::get_label($field, $input['id']);
 						}
 					}
