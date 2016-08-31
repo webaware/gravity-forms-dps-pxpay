@@ -17,6 +17,7 @@ class GFDpsPxPayFeed {
 	public $DelayAutorespond;				// boolean: send user notification only when payment is received
 	public $DelayUserrego;					// boolean: register user only when payment is received
 	public $ExecDelayedAlways;				// boolean: always execute delayed actions, regardless of payment status
+	public $IgnoreDelayedNoFeed;			// boolean: ignore delaying actions when no feed is active
 	public $IsEnabled;						// boolean: is this feed enabled?
 
 	// fields set in admin
@@ -42,6 +43,7 @@ class GFDpsPxPayFeed {
 		'DelayAutorespond'		=> '_gfdpspxpay_delay_autorespond',
 		'DelayUserrego'			=> '_gfdpspxpay_delay_userrego',
 		'ExecDelayedAlways'		=> '_gfdpspxpay_delay_exec_always',
+		'IgnoreDelayedNoFeed'	=> '_gfdpspxpay_delay_ignore_nofeed',
 	);
 
 	/**

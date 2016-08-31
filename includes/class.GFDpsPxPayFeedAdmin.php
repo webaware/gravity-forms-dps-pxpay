@@ -224,7 +224,7 @@ class GFDpsPxPayFeedAdmin {
 				'_gfdpspxpay_delay_notify',
 				'_gfdpspxpay_delay_autorespond',
 				'_gfdpspxpay_delay_userrego',
-				'_gfdpspxpay_delay_exec_always',
+				'gfdpspxpay_delay_exec_option',
 			);
 
 			if (isset($_POST['_gfdpspxpay_form'])) {
@@ -235,6 +235,28 @@ class GFDpsPxPayFeedAdmin {
 				if (isset($_POST[$fieldName])) {
 
 					$value = $_POST[$fieldName];
+
+					if ($fieldName === 'gfdpspxpay_delay_exec_option') {
+						switch ($value) {
+
+							case 'always':
+								update_post_meta($postID, '_gfdpspxpay_delay_exec_always', '1');
+								delete_post_meta($postID, '_gfdpspxpay_delay_ignore_nofeed');
+								break;
+
+							case 'ignore_nofeed':
+								delete_post_meta($postID, '_gfdpspxpay_delay_exec_always');
+								update_post_meta($postID, '_gfdpspxpay_delay_ignore_nofeed', '1');
+								break;
+
+							default:
+								delete_post_meta($postID, '_gfdpspxpay_delay_exec_always');
+								delete_post_meta($postID, '_gfdpspxpay_delay_ignore_nofeed');
+								break;
+
+						}
+						continue;
+					}
 
 					if (empty($value)) {
 						delete_post_meta($postID, $fieldName);

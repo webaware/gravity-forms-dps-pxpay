@@ -168,7 +168,16 @@ class GFDpsPxPayPlugin {
 			if ($feed && $addon_slug === 'gravityformsuserregistration') {
 				if (!empty($feed->DelayUserrego)) {
 					$is_delayed = true;
-					self::log_debug(sprintf('delay user registration: form id %s, lead id %s', $form['id'], $entry['id']));
+
+					// maybe ignore delay if feed won't be processed, i.e. nothing to charge
+					if ($feed->IgnoreDelayedNoFeed) {
+						$formData = $this->getFormData($form);
+						$is_delayed = !empty($formData->total);
+					}
+
+					if ($is_delayed) {
+						self::log_debug(sprintf('delay user registration: form id %s, lead id %s', $form['id'], $entry['id']));
+					}
 				}
 			}
 
@@ -188,6 +197,12 @@ class GFDpsPxPayPlugin {
 		$feed = $this->getFeed($form['id']);
 		$is_disabled = !empty($feed->DelayPost);
 
+		// maybe ignore delay if feed won't be processed, i.e. nothing to charge
+		if ($is_disabled && $feed->IgnoreDelayedNoFeed) {
+			$formData = $this->getFormData($form);
+			$is_disabled = !empty($formData->total);
+		}
+
 		self::log_debug(sprintf('delay post creation: %s; form id %s, lead id %s', $is_disabled ? 'yes' : 'no', $form['id'], $lead['id']));
 
 		return $is_disabled;
@@ -204,6 +219,12 @@ class GFDpsPxPayPlugin {
 		$feed = $this->getFeed($form['id']);
 		$is_disabled = !empty($feed->DelayAutorespond);
 
+		// maybe ignore delay if feed won't be processed, i.e. nothing to charge
+		if ($is_disabled && $this->IgnoreDelayedNoFeed) {
+			$formData = $this->getFormData($form);
+			$is_disabled = !empty($formData->total);
+		}
+
 		$this->log_debug(sprintf('delay user notification: %s; form id %s, lead id %s', $is_disabled ? 'yes' : 'no', $form['id'], $lead['id']));
 
 		return $is_disabled;
@@ -219,6 +240,12 @@ class GFDpsPxPayPlugin {
 	public function gformDelayAdminNotification($is_disabled, $form, $lead) {
 		$feed = $this->getFeed($form['id']);
 		$is_disabled = !empty($feed->DelayNotify);
+
+		// maybe ignore delay if feed won't be processed, i.e. nothing to charge
+		if ($is_disabled && $this->IgnoreDelayedNoFeed) {
+			$formData = $this->getFormData($form);
+			$is_disabled = !empty($formData->total);
+		}
 
 		$this->log_debug(sprintf('delay admin notification: %s; form id %s, lead id %s', $is_disabled ? 'yes' : 'no', $form['id'], $lead['id']));
 
@@ -266,6 +293,12 @@ class GFDpsPxPayPlugin {
 					}
 					break;
 			}
+		}
+
+		// maybe ignore delay if feed won't be processed, i.e. nothing to charge
+		if ($is_disabled && $feed->IgnoreDelayedNoFeed) {
+			$formData = $this->getFormData($form);
+			$is_disabled = !empty($formData->total);
 		}
 
 		$this->log_debug(sprintf('delay notification: %s; form id %s, lead id %s, notification "%s"', $is_disabled ? 'yes' : 'no',
