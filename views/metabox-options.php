@@ -16,12 +16,12 @@ if (!defined('ABSPATH')) {
 <fieldset>
 
 	<p><label><input type="radio" name="gfdpspxpay_delay_exec_option" value="success" <?php checked(!$feed->ExecDelayedAlways && !$feed->IgnoreDelayedNoFeed); ?> />
-	 Only execute delayed actions for successful payment</label></p>
+	 Execute delayed actions for successful payment, or if no payment is required</label></p>
 
 	<p><label><input type="radio" name="gfdpspxpay_delay_exec_option" value="always" <?php checked($feed->ExecDelayedAlways); ?> />
 	 Always execute delayed actions, regardless of payment status</label></p>
 
 	<p><label><input type="radio" name="gfdpspxpay_delay_exec_option" value="ignore_nofeed" <?php checked($feed->IgnoreDelayedNoFeed); ?> />
-	 Ignore delayed actions if there is no PxPay feed to process</label></p>
+	 Don't execute delayed actions if no payment is required</label></p>
 
 </fieldset>
