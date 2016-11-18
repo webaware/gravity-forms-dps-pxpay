@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 1.8.0, 2016-11-19
+
+* fixed: delayed actions don't fire when there's no charge to process
+
 ### 1.7.0, 2016-08-19
 
 * fixed: stop WooCommerce Payment Express Gateway from intercepting Gravity Forms transactions (loose!)

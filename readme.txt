@@ -6,8 +6,8 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 4.3
-Tested up to: 4.6
-Stable tag: 1.7.0
+Tested up to: 4.7
+Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -144,13 +144,17 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 1.7.0 =
+= 1.8.0 =
 
-Stop WooCommerce Payment Express Gateway from intercepting Gravity Forms transactions; removed a redundant filter (see changelog); support billing in Japanese Yen.
+fixed: delayed actions don't fire when there's no charge to process
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
+
+### 1.8.0, 2016-11-19
+
+* fixed: delayed actions don't fire when there's no charge to process
 
 ### 1.7.0, 2016-08-19
 
