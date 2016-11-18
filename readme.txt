@@ -1,27 +1,27 @@
 === Gravity Forms DPS PxPay ===
 Contributors: webaware, IstanbulMMV
 Plugin Name: Gravity Forms DPS PxPay
-Plugin URI: http://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
-Author URI: http://webaware.com.au/
+Plugin URI: https://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
+Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravityforms, gravity forms, dps, payment express, pxpay, donation, donations, payment, payment gateway, ecommerce, credit cards, new zealand, australia
 Requires at least: 4.3
 Tested up to: 4.6
 Stable tag: 1.7.0
 License: GPLv2 or later
-License URI: http://www.gnu.org/licenses/gpl-2.0.html
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Integrate Gravity Forms with the DPS Payment Express PxPay credit card payment gateway
 
 == Description ==
 
-Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS Payment Express PxPay](https://www.paymentexpress.com/merchant-ecommerce-pxpay) to the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin.
+Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS Payment Express PxPay](https://www.paymentexpress.com/merchant-ecommerce-pxpay) to the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin.
 
 * build online donation forms
 * build online booking forms
 * build simple Buy Now forms
 
-> NB: this plugin extends [Gravity Forms](http://webaware.com.au/get-gravity-forms); you still need to install and activate Gravity Forms!
+> NB: this plugin extends [Gravity Forms](https://webaware.com.au/get-gravity-forms); you still need to install and activate Gravity Forms!
 
 = Sponsorships =
 
@@ -31,12 +31,12 @@ Thanks for sponsoring new features on Gravity Forms DPS PxPay!
 
 = Requirements: =
 
-* Install the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin
+* Install the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
 * Create an account with DPS for [PxPay](https://sec.paymentexpress.com/pxmi/apply)
 
 == Installation ==
 
-1. Install and activate the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin
+1. Install and activate the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
 2. Upload the Gravity Forms DPS PxPay plugin to your /wp-content/plugins/ directory.
 3. Activate the Gravity Forms DPS PxPay plugin through the 'Plugins' menu in WordPress.
 4. Edit the DPS PxPay payment gateway settings to set your DPS PxPay user ID and key
@@ -55,7 +55,7 @@ DPS PxPay is a hosted Credit Card payment gateway. DPS Payment Express is one of
 
 = Will this plugin work without installing Gravity Forms? =
 
-No. This plugin adds a DPS Payment Express PxPay payment gateway to Gravity Forms so that you can add online payments to your forms. You must purchase and install a copy of the [Gravity Forms](http://webaware.com.au/get-gravity-forms) plugin too.
+No. This plugin adds a DPS Payment Express PxPay payment gateway to Gravity Forms so that you can add online payments to your forms. You must purchase and install a copy of the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin too.
 
 = What Gravity Forms license do I need? =
 
@@ -75,7 +75,7 @@ Successful transaction details including the DPS PxPay transaction number and ba
 
 = How do I add a confirmed payment amount and transaction number to my Gravity Forms admin or customer email? =
 
-Browse to your Gravity Form, select [Notifications](http://www.gravityhelp.com/documentation/page/Notifications) and use the Insert Merge Tag dropdown (Payment Amount, Transaction Number and Auth Code will appear under Custom at the very bottom of the dropdown list).
+Browse to your Gravity Form, select [Notifications](https://www.gravityhelp.com/documentation/article/configuring-notifications-in-gravity-forms/) and use the Insert Merge Tag dropdown (Payment Amount, Transaction Number and Auth Code will appear under Custom at the very bottom of the dropdown list).
 
 NB: these custom merge tags will only work if notifications are only sent after payment is accepted.
 

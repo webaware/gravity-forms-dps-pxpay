@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Gravity Forms DPS PxPay
-Plugin URI: http://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
+Plugin URI: https://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
 Description: Integrate Gravity Forms with the DPS Payment Express PxPay credit card payment gateway.
 Version: 1.8.0-dev
 Author: WebAware
-Author URI: http://webaware.com.au/
+Author URI: https://shop.webaware.com.au/
 */
 
 /*
