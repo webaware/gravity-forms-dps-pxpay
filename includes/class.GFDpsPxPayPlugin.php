@@ -803,6 +803,11 @@ class GFDpsPxPayPlugin {
 	* @return string
 	*/
 	public function gformReplaceMergeTags($text, $form, $lead, $url_encode, $esc_html, $nl2br, $format) {
+		// check for invalid calls, e.g. Gravity Forms User Registration login form widget
+		if (empty($form) || empty($lead)) {
+			return $text;
+		}
+
 		$gateway = gform_get_meta($lead['id'], 'payment_gateway');
 		if ($gateway == 'gfdpspxpay') {
 			$authCode = gform_get_meta($lead['id'], 'authcode');

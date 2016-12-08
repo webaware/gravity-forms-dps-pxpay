@@ -4,6 +4,7 @@
 
 ### 1.8.1, soon...
 
+* fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget
 
 ### 1.8.0, 2016-11-19
 
