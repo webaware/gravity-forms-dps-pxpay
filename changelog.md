@@ -2,6 +2,9 @@
 
 ## Changelog
 
+### 1.8.1, soon...
+
+
 ### 1.8.0, 2016-11-19
 
 * fixed: delayed actions don't fire when there's no charge to process
