@@ -5,5 +5,6 @@ if (!defined('ABSPATH')) {
 ?>
 
 <div class="error">
-	<p>Gravity Forms DPS PxPay requires <a target="_blank" href="https://webaware.com.au/get-gravity-forms">Gravity Forms</a> to be installed and activated.</p>
+	<p><?php printf(__('Gravity Forms DPS PxPay requires <a target="_blank" href="%s">Gravity Forms</a> to be installed and activated.', 'gravity-forms-dps-pxpay'),
+		'https://webaware.com.au/get-gravity-forms'); ?></p>
 </div>
