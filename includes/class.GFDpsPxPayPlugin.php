@@ -33,7 +33,7 @@ class GFDpsPxPayPlugin {
 	const PXPAY_RETURN		= 'PXPAYRETURN';
 
 	// minimum versions required
-	const MIN_VERSION_GF	= '1.9';
+	const MIN_VERSION_GF	= '2.0';
 
 	/**
 	* static method for getting the instance of this singleton object

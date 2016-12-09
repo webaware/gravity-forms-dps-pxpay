@@ -2,9 +2,10 @@
 
 ## Changelog
 
-### 1.8.1, soon...
+### 2.0.0, soon...
 
 * fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget
+* changed: minimum requirements now Gravity Forms 2.0
 
 ### 1.8.0, 2016-11-19
 
