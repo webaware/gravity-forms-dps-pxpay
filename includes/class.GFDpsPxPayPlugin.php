@@ -8,7 +8,6 @@ if (!defined('ABSPATH')) {
 * custom exception types
 */
 class GFDpsPxPayException extends Exception {}
-class GFDpsPxPayCurlException extends Exception {}
 
 /**
 * class for managing the plugin
@@ -105,7 +104,11 @@ class GFDpsPxPayPlugin {
 	*/
 	public static function autoload($class_name) {
 		static $classMap = array (
+			'GFDpsPxPayAPI'							=> 'includes/class.GFDpsPxPayAPI.php',
 			'GFDpsPxPayCredentials'					=> 'includes/class.GFDpsPxPayCredentials.php',
+			'GFDpsPxPayResponse'					=> 'includes/class.GFDpsPxPayResponse.php',
+			'GFDpsPxPayResponseRequest'				=> 'includes/class.GFDpsPxPayResponseRequest.php',
+			'GFDpsPxPayResponseResult'				=> 'includes/class.GFDpsPxPayResponseResult.php',
 		);
 
 		if (isset($classMap[$class_name])) {

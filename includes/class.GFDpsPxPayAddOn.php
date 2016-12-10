@@ -584,7 +584,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			}
 
 			// make sure that gateway credentials have been set for feed, or globally
-			$creds = new GFHeidelpayCredentials($this, $feed);
+			$creds = new GFDpsPxPayCredentials($this, $feed);
 			if ($creds->isIncomplete()) {
 				throw new GFDpsPxPayException(__('Incomplete credentials for Payment Express PxPay payment; please tell the web master.', 'gravity-forms-dps-pxpay'));
 			}
@@ -714,61 +714,36 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	protected function getPaymentRequest($formData, $feed, $form, $entry = false) {
 		// build a payment request and execute on API
-		$creds		= new GFHeidelpayCredentials($this, $feed);
-		$useTest	= !empty($feed['meta']['useTest']);
-		$paymentReq	= new GFHeidelpayPayment($creds, $useTest);
+		$creds		= new GFDpsPxPayCredentials($this, $feed);
+		$paymentReq	= new GFDpsPxPayAPI($creds);
 
 		// generate a unique transaction ID to avoid collisions, e.g. between different installations using the same gateway account
-		$transactionID = uniqid();
+		// use last three characters of entry ID as prefix, to avoid collisions with entries created at same microsecond
+		// uniqid() generates 13-character string, plus 3 characters from entry ID = 16 characters which is max for field
+		$transactionID = uniqid(substr($entry['id'], -3));
 
 		// allow plugins/themes to modify transaction ID; NB: must remain unique for gateway account!
-		$transactionID = apply_filters('gfheidelpay_invoice_trans_number', $transactionID, $form);
-
-		switch (rgar($feed['meta'], 'paymentMethod', 'debit')) {
-
-			case 'authorize':
-				$paymentReq->transactionType = GFHeidelpayPayment::TRANS_CODE_RESERVE;
-				break;
-
-			default:
-				$paymentReq->transactionType = GFHeidelpayPayment::TRANS_CODE_DEBIT;
-				break;
-
-		}
+		$transactionID = apply_filters('gfdpspxpay_invoice_trans_number', $transactionID, $form);
 
 		$paymentReq->amount					= $formData['payment_amount'];
-		$paymentReq->currencyCode			= GFCommon::get_currency();
+		$paymentReq->currency				= GFCommon::get_currency();
 		$paymentReq->transactionNumber		= $transactionID;
-		$paymentReq->invoiceDescription		= $formData['description'];
-		$paymentReq->languageCode			= get_locale();
-		$paymentReq->enabledMethods			= rgar($feed['meta'], 'enabledMethods', array('CC' => 1));
-
-		if (!empty($entry['id'])) {
-			$paymentReq->invoiceReference	= sprintf('F%d:E%d', $form['id'], $entry['id']);
-		}
-		else {
-			$paymentReq->invoiceReference	= 'F' . $form['id'];
-		}
+		$paymentReq->invoiceReference		= $formData['description'];
+		$paymentReq->txnType				= GFDpsPxPayAPI::TXN_TYPE_CAPTURE;
+		$paymentReq->urlSuccess				= home_url(self::ENDPOINT_RETURN);
+		$paymentReq->urlFail				= home_url(self::ENDPOINT_RETURN);		// NB: redirection will happen after transaction status is updated
 
 		// billing details
-		$paymentReq->title					= $formData['title'];
-		$paymentReq->lastName				= $formData['lastName'];
-		$paymentReq->firstName				= $formData['firstName'];
-		$paymentReq->birthDate				= $formData['birthDate'];
-		$paymentReq->companyName			= $formData['companyName'];
-		$paymentReq->address1				= $formData['address'];
-		$paymentReq->address2				= $formData['address2'];
-		$paymentReq->suburb					= $formData['city'];
-		$paymentReq->state					= $formData['state'];
-		$paymentReq->postcode				= $formData['zip'];
-		$paymentReq->country				= GFCommon::get_country_code($formData['country']);
+		$paymentReq->txn_data1				= $formData['txn_data1'];
+		$paymentReq->txn_data2				= $formData['txn_data2'];
+		$paymentReq->txn_data3				= $formData['txn_data3'];
 		$paymentReq->emailAddress			= $formData['email'];
-		$paymentReq->phone					= $formData['phone'];
-		$paymentReq->mobile					= $formData['mobile'];
 
 		// allow plugins/themes to modify invoice description and reference, and set option fields
-		$paymentReq->invoiceDescription		= apply_filters('gfheidelpay_invoice_desc', $paymentReq->invoiceDescription, $form);
-		$paymentReq->invoiceReference		= apply_filters('gfheidelpay_invoice_ref', $paymentReq->invoiceReference, $form);
+		$paymentReq->invoiceReference	= apply_filters('gfdpspxpay_invoice_ref', $paymentReq->invoiceReference, $form);
+		$paymentReq->txn_data1			= apply_filters('gfdpspxpay_invoice_txndata1', $paymentReq->txn_data1, $form);
+		$paymentReq->txn_data2			= apply_filters('gfdpspxpay_invoice_txndata2', $paymentReq->txn_data2, $form);
+		$paymentReq->txn_data3			= apply_filters('gfdpspxpay_invoice_txndata3', $paymentReq->txn_data3, $form);
 
 		return $paymentReq;
 	}
