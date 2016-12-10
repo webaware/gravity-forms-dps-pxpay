@@ -1,5 +1,5 @@
 === Gravity Forms DPS PxPay ===
-Contributors: webaware, IstanbulMMV
+Contributors: webaware
 Plugin Name: Gravity Forms DPS PxPay
 Plugin URI: https://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
 Author URI: https://shop.webaware.com.au/
@@ -11,7 +11,7 @@ Stable tag: 1.8.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Integrate Gravity Forms with the DPS Payment Express PxPay credit card payment gateway
+Easily create online payment forms with Gravity Forms and DPS Payment Express PxPay
 
 == Description ==
 

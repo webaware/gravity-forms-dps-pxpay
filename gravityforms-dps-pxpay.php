@@ -34,7 +34,6 @@ if (!defined('ABSPATH')) {
 define('GFDPSPXPAY_PLUGIN_ROOT', dirname(__FILE__) . '/');
 define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__FILE__));
 define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
-define('GFDPSPXPAY_PLUGIN_OPTIONS', 'gfdpspxpay_plugin');
 define('GFDPSPXPAY_PLUGIN_VERSION', '2.0.0-dev');
 
 // custom post types
