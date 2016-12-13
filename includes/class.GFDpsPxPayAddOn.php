@@ -1079,9 +1079,11 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			if ($query && wp_hash(http_build_query($check)) === rgar($query, 'hash')) {
 
 				// stop WordPress SEO from stripping off our query parameters and redirecting the page
-				global $wpseo_front;
-				if (isset($wpseo_front)) {
-					remove_action('template_redirect', array($wpseo_front, 'clean_permalink'), 1);
+				if (isset($GLOBALS['wpseo_front'])) {
+					remove_action('template_redirect', array($GLOBALS['wpseo_front'], 'clean_permalink'), 1);
+				}
+				elseif (class_exists('WPSEO_Frontend', false) && method_exists('WPSEO_Frontend', 'get_instance')) {
+					remove_action('template_redirect', array(WPSEO_Frontend::get_instance(), 'clean_permalink'), 1);
 				}
 
 				// load form and lead data
