@@ -970,11 +970,21 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return bool
 	*/
 	public function gformDelayPost($is_delayed, $form, $entry) {
-		$feed = $this->getFeed($entry['id']);
+		if (!$is_delayed) {
+			$feed = $this->getFeed($entry['id']);
 
-		if ($entry['payment_status'] === 'Processing' && !empty($feed['meta']['delayPost'])) {
-			$is_delayed = true;
-			$this->log_debug(sprintf('delay post creation: form id %s, lead id %s', $form['id'], $entry['id']));
+			if (rgar($entry, 'payment_status') === 'Processing' && !empty($feed['meta']['delayPost'])) {
+				$is_delayed = true;
+			}
+
+			// if there's nothing to charge and exec delay mode is success, then check for empty amount which is always allowed
+			if ($is_delayed && rgar($feed['meta'], 'execDelayed', 'success') === 'success') {
+				$is_delayed = !empty($this->current_submission_data['payment_amount']);
+			}
+
+			if ($is_delayed) {
+				$this->log_debug(sprintf('delay post creation: form id %s, lead id %s', $form['id'], $entry['id']));
+			}
 		}
 
 		return $is_delayed;
@@ -989,7 +999,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return bool
 	*/
 	public function gformIsDelayed($is_delayed, $form, $entry, $addon_slug) {
-		if ($entry['payment_status'] === 'Processing') {
+		if (!$is_delayed && rgar($entry, 'payment_status') === 'Processing') {
 			$feed = $this->getFeed($entry['id']);
 
 			if ($feed) {
@@ -1012,6 +1022,11 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 				}
 
+				// if there's nothing to charge and exec delay mode is success, then check for empty amount which is always allowed
+				if ($is_delayed && rgar($feed['meta'], 'execDelayed', 'success') === 'success') {
+					$is_delayed = !empty($this->current_submission_data['payment_amount']);
+				}
+
 			}
 
 		}
@@ -1027,12 +1042,15 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function gformDelayOther($entry, $form) {
 		$feed = $this->getFeed($entry['id']);
 
-		if (!empty($feed['meta']['delayZapier']) && has_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'))) {
+		// if there's nothing to charge and exec delay mode is success, then check for empty amount which is always allowed
+		$is_delayed = rgar($feed['meta'], 'execDelayed', 'success') !== 'success' || !empty($this->current_submission_data['payment_amount']);
+
+		if ($is_delayed && !empty($feed['meta']['delayZapier']) && has_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'))) {
 			$this->log_debug(sprintf('delay Zapier feed: form id %s, lead id %s', $form['id'], $entry['id']));
 			remove_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'), 10, 2);
 		}
 
-		if (!empty($feed['meta']['delaySalesforce']) && has_action('gform_after_submission', array('GFSalesforce', 'export'))) {
+		if ($is_delayed && !empty($feed['meta']['delaySalesforce']) && has_action('gform_after_submission', array('GFSalesforce', 'export'))) {
 			$this->log_debug(sprintf('delay Salesforce feed: form id %s, lead id %s', $form['id'], $entry['id']));
 			remove_action('gform_after_submission', array('GFSalesforce', 'export'), 10, 2);
 		}
@@ -1047,7 +1065,17 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	protected function processDelayed($feed, $entry, $form) {
 		// default to only performing delayed actions if payment was successful, unless feed opts to always execute
 		// can filter each delayed action to permit / deny execution
-		$execute_delayed = in_array($entry['payment_status'], array('Paid', 'Pending')) || rgar($feed['meta'], 'execDelayedAlways');
+		switch (rgar($feed['meta'], 'execDelayed', 'success')) {
+
+			case 'always':
+				$execute_delayed = true;
+				break;
+
+			default:
+				$execute_delayed = in_array($entry['payment_status'], array('Paid', 'Pending'));
+				break;
+
+		}
 
 		if ($feed['meta']['delayPost']) {
 			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
@@ -1062,7 +1090,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			}
 
 			$this->log_debug(sprintf('calling gform_paypal_fulfillment action; form id %s, lead id %s', $form['id'], $entry['id']));
-			do_action('gform_paypal_fulfillment', $entry, $feed, $entry['transaction_id'], $entry['payment_amount']);
+			do_action('gform_paypal_fulfillment', $entry, $feed, rgar($entry, 'transaction_id'), rgar($entry, 'payment_amount'));
 		}
 	}
 
