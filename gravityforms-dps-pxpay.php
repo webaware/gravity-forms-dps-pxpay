@@ -36,9 +36,6 @@ define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__
 define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
 define('GFDPSPXPAY_PLUGIN_VERSION', '2.0.0-dev');
 
-// custom post types
-define('GFDPSPXPAY_TYPE_FEED', 'gfdpspxpay_feed');
-
 // instantiate the plug-in
 require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayPlugin.php';
 GFDpsPxPayPlugin::getInstance();

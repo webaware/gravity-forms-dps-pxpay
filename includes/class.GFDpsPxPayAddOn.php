@@ -63,9 +63,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
 		add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
 		add_action('wp', array($this, 'processFormConfirmation'), 5);		// process redirect to GF confirmation
-
-		// handle the new Payment Details box
-		add_action('gform_payment_details', array($this, 'gformPaymentDetails'), 10, 2);
+		add_action('gform_payment_details', array($this, 'gformPaymentDetails'), 9, 2);
 
 		// handle deferrals
 		add_filter('gform_is_delayed_pre_process_feed', array($this, 'gformIsDelayed'), 10, 4);
@@ -1276,7 +1274,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$payment_gateway = gform_get_meta($entry['id'], 'payment_gateway');
 		if ($payment_gateway === $this->_slug) {
 			$authCode		= gform_get_meta($entry['id'], self::META_AUTHCODE);
-			//~ $txn_id			= gform_get_meta($entry['id'], self::META_TRANSACTION_ID);
 
 			require GFDPSPXPAY_PLUGIN_ROOT . 'views/admin-entry-payment-details.php';
 		}
