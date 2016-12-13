@@ -326,7 +326,7 @@ class GFDpsPxPayAPI {
 		$response = wp_remote_post($url, array(
 			'user-agent'	=> $this->httpUserAgent,
 			'sslverify'		=> $this->sslVerifyPeer,
-			'timeout'		=> 60,
+			'timeout'		=> 30,
 			'headers'		=> array(
 									'Content-Type'		=> 'text/xml; charset=utf-8',
 							   ),
