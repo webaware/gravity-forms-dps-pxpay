@@ -19,10 +19,10 @@ class GFDpsPxPayCredentials {
 	/**
 	* set gateway credentials for selected feed
 	* @param GFPaymentAddOn $addon
-	* @param array $feed
+	* @param bool $useTest
 	*/
-	public function __construct($addon, $feed) {
-		if (empty($feed['meta']['useTest'])) {
+	public function __construct($addon, $useTest) {
+		if (empty($useTest)) {
 			// get defaults from add-on settings
 			$this->userID			= $addon->get_plugin_setting('userID');
 			$this->userKey			= $addon->get_plugin_setting('userKey');

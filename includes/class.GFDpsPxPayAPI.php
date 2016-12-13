@@ -155,9 +155,11 @@ class GFDpsPxPayAPI {
 	}
 
 	/**
-	* process a payment against DPS PxPay; throws exception on error with error described in exception message.
+	* process a payment request against DPS PxPay; throws exception on error with error described in exception message.
+	* @return GFDpsPxPayResponseRequest
+	* @throws GFDpsPxPayException
 	*/
-	public function processPayment() {
+	public function requestSharedPage() {
 		$this->validate();
 		$xml = $this->getPaymentXML();
 
@@ -170,13 +172,15 @@ class GFDpsPxPayAPI {
 
 	/**
 	* process a result against DPS PxPay; throws exception on error with error described in exception message.
+	* @return GFDpsPxPayResponseResult
+	* @throws GFDpsPxPayException
 	*/
 	public function processResult() {
 		$xml = $this->getResultXML();
 
 		$resultXML = $this->xmlPostRequest($this->endpoint, $xml);
 
-		$result = new DpsPxPayWpscResponseResult();
+		$result = new GFDpsPxPayResponseResult();
 		$result->loadResponse($resultXML);
 		return $result;
 	}

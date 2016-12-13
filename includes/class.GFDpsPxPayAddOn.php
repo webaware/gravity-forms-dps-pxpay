@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) {
 */
 class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
+	protected $dpsReturnArgs;							// data returned in Payment Express callback
 	protected $validationMessages;						// any validation messages picked up for the form as a whole
 	protected $urlPaymentForm;							// URL for payment form where purchaser will enter credit card details
 	protected $feed = null;								// current feed mapping form fields to payment fields
@@ -22,8 +23,8 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 	// end points for return to website
 	const ENDPOINT_RETURN					= '__gfpxpayreturn';
+	const ENDPOINT_RETURN_TEST				= '__gfpxpayreturntest';	// return from test environment
 	const ENDPOINT_CONFIRMATION				= '__gfpxpayconfirm';
-	const ENDPOINT_HASH						= '__gfpxpayhash';
 
 	/**
 	* static method for getting the instance of this singleton object
@@ -584,7 +585,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			}
 
 			// make sure that gateway credentials have been set for feed, or globally
-			$creds = new GFDpsPxPayCredentials($this, $feed);
+			$creds = new GFDpsPxPayCredentials($this, !empty($feed['meta']['useTest']));
 			if ($creds->isIncomplete()) {
 				throw new GFDpsPxPayException(__('Incomplete credentials for Payment Express PxPay payment; please tell the web master.', 'gravity-forms-dps-pxpay'));
 			}
@@ -613,22 +614,14 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		try {
 			$paymentReq = $this->getPaymentRequest($submission_data, $feed, $form, $entry);
 
-			$returnURL						= $this->getReturnURL($paymentReq->transactionNumber);
-			$paymentReq->redirectURL		= $returnURL;
-			$paymentReq->cancelUrl			= $returnURL;
-
-//~ error_log(__METHOD__ . ": paymentReq =\n" . print_r($paymentReq,1));
-
 			// record some payment meta
 			gform_update_meta($entry['id'], self::META_TRANSACTION_ID, $paymentReq->transactionNumber);
 			gform_update_meta($entry['id'], self::META_FEED_ID, $feed['id']);
 
 			$response = $paymentReq->requestSharedPage();
 
-//~ error_log(__METHOD__ . ": response =\n" . print_r($response,1));
-
-			if ($response && $response->POST_VALIDATION === 'ACK') {
-				$this->urlPaymentForm = $response->FRONTEND_REDIRECT_URL;
+			if ($response->isValid && !empty($response->URI)) {
+				$this->urlPaymentForm = $response->URI;
 				GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
 				$entry['payment_status']	= 'Processing';
 			}
@@ -651,8 +644,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			}
 		}
 		catch (GFDpsPxPayException $e) {
-
-//~ error_log(__METHOD__ . ": exception =\n" . $e->getMessage());
 			$this->log_error(__FUNCTION__ . ': exception = ' . $e->getMessage());
 
 			// record payment failure, and set hook for displaying error message
@@ -684,7 +675,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$error_msg = wpautop($this->error_msg);
 
 		ob_start();
-		include GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-failure.php';
+		require GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-failure.php';
 		return ob_get_clean();
 	}
 
@@ -706,15 +697,16 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 	/**
 	* create and populate a Payment Request object
-	* @param GFHeidelpayFormData $formData
+	* @param array $formData
 	* @param array $feed
 	* @param array $form
 	* @param array|false $entry
-	* @return GFHeidelpayPayment
+	* @return GFDpsPxPayAPI
 	*/
 	protected function getPaymentRequest($formData, $feed, $form, $entry = false) {
 		// build a payment request and execute on API
-		$creds		= new GFDpsPxPayCredentials($this, $feed);
+		$useTest	= !empty($feed['meta']['useTest']);
+		$creds		= new GFDpsPxPayCredentials($this, !empty($feed['meta']['useTest']));
 		$paymentReq	= new GFDpsPxPayAPI($creds);
 
 		// generate a unique transaction ID to avoid collisions, e.g. between different installations using the same gateway account
@@ -730,8 +722,8 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$paymentReq->transactionNumber		= $transactionID;
 		$paymentReq->invoiceReference		= $formData['description'];
 		$paymentReq->txnType				= GFDpsPxPayAPI::TXN_TYPE_CAPTURE;
-		$paymentReq->urlSuccess				= home_url(self::ENDPOINT_RETURN);
-		$paymentReq->urlFail				= home_url(self::ENDPOINT_RETURN);		// NB: redirection will happen after transaction status is updated
+		$paymentReq->urlSuccess				= home_url($useTest ? self::ENDPOINT_RETURN_TEST : self::ENDPOINT_RETURN);
+		$paymentReq->urlFail				= $paymentReq->urlSuccess;		// NB: redirection will happen after transaction status is updated
 
 		// billing details
 		$paymentReq->txn_data1				= $formData['txn_data1'];
@@ -746,26 +738,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$paymentReq->txn_data3			= apply_filters('gfdpspxpay_invoice_txndata3', $paymentReq->txn_data3, $form);
 
 		return $paymentReq;
-	}
-
-	/**
-	* generate an entry-based return URL for passing information back from gateway
-	* @param string $transactionNumber
-	* @return string
-	*/
-	protected function getReturnURL($transactionNumber) {
-		$args = array(
-			'callback'		=> $this->_slug,
-			'txid'			=> $transactionNumber,
-		);
-		$hash = wp_hash(wp_json_encode($args));
-		$args['hash'] = $hash;
-
-		$url = home_url('/');
-
-		$url = add_query_arg($args, $url);
-
-		return $url;
 	}
 
 	/**
@@ -793,7 +765,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function redirect_url($feed, $submission_data, $form, $entry) {
 		if ($this->urlPaymentForm) {
 			// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-			gform_update_meta($entry['id'], 'heidelpay_unique_id', GFFormsModel::get_form_unique_id($form['id']));
+			gform_update_meta($entry['id'], self::META_UNIQUE_ID, GFFormsModel::get_form_unique_id($form['id']));
 		}
 
 		return $this->urlPaymentForm;
@@ -803,22 +775,31 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* test for valid callback from gateway
 	*/
 	public function is_callback_valid() {
-		if (rgget('callback') != $this->_slug) {
+		$request_uri = parse_url($_SERVER['REQUEST_URI']);
+
+		// path must contain our callback slug
+		if (empty($request_uri['path']) || strpos($request_uri['path'], self::ENDPOINT_RETURN) === false) {
 			return false;
 		}
 
-		$hash = rgget('hash');
-		if (empty($hash)) {
+		// there must be a query string
+		if (empty($request_uri['query'])) {
 			return false;
 		}
 
-		$args = array(
-			'callback'	=> rgget('callback'),
-			'txid'		=> rgget('txid'),
-		);
-		if ($hash !== wp_hash(wp_json_encode($args))) {
+		// query string must have a result element
+		parse_str($request_uri['query'], $args);
+		if (!isset($args['result'])) {
 			return false;
 		}
+
+		// set up for processing the callback after everything has loaded properly
+		$this->dpsReturnArgs = wp_unslash($args);
+		$this->dpsReturnArgs['useTest'] = strpos($request_uri['path'], self::ENDPOINT_RETURN_TEST) !== false;
+
+		// stop WooCommerce Payment Express Gateway from intercepting other integrations' transactions!
+		unset($_GET['userid']);
+		unset($_REQUEST['userid']);
 
 		return true;
 	}
@@ -829,9 +810,18 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function callback() {
 		self::log_debug('========= processing transaction result');
 
-		$transactionNumber = rgget('txid');
-
 		try {
+			$creds				= new GFDpsPxPayCredentials($this, rgar($this->dpsReturnArgs, 'useTest', false));
+			$paymentReq			= new GFDpsPxPayAPI($creds);
+			$paymentReq->result	= rgar($this->dpsReturnArgs, 'result');
+			$response			= $paymentReq->processResult();
+
+			if (!$response->isValid) {
+				return;
+			}
+
+			$transactionNumber = $response->TxnId;
+
 			global $wpdb;
 			$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key=%s and meta_value = %s";
 			$lead_id = $wpdb->get_var($wpdb->prepare($sql, self::META_TRANSACTION_ID, $transactionNumber));
@@ -840,9 +830,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			if (empty($lead_id)) {
 				throw new GFDpsPxPayException(sprintf(__('Invalid entry ID: %s', 'gravity-forms-dps-pxpay'), $lead_id));
 			}
-
-			$response = new GFHeidelpayResponseCallback();
-			$response->loadResponse($_POST);
 
 			$entry = GFFormsModel::get_lead($lead_id);
 			$form = GFFormsModel::get_form_meta($entry['form_id']);
@@ -855,46 +842,43 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			if (rgar($entry, 'payment_status') === 'Processing') {
 				// update lead entry, with success/fail details
-				if ($response->PROCESSING_RESULT === 'ACK') {
+				if ($response->Success) {
 					$action = array(
-						'type'						=> 'complete_payment',
-						'payment_status'			=> $capture ? 'Paid' : 'Pending',
-						'payment_date'				=> $response->CLEARING_DATE,
-						'amount'					=> $response->CLEARING_AMOUNT,
-						'currency'					=> $response->CLEARING_CURRENCY,
-						'transaction_id'			=> $response->IDENTIFICATION_UNIQUEID,
+						'type'							=> 'complete_payment',
+						'payment_status'				=> $capture ? 'Paid' : 'Pending',
+						'payment_date'					=> date('Y-m-d H:i:s'),
+						'amount'						=> $response->AmountSettlement,
+						'currency'						=> $response->CurrencySettlement,
+						'transaction_id'				=> $response->DpsTxnRef,
 					);
-					$action['note']					=  $this->getPaymentNote($capture, $action, $response->getProcessingMessages());
-					$entry[self::META_SHORT_ID]		=  $response->IDENTIFICATION_SHORTID;
-					$entry[self::META_RETURN_CODE]	=  $response->PROCESSING_RETURN_CODE;
-					$entry['currency']				=  $response->CLEARING_CURRENCY;
+					$action['note']						=  $this->getPaymentNote($capture, $action, $response->getProcessingMessages());
+					$entry[self::META_AUTHCODE]			=  $response->AuthCode;
+					$entry[self::META_GATEWAY_TXN_ID]	=  $response->DpsTxnRef;
+					$entry['currency']					=  $response->CurrencySettlement;
 					$this->complete_payment($entry, $action);
 
 					$this->log_debug(sprintf('%s: success, date = %s, id = %s, status = %s, amount = %s',
 						__FUNCTION__, $entry['payment_date'], $entry['transaction_id'], $entry['payment_status'], $entry['payment_amount']));
-					$this->log_debug(sprintf('%s: %s', __FUNCTION__, $response->PROCESSING_RETURN));
-					$this->log_debug(sprintf('%s: %s', __FUNCTION__, $response->CLEARING_DESCRIPTOR));
+					$this->log_debug(sprintf('%s: %s', __FUNCTION__, $response->ResponseText));
+					$this->log_debug(sprintf('%s: TxnMac = %s', __FUNCTION__, $response->TxnMac));
 				}
 				else {
-					$entry['payment_status']		=  'Failed';
-					$entry['payment_date']			=  $response->CLEARING_DATE;
-					$entry['currency']				=  $response->CLEARING_CURRENCY;
-					$entry[self::META_RETURN_CODE]	=  $response->PROCESSING_RETURN_CODE;
+					$entry['payment_status']			=  'Failed';
+					$entry['payment_date']				=  date('Y-m-d H:i:s');
+					$entry['currency']					=  $response->CurrencySettlement;
+
+					// record empty bank authorisation code, so that we can test for it
+					$entry[self::META_AUTHCODE]			=  '';
 
 					// fail_payment() below doesn't update whole entry, so we need to do it here
 					GFAPI::update_entry($entry);
 
-					if ($response->FRONTEND_REQUEST_CANCELLED) {
-						$note = esc_html('Transaction canceled by customer', 'gravity-forms-dps-pxpay');
-					}
-					else {
-						$note = $this->getFailureNote($capture, $response->getProcessingMessages());
-					}
+					$note = $this->getFailureNote($capture, $response->getProcessingMessages());
 
 					$action = array(
-						'type'						=> 'fail_payment',
-						'payment_status'			=> 'Failed',
-						'note'						=> $note,
+						'type'							=> 'fail_payment',
+						'payment_status'				=> 'Failed',
+						'note'							=> $note,
 					);
 					$this->fail_payment($entry, $action);
 
@@ -908,14 +892,15 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					$this->processDelayed($feed, $entry, $form);
 
 					// allow hookers to trigger their own actions
-					$hook_status = $response->PROCESSING_RESULT === 'ACK' ? 'approved' : 'failed';
-					do_action("gfheidelpay_process_{$hook_status}", $entry, $form, $feed);
+					$hook_status = $response->Success ? 'approved' : 'failed';
+					do_action("gfdpspxpay_process_{$hook_status}", $entry, $form, $feed);
 				}
 			}
 
 			if ($entry['payment_status'] === 'Failed' && $feed['meta']['cancelURL']) {
 				// on failure, redirect to failure page if set
 				$redirect_url = esc_url_raw($feed['meta']['cancelURL']);
+				wp_redirect($redirect_url);
 			}
 			else {
 				// otherwise, redirect to Gravity Forms page, passing form and lead IDs, encoded to deter simple attacks
@@ -923,12 +908,12 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					'form_id'	=> $entry['form_id'],
 					'lead_id'	=> $entry['id'],
 				);
-				$hash = wp_hash(wp_json_encode($query));
+				$hash = wp_hash(http_build_query($query));
 				$query['hash']	=  $hash;
-				$query = base64_encode(wp_json_encode($query));
+				$query = base64_encode(http_build_query($query));
 				$redirect_url = esc_url_raw(add_query_arg(self::ENDPOINT_CONFIRMATION, $query, $entry['source_url']));
+				wp_safe_redirect($redirect_url);
 			}
-			echo $redirect_url;
 			exit;
 		}
 		catch (GFDpsPxPayException $e) {
@@ -1008,7 +993,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$execute_delayed = in_array($entry['payment_status'], array('Paid', 'Pending')) || $feed['meta']['execDelayedAlways'];
 
 		if ($feed['meta']['delayPost']) {
-			if (apply_filters('gfheidelpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
+			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
 				$this->log_debug(sprintf('executing delayed post creation; form id %s, lead id %s', $form['id'], $entry['id']));
 				GFFormsModel::create_post($form, $entry);
 			}
@@ -1082,17 +1067,18 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function processFormConfirmation() {
 		// check for redirect to Gravity Forms page with our encoded parameters
 		if (isset($_GET[self::ENDPOINT_CONFIRMATION])) {
-			do_action('gfheidelpay_process_confirmation');
+			do_action('gfdpspxpay_process_confirmation');
 
 			// decode the encoded form and lead parameters
-			$query = json_decode(base64_decode($_GET[self::ENDPOINT_CONFIRMATION]), true);
+			parse_str(base64_decode($_GET[self::ENDPOINT_CONFIRMATION]), $query);
+
 			$check = array(
 				'form_id'	=> rgar($query, 'form_id'),
 				'lead_id'	=> rgar($query, 'lead_id'),
 			);
 
 			// make sure we have a match
-			if ($query && wp_hash(wp_json_encode($check)) === rgar($query, 'hash')) {
+			if ($query && wp_hash(http_build_query($check)) === rgar($query, 'hash')) {
 
 				// stop WordPress SEO from stripping off our query parameters and redirecting the page
 				global $wpseo_front;
@@ -1104,7 +1090,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				$form = GFFormsModel::get_form_meta($query['form_id']);
 				$lead = GFFormsModel::get_lead($query['lead_id']);
 
-				do_action('gfheidelpay_process_confirmation_parsed', $lead, $form);
+				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
 				// get confirmation page
 				if (!class_exists('GFFormDisplay', false)) {

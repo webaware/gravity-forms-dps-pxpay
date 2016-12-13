@@ -155,4 +155,12 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 		return __('Invalid response from Payment Express for payment response', 'gravity-forms-dps-pxpay');
 	}
 
+	/**
+	* get processing message
+	* @return string
+	*/
+	public function getProcessingMessages() {
+		return array($this->ResponseText);
+	}
+
 }
