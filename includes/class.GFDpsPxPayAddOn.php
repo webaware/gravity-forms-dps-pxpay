@@ -829,6 +829,16 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				throw new GFDpsPxPayException(sprintf(__('Invalid entry ID: %s', 'gravity-forms-dps-pxpay'), $lead_id));
 			}
 
+			// attempt to lock entry
+			$lock_id = 'gfdpspxpay_elock_' . $lead_id;
+			$entry_was_locked = get_transient($lock_id);
+			if (!$entry_was_locked) {
+				set_transient($lock_id, time(), 90);
+			}
+			else {
+				self::log_debug("entry $lead_id was locked");
+			}
+
 			$entry = GFFormsModel::get_lead($lead_id);
 			$form = GFFormsModel::get_form_meta($entry['form_id']);
 			$feed = $this->getFeed($lead_id);
@@ -853,7 +863,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					$entry[self::META_AUTHCODE]			=  $response->AuthCode;
 					$entry[self::META_GATEWAY_TXN_ID]	=  $response->DpsTxnRef;
 					$entry['currency']					=  $response->CurrencySettlement;
-					$this->complete_payment($entry, $action);
+
+					if (!$entry_was_locked) {
+						$this->complete_payment($entry, $action);
+					}
 
 					$this->log_debug(sprintf('%s: success, date = %s, id = %s, status = %s, amount = %s',
 						__FUNCTION__, $entry['payment_date'], $entry['transaction_id'], $entry['payment_status'], $entry['payment_amount']));
@@ -868,23 +881,25 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					// record empty bank authorisation code, so that we can test for it
 					$entry[self::META_AUTHCODE]			=  '';
 
-					// fail_payment() below doesn't update whole entry, so we need to do it here
-					GFAPI::update_entry($entry);
+					if (!$entry_was_locked) {
+						// fail_payment() below doesn't update whole entry, so we need to do it here
+						GFAPI::update_entry($entry);
 
-					$note = $this->getFailureNote($capture, $response->getProcessingMessages());
+						$note = $this->getFailureNote($capture, $response->getProcessingMessages());
 
-					$action = array(
-						'type'							=> 'fail_payment',
-						'payment_status'				=> 'Failed',
-						'note'							=> $note,
-					);
-					$this->fail_payment($entry, $action);
+						$action = array(
+							'type'							=> 'fail_payment',
+							'payment_status'				=> 'Failed',
+							'note'							=> $note,
+						);
+						$this->fail_payment($entry, $action);
+					}
 
 					$this->log_debug(sprintf('%s: failed; %s', __FUNCTION__, $this->getErrorsForLog($response->getProcessingMessages())));
 				}
 
 				// if order hasn't been fulfilled, process any deferred actions
-				if ($initial_status === 'Processing') {
+				if (!$entry_was_locked && $initial_status === 'Processing') {
 					$this->log_debug('processing deferred actions');
 
 					$this->processDelayed($feed, $entry, $form);
@@ -893,6 +908,11 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					$hook_status = $response->Success ? 'approved' : 'failed';
 					do_action("gfdpspxpay_process_{$hook_status}", $entry, $form, $feed);
 				}
+			}
+
+			// clear lock if we set one
+			if (!$entry_was_locked) {
+				delete_transient($lock_id);
 			}
 
 			if ($entry['payment_status'] === 'Failed' && $feed['meta']['cancelURL']) {
@@ -988,7 +1008,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	protected function processDelayed($feed, $entry, $form) {
 		// default to only performing delayed actions if payment was successful, unless feed opts to always execute
 		// can filter each delayed action to permit / deny execution
-		$execute_delayed = in_array($entry['payment_status'], array('Paid', 'Pending')) || $feed['meta']['execDelayedAlways'];
+		$execute_delayed = in_array($entry['payment_status'], array('Paid', 'Pending')) || rgar($feed['meta'], 'execDelayedAlways');
 
 		if ($feed['meta']['delayPost']) {
 			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
