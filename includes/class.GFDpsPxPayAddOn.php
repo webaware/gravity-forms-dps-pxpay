@@ -362,55 +362,19 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'type'			=> 'text',
 						'class'  		=> 'large',
 						'placeholder'	=> esc_html_x('Leave empty to use default Gravity Forms confirmation handler', 'field placeholder', 'gravity-forms-dps-pxpay'),
-						'tooltip'		=> __('Redirect to this URL if the transaction is canceled.', 'gravity-forms-dps-pxpay')
+						'tooltip'		=> esc_html__('Redirect to this URL if the transaction is canceled.', 'gravity-forms-dps-pxpay')
 										.  '<br/><br/>'
-										.  __('Please note: standard Gravity Forms submission logic applies if the transaction is successful.', 'gravity-forms-dps-pxpay'),
+										.  esc_html__('Please note: standard Gravity Forms submission logic applies if the transaction is successful.', 'gravity-forms-dps-pxpay'),
 					),
 
 					array(
-						'name'			=> 'delayPost',
-						'label'			=> esc_html_x('Create Post', 'feed field name', 'gravity-forms-dps-pxpay'),
+						'name'			=> 'post_payment_actions',
+						'label'			=> esc_html_x('Post Payment Actions', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'checkbox',
-						'choices'		=> array(
-							array('name' => 'delayPost', 'label' => esc_html__('Create post only when transaction completes', 'gravity-forms-dps-pxpay')),
-						),
-					),
-
-					array(
-						'name'			=> 'delayMailchimp',
-						'label'			=> esc_html_x('MailChimp Subscription', 'feed field name', 'gravity-forms-dps-pxpay'),
-						'type'			=> 'checkbox',
-						'choices'		=> array(
-							array('name' => 'delayMailchimp', 'label' => esc_html__('Subscribe user to MailChimp only when transaction completes', 'gravity-forms-dps-pxpay')),
-						),
-					),
-
-					array(
-						'name'			=> 'delayUserrego',
-						'label'			=> esc_html_x('User Registration', 'feed field name', 'gravity-forms-dps-pxpay'),
-						'type'			=> 'checkbox',
-						'choices'		=> array(
-							array('name' => 'delayUserrego', 'label' => esc_html__('Register user only when transaction completes', 'gravity-forms-dps-pxpay')),
-						),
-					),
-
-					array(
-						'name'			=> 'delayZapier',
-						'label'			=> esc_html_x('Zapier', 'feed field name', 'gravity-forms-dps-pxpay'),
-						'type'			=> 'checkbox',
-						'choices'		=> array(
-							array('name' => 'delayZapier', 'label' => esc_html__('Send feed to Zapier only when transaction completes', 'gravity-forms-dps-pxpay')),
-						),
-					),
-
-					array(
-						'name'			=> 'delaySalesforce',
-						'label'			=> esc_html_x('Salesforce', 'feed field name', 'gravity-forms-dps-pxpay'),
-						'type'			=> 'checkbox',
-						'choices'		=> array(
-							array('name' => 'delaySalesforce', 'label' => esc_html__('Send feed to Salesforce only when transaction completes', 'gravity-forms-dps-pxpay')),
-						),
-						'tooltip'		=> esc_html__('Supports the free Gravity Forms Salesforce add-on.', 'gravity-forms-dps-pxpay'),
+						'choices'		=> $this->getDelayedActionFields(),
+						'tooltip'		=> esc_html__('Select which actions should only occur after transaction has been completed.', 'gravity-forms-dps-pxpay')
+										.  '<br/><br/>'
+										.  esc_html__('By default, transaction must be successful to trigger these actions. You can change that with the Delayed Execute setting, below.', 'gravity-forms-dps-pxpay'),
 					),
 
 					array(
@@ -471,7 +435,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$this->feedDefaultFieldMap = array();
 
 		$form_id = rgget( 'id' );
-		$form = RGFormsModel::get_form_meta( $form_id );
+		$form = GFFormsModel::get_form_meta( $form_id );
 
 		if (!isset($this->feedDefaultFieldMap['billingInformation_description'])) {
 			$this->feedDefaultFieldMap['billingInformation_description']			= 'form_title';
@@ -541,6 +505,35 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		}
 
 		return parent::get_default_field_select_field($field);
+	}
+
+	/**
+	* get list of checkbox fields for delayed actions
+	* @return array
+	*/
+	protected function getDelayedActionFields() {
+		return array (
+			array(
+				'name' => 'delayPost',
+				'label' => esc_html__('Create post only when transaction completes', 'gravity-forms-dps-pxpay'),
+			),
+			array(
+				'name' => 'delay_gravityformsmailchimp',
+				'label' => esc_html__('Subscribe user to MailChimp only when transaction completes', 'gravity-forms-dps-pxpay'),
+			),
+			array(
+				'name' => 'delay_gravity-forms-salesforce',
+				'label' => esc_html__('Send feed to Salesforce only when transaction completes', 'gravity-forms-dps-pxpay'),
+			),
+			array(
+				'name' => 'delay_gravityformszapier',
+				'label' => esc_html__('Send feed to Zapier only when transaction completes', 'gravity-forms-dps-pxpay'),
+			),
+			array(
+				'name' => 'delay_gravityformsuserregistration',
+				'label' => esc_html__('Register user only when transaction completes', 'gravity-forms-dps-pxpay'),
+			),
+		);
 	}
 
 	/**
@@ -1004,27 +997,17 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			if ($feed) {
 
-				switch ($addon_slug) {
-
-					case 'gravityformsmailchimp':
-						if (!empty($feed['meta']['delayMailchimp'])) {
-							$is_delayed = true;
-							$this->log_debug(sprintf('delay MailChimp registration: form id %s, lead id %s', $form['id'], $entry['id']));
-						}
-						break;
-
-					case 'gravityformsuserregistration':
-						if (!empty($feed['meta']['delayUserrego'])) {
-							$is_delayed = true;
-							$this->log_debug(sprintf('delay user registration: form id %s, lead id %s', $form['id'], $entry['id']));
-						}
-						break;
-
+				if (!empty($feed['meta']['delay_' . $addon_slug])) {
+					$is_delayed = true;
 				}
 
 				// if there's nothing to charge and exec delay mode is success, then check for empty amount which is always allowed
 				if ($is_delayed && rgar($feed['meta'], 'execDelayed', 'success') === 'success') {
 					$is_delayed = !empty($this->current_submission_data['payment_amount']);
+				}
+
+				if ($is_delayed) {
+					$this->log_debug(sprintf('delay %s feeds for form id %s, lead id %s', $addon_slug, $form['id'], $entry['id']));
 				}
 
 			}
@@ -1044,15 +1027,18 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 		// if there's nothing to charge and exec delay mode is success, then check for empty amount which is always allowed
 		$is_delayed = rgar($feed['meta'], 'execDelayed', 'success') !== 'success' || !empty($this->current_submission_data['payment_amount']);
+		if ($is_delayed) {
 
-		if ($is_delayed && !empty($feed['meta']['delayZapier']) && has_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'))) {
-			$this->log_debug(sprintf('delay Zapier feed: form id %s, lead id %s', $form['id'], $entry['id']));
-			remove_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'), 10, 2);
-		}
+			if (!empty($feed['meta']['delay_gravityformszapier']) && has_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'))) {
+				$this->log_debug(sprintf('delay gravityformszapier feeds: form id %s, lead id %s', $form['id'], $entry['id']));
+				remove_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'), 10, 2);
+			}
 
-		if ($is_delayed && !empty($feed['meta']['delaySalesforce']) && has_action('gform_after_submission', array('GFSalesforce', 'export'))) {
-			$this->log_debug(sprintf('delay Salesforce feed: form id %s, lead id %s', $form['id'], $entry['id']));
-			remove_action('gform_after_submission', array('GFSalesforce', 'export'), 10, 2);
+			if (!empty($feed['meta']['delay_gravity-forms-salesforce']) && has_action('gform_after_submission', array('GFSalesforce', 'export'))) {
+				$this->log_debug(sprintf('delay gravity-forms-salesforce feeds: form id %s, lead id %s', $form['id'], $entry['id']));
+				remove_action('gform_after_submission', array('GFSalesforce', 'export'), 10, 2);
+			}
+
 		}
 	}
 
@@ -1085,7 +1071,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		}
 
 		if ($execute_delayed) {
-			if (!empty($feed['meta']['delaySalesforce'])) {
+			if (!empty($feed['meta']['delay_gravity-forms-salesforce'])) {
 				add_action('gform_paypal_fulfillment', array($this, 'maybeExecuteSalesforce'), 10, 4);
 			}
 
@@ -1104,7 +1090,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function maybeExecuteSalesforce($entry, $feed, $transaction_id, $payment_amount) {
 		if (class_exists('GFSalesforce', false) && method_exists('GFSalesforce', 'export')) {
 			$form = GFFormsModel::get_form_meta($entry['form_id']);
-			$this->log_debug(sprintf('executing delayed Salesforce feed: form id %s, lead id %s', $form['id'], $entry['id']));
+			$this->log_debug(sprintf('executing delayed gravity-forms-salesforce feed: form id %s, lead id %s', $form['id'], $entry['id']));
 			GFSalesforce::export($entry, $form);
 		}
 	}
