@@ -199,7 +199,9 @@ class GFDpsPxPayUpdateV1 {
 					break;
 
 				case 'transactions':
-					$response = array('step' => 'transactions', 'next' => absint(rgget('next')));
+					$ids = GFDpsPxPayUpdateV1::getTxnUnconverted();
+					self::upgradeTransactions();
+					$response = array('step' => 'transactions', 'next' => count($ids) + 1);
 					break;
 
 				default:
@@ -343,6 +345,41 @@ class GFDpsPxPayUpdateV1 {
 		if ($modified) {
 			GFAPI::update_form($form);
 		}
+	}
+
+	/**
+	* upgrade transactions to have the new slug, and a transaction record
+	*/
+	protected static function upgradeTransactions() {
+		global $wpdb;
+
+		$addon = GFDpsPxPayAddOn::get_instance();
+
+		$sql = "
+			insert into {$wpdb->prefix}gf_addon_payment_transaction (lead_id, transaction_type, transaction_id, is_recurring, amount, date_created)
+				select e.id, 'payment', e.transaction_id, 0, e.payment_amount, e.payment_date
+				from {$wpdb->prefix}rg_lead e
+				inner join {$wpdb->prefix}rg_lead_meta em on em.lead_id = e.id and em.meta_key = 'payment_gateway'
+				where em.meta_value = %s
+		";
+		$success = $wpdb->query($wpdb->prepare($sql, self::META_VALUE_OLD_GATEWAY));
+
+		if ($success) {
+			$sql = "
+				update {$wpdb->prefix}rg_lead e
+				inner join {$wpdb->prefix}rg_lead_meta em on em.lead_id = e.id and em.meta_key = 'payment_gateway'
+				set em.meta_value = %s
+				where em.meta_value = %s
+			";
+			$success = $wpdb->query($wpdb->prepare($sql, $addon->get_slug(), self::META_VALUE_OLD_GATEWAY));
+		}
+
+		if (!$success) {
+			$addon->log_error("Error upgrading transactions from version 1 of add-on: " . $wpdb->last_error);
+			throw new Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+		}
+
+		$addon->log_debug('Old v1 transactions upgraded to add-on transactions.');
 	}
 
 }
