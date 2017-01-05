@@ -109,6 +109,7 @@ class GFDpsPxPayPlugin {
 			'GFDpsPxPayResponse'					=> 'includes/class.GFDpsPxPayResponse.php',
 			'GFDpsPxPayResponseRequest'				=> 'includes/class.GFDpsPxPayResponseRequest.php',
 			'GFDpsPxPayResponseResult'				=> 'includes/class.GFDpsPxPayResponseResult.php',
+			'GFDpsPxPayUpdateV1'					=> 'includes/class.GFDpsPxPayUpdateV1.php',
 		);
 
 		if (isset($classMap[$class_name])) {

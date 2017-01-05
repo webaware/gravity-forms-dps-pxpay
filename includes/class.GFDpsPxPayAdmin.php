@@ -12,6 +12,8 @@ class GFDpsPxPayAdmin {
 	public function __construct() {
 		add_action('admin_notices', array($this, 'checkPrerequisites'));
 		add_filter('plugin_row_meta', array($this, 'pluginDetailsLinks'), 10, 2);
+
+		add_action('wp_ajax_gfdpspxpay_upgradev1', array('GFDpsPxPayUpdateV1', 'ajaxUpgrade'));
 	}
 
 	/**

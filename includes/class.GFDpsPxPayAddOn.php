@@ -101,13 +101,11 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function setup() {
 		parent::setup();
 
-		$old_settings_name	= 'gfdpspxpay_plugin';
-		$old_settings		= get_option($old_settings_name);
+		$old_settings = get_option('gfdpspxpay_plugin');
 
 		if ($old_settings !== false) {
 			// might be v1.x add-on needing upgrades
-			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayUpdateV1.php';
-			new GFDpsPxPayUpdateV1($this->_slug, $old_settings_name);
+			new GFDpsPxPayUpdateV1($this->_slug);
 		}
 	}
 
