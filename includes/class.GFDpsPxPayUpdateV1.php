@@ -379,6 +379,16 @@ class GFDpsPxPayUpdateV1 {
 			throw new Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
+		// update old payment status from Approved to Paid
+		$sql = "
+			update {$wpdb->prefix}rg_lead e
+			inner join {$wpdb->prefix}rg_lead_meta em on em.lead_id = e.id and em.meta_key = 'payment_gateway'
+			set e.payment_status = 'Paid'
+			where e.payment_status = 'Approved'
+			and em.meta_value = %s
+		";
+		$wpdb->query($wpdb->prepare($sql, $addon->get_slug()));
+
 		$addon->log_debug('Old v1 transactions upgraded to add-on transactions.');
 	}
 
