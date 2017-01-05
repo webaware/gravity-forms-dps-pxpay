@@ -54,6 +54,11 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$this->_short_title					= 'DPS PxPay';					// NB: no localisation yet
 		$this->_supports_callbacks			= true;
 
+		// define capabilities in case role/permissions have been customised (e.g. Members plugin)
+		$this->_capabilities_settings_page	= 'gravityforms_edit_settings';
+		$this->_capabilities_form_settings	= 'gravityforms_edit_forms';
+		$this->_capabilities_uninstall		= 'gravityforms_uninstall';
+
 // TODO: remove once upgrade routines are working well
 //~ delete_option("gravityformsaddon_{$this->_slug}_version");
 
