@@ -3,14 +3,14 @@
 Plugin Name: Gravity Forms DPS PxPay
 Plugin URI: https://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/
 Description: Easily create online payment forms with Gravity Forms and DPS Payment Express PxPay
-Version: 2.0.0-dev
+Version: 2.0.0-beta1
 Author: WebAware
 Author URI: https://shop.webaware.com.au/
 Text Domain: gravity-forms-dps-pxpay
 */
 
 /*
-copyright (c) 2013-2016 WebAware Pty Ltd (email : support@webaware.com.au)
+copyright (c) 2013-2017 WebAware Pty Ltd (email : support@webaware.com.au)
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -34,7 +34,7 @@ if (!defined('ABSPATH')) {
 define('GFDPSPXPAY_PLUGIN_ROOT', dirname(__FILE__) . '/');
 define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__FILE__));
 define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
-define('GFDPSPXPAY_PLUGIN_VERSION', '2.0.0-dev');
+define('GFDPSPXPAY_PLUGIN_VERSION', '2.0.0-beta1');
 
 // instantiate the plug-in
 require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayPlugin.php';

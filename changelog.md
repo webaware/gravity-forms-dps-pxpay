@@ -4,6 +4,7 @@
 
 ### 2.0.0, soon...
 
+* MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework
 * fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget
 * changed: minimum requirements now Gravity Forms 2.0
 
