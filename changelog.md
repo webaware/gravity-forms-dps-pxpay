@@ -4,9 +4,15 @@
 
 ### 2.0.0, soon...
 
-* MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework
+* MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
 * fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget
 * changed: minimum requirements now Gravity Forms 2.0
+* changed: actions `gfdpspxpay_process_return` and `gfdpspxpay_process_return_parsed` have been removed; please review other available actions and filters
+* changed: each form feed can be independently set to Live or Test/Sandbox
+* added: support for notification events Payment Completed and Payment Failed
+* added: support for conditional logic in feeds
+* added: support for delayed execution of MailChimp, Zapier, and Salesforce feeds
+* added: additional detail in errors returned from payment gateway
 
 ### 1.8.0, 2016-11-19
 
