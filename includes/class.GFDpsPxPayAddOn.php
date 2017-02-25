@@ -232,7 +232,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function feed_list_columns() {
 		$columns = array(
 			'feedName'				=> esc_html_x('Feed name', 'feed field name', 'gravity-forms-dps-pxpay'),
-			'feedItem_useTest'		=> esc_html_x('Mode', 'payment transaction mode', 'gravity-forms-dps-pxpay'),
+			'feedItem_useTest'		=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
 		);
 
 		return $columns;
@@ -288,7 +288,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 					array(
 						'name'   		=> 'useTest',
-						'label'  		=> esc_html_x('Mode', 'payment transaction mode', 'gravity-forms-dps-pxpay'),
+						'label'  		=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'   		=> 'radio',
 						'tooltip'		=> esc_html__('Credit cards will not be processed in Test mode. Special card numbers must be used.', 'gravity-forms-dps-pxpay'),
 						'choices'		=> array(
