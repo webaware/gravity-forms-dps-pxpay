@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="error">
+<div class="error notice is-dismissible">
 	<p><?php esc_html_e('Gravity Forms DPS PxPay needs to update your data for the new version. Your forms will not process payments until updates have completed!', 'gravity-forms-dps-pxpay'); ?></p>
 
 	<ul style="padding-left: 2em">

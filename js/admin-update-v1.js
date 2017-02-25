@@ -15,7 +15,7 @@
 		var step = gfdpspxpay_updatev1[step_next];
 
 		if (step === "end") {
-			$("#gfdpspxpay-upgrade").text("Done.");
+			$("#gfdpspxpay-upgrade").replaceWith("<strong>Done.</strong>");
 			$("#gfdpspxpay-updatev1-progress").hide();
 		}
 		else {
@@ -58,7 +58,7 @@
 		}
 		else {
 			var error = response.data.error || "ERROR";
-			$("#gfdpspxpay-updatev1-progress > div").text(error);
+			$("#gfdpspxpay-updatev1-progress > div").css({width : "100%", backgroundColor: "transparent"}).text(error);
 		}
 	}
 
