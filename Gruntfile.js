@@ -45,7 +45,8 @@ module.exports = function (grunt) {
 		uglify: {
 			build: {
 				options: {
-					preserveComments: /^!/
+					ASCIIOnly: true,
+					banner: "// <%= pkg.name %>\n// <%= pkg.homepage %>\n"
 				},
 				files: [{
 					expand: true,
@@ -69,6 +70,5 @@ module.exports = function (grunt) {
 	grunt.loadNpmTasks("grunt-contrib-uglify");
 
 	grunt.registerTask("release", ["clean","copy","compress"]);
-	grunt.registerTask("default", [ "jshint" ]);
 
 };
