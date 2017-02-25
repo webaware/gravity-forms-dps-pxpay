@@ -148,7 +148,7 @@ class GFDpsPxPayAPI {
 		$this->userID			= $creds->userID;
 		$this->userKey			= $creds->userKey;
 		$this->endpoint			= $creds->endpoint;
-		$this->httpUserAgent	= 'Gravity Forms DPS PxPay ' . GFDPSPXPAY_PLUGIN_VERSION;
+		$this->httpUserAgent	= 'Gravity Forms DPS PxPay v' . GFDPSPXPAY_PLUGIN_VERSION;
 
 		// default to single payment, not recurring
 		$this->enableRecurring	= false;
