@@ -59,9 +59,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$this->_capabilities_form_settings	= 'gravityforms_edit_forms';
 		$this->_capabilities_uninstall		= 'gravityforms_uninstall';
 
-// TODO: remove once upgrade routines are working well
-//~ delete_option("gravityformsaddon_{$this->_slug}_version");
-
 		parent::__construct();
 
 		add_action('init', array($this, 'lateLocalise'), 50);
@@ -132,32 +129,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		);
 
 		return array_merge(parent::styles(), $styles);
-	}
-
-	/**
-	* enqueue required scripts
-	*/
-	public function scripts() {
-		$min = SCRIPT_DEBUG ? '' : '.min';
-		$ver = SCRIPT_DEBUG ? time() : GFDPSPXPAY_PLUGIN_VERSION;
-
-		$scripts = array(
-
-			//~ array(
-				//~ 'handle'		=> 'gfdpspxpay_feed_admin',
-				//~ 'src'			=> plugins_url("js/feed-admin$min.js", GFDPSPXPAY_PLUGIN_FILE),
-				//~ 'version'		=> $ver,
-				//~ 'deps'			=> array('jquery'),
-				//~ 'in_footer'		=> true,
-				//~ 'enqueue'		=> array( array(
-										//~ 'admin_page'	=> array('form_settings'),
-										//~ 'tab'			=> array($this->_slug),
-									//~ )),
-			//~ ),
-
-		);
-
-		return array_merge(parent::scripts(), $scripts);
 	}
 
 	/**
@@ -623,10 +594,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 		$this->log_debug('========= initiating transaction request');
 		$this->log_debug(sprintf('%s: feed #%d - %s', __FUNCTION__, $feed['id'], $feed['meta']['feedName']));
-
-//~ error_log(__METHOD__ . ": submission_data =\n" . print_r($submission_data,1));
-//~ error_log(__METHOD__ . ": feed =\n" . print_r($feed,1));
-//~ error_log(__METHOD__ . ": entry =\n" . print_r($entry,1));
 
 		try {
 			$paymentReq = $this->getPaymentRequest($submission_data, $feed, $form, $entry);
