@@ -34,18 +34,18 @@ Thanks for sponsoring new features on Gravity Forms DPS PxPay!
 * Install the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
 * Create an account with DPS for [PxPay](https://sec.paymentexpress.com/pxmi/apply)
 
-== Installation ==
-
-1. Install and activate the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
-2. Upload the Gravity Forms DPS PxPay plugin to your /wp-content/plugins/ directory.
-3. Activate the Gravity Forms DPS PxPay plugin through the 'Plugins' menu in WordPress.
-4. Edit the DPS PxPay payment gateway settings to set your DPS PxPay user ID and key
-
 = Building a Gravity Form with Credit Card Payments =
 
 * add one or more Product fields or a Total field to your form. The plugin will automatically detect the values assigned to these pricing fields
 * if required, add customer name and contact information fields to your form. These optional fields can be mapped when creating a DPS PxPay feed and their values stored against each transaction in your DPS Payline console
 * add a DPS PxPay feed, mapping your form fields to DPS PxPay transaction fields (Merchant Reference, TxnData1, TxnData2, TxnData3)
+
+== Installation ==
+
+1. Install and activate the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
+2. Either install automatically through the WordPress admin, or download the .zip file, unzip to a folder, and upload the folder to your /wp-content/plugins/ directory. Read [Installing Plugins](https://codex.wordpress.org/Managing_Plugins#Installing_Plugins) in the WordPress Codex for details.
+3. Activate the plugin through the 'Plugins' menu in WordPress.
+4. Edit the DPS PxPay payment gateway settings to set your DPS PxPay user ID and key
 
 == Frequently Asked Questions ==
 
@@ -114,7 +114,7 @@ The plugin will run in shared hosting environments, but requires PHP 5 with the 
 
 1. Options screen
 2. A sample donation form
-3. A list of DPS PxPay feeds
+3. A list of DPS PxPay feeds for a form
 4. A DPS PxPay feed (mapping form fields to DPS PxPay)
 5. The sample donation form as it appears on a page
 6. A successful entry in Gravity Forms admin
@@ -131,8 +131,6 @@ Developers can use these filter hooks to modify some invoice properties. Each fi
 
 Developers can run processes on these actions (e.g. load classes required to handle invoice presentation):
 
-* `gfdpspxpay_process_return`
-* `gfdpspxpay_process_return_parsed`
 * `gfdpspxpay_process_confirmation`
 * `gfdpspxpay_process_confirmation_parsed`
 * `gfdpspxpay_process_approved`
