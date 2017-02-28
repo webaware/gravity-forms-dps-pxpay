@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.0.0, soon...
+### 2.0.0, 2017-02-28
 
 * MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
 * fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget

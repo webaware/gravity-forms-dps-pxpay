@@ -6,8 +6,8 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.3
-Tested up to: 4.7
-Stable tag: 1.8.0
+Tested up to: 4.7.2
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -142,21 +142,22 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 1.8.0 =
+= 2.0.0 =
 
-fixed: delayed actions don't fire when there's no charge to process
+MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 1.8.0, 2016-11-19
+### 2.0.0, 2017-02-28
 
-* fixed: delayed actions don't fire when there's no charge to process
-
-### 1.7.0, 2016-08-19
-
-* fixed: stop WooCommerce Payment Express Gateway from intercepting Gravity Forms transactions (loose!)
-* fixed: handle no-decimals currencies correctly (i.e. just Japanese Yen, for now)
-* fixed: one Gravity Forms field could not be mapped to multiple PxPay fields
-* changed: removed filter `gfdpspxpay_invoice_desc`, it actually never did anything!
+* MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
+* fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget
+* changed: minimum requirements now Gravity Forms 2.0
+* changed: actions `gfdpspxpay_process_return` and `gfdpspxpay_process_return_parsed` have been removed; please review other available actions and filters
+* changed: each form feed can be independently set to Live or Test/Sandbox
+* added: support for notification events Payment Completed and Payment Failed
+* added: support for conditional logic in feeds
+* added: support for delayed execution of MailChimp, Zapier, and Salesforce feeds
+* added: additional detail in errors returned from payment gateway
