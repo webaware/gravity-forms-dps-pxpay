@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.0.1, soon...
+
+* fixed: invalid argument warning in `pre_process_feeds()` when form has no feeds
+
 ### 2.0.0, 2017-02-28
 
 * MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
