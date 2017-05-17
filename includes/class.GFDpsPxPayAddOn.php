@@ -566,16 +566,18 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @throws GFDpsPxPayException
 	*/
 	public function pre_process_feeds($feeds, $entry, $form) {
-		foreach ($feeds as $feed) {
-			// feed must be active and meet feed conditions, if any
-			if (!$feed['is_active'] || !$this->is_feed_condition_met($feed, $form, array())) {
-				continue;
-			}
+		if (is_array($feeds)) {
+			foreach ($feeds as $feed) {
+				// feed must be active and meet feed conditions, if any
+				if (!$feed['is_active'] || !$this->is_feed_condition_met($feed, $form, array())) {
+					continue;
+				}
 
-			// make sure that gateway credentials have been set for feed, or globally
-			$creds = new GFDpsPxPayCredentials($this, !empty($feed['meta']['useTest']));
-			if ($creds->isIncomplete()) {
-				throw new GFDpsPxPayException(__('Incomplete credentials for Payment Express PxPay payment; please tell the web master.', 'gravity-forms-dps-pxpay'));
+				// make sure that gateway credentials have been set for feed, or globally
+				$creds = new GFDpsPxPayCredentials($this, !empty($feed['meta']['useTest']));
+				if ($creds->isIncomplete()) {
+					throw new GFDpsPxPayException(__('Incomplete credentials for Payment Express PxPay payment; please tell the web master.', 'gravity-forms-dps-pxpay'));
+				}
 			}
 		}
 
