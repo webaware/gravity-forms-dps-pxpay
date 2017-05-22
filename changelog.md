@@ -2,9 +2,9 @@
 
 ## Changelog
 
-### 2.0.1, soon...
+### 2.0.1, 2017-05-22
 
-* fixed: invalid argument warning in `pre_process_feeds()` when form has no feeds
+* fixed: invalid argument warning in `pre_process_feeds()` on forms with no DPS PxPay feeds
 
 ### 2.0.0, 2017-02-28
 

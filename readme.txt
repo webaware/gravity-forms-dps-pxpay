@@ -6,8 +6,8 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.3
-Tested up to: 4.7.2
-Stable tag: 2.0.0
+Tested up to: 4.7
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,13 +15,15 @@ Easily create online payment forms with Gravity Forms and DPS Payment Express Px
 
 == Description ==
 
-Gravity Forms DPS PxPay adds a credit card payment gateway for [DPS Payment Express PxPay](https://www.paymentexpress.com/merchant-ecommerce-pxpay) to the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin.
+Easily create online payment forms with Gravity Forms and DPS Payment Express PxPay
+
+Gravity Forms DPS PxPay integrates the [DPS Payment Express PxPay credit card payment gateway](https://www.paymentexpress.com/merchant-ecommerce-pxpay) with [Gravity Forms](https://webaware.com.au/get-gravity-forms) advanced form builder.
 
 * build online donation forms
 * build online booking forms
 * build simple Buy Now forms
 
-> NB: this plugin extends [Gravity Forms](https://webaware.com.au/get-gravity-forms); you still need to install and activate Gravity Forms!
+> NB: this plugin extends Gravity Forms; you still need to install and activate [Gravity Forms](https://webaware.com.au/get-gravity-forms)!
 
 = Sponsorships =
 
@@ -34,24 +36,11 @@ Thanks for sponsoring new features on Gravity Forms DPS PxPay!
 * Install the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
 * Create an account with DPS for [PxPay](https://sec.paymentexpress.com/pxmi/apply)
 
-= Building a Gravity Form with Credit Card Payments =
-
-* add one or more Product fields or a Total field to your form. The plugin will automatically detect the values assigned to these pricing fields
-* if required, add customer name and contact information fields to your form. These optional fields can be mapped when creating a DPS PxPay feed and their values stored against each transaction in your DPS Payline console
-* add a DPS PxPay feed, mapping your form fields to DPS PxPay transaction fields (Merchant Reference, TxnData1, TxnData2, TxnData3)
-
-== Installation ==
-
-1. Install and activate the [Gravity Forms](https://webaware.com.au/get-gravity-forms) plugin
-2. Either install automatically through the WordPress admin, or download the .zip file, unzip to a folder, and upload the folder to your /wp-content/plugins/ directory. Read [Installing Plugins](https://codex.wordpress.org/Managing_Plugins#Installing_Plugins) in the WordPress Codex for details.
-3. Activate the plugin through the 'Plugins' menu in WordPress.
-4. Edit the DPS PxPay payment gateway settings to set your DPS PxPay user ID and key
-
 == Frequently Asked Questions ==
 
 = What is DPS PxPay? =
 
-DPS PxPay is a hosted Credit Card payment gateway. DPS Payment Express is one of Australasia's leading online payments solutions providers.
+DPS PxPay is a hosted Credit Card payment gateway, accepting payments in New Zealand, Australia, North America, United Kingdom, Ireland, and Singapore.
 
 = Will this plugin work without installing Gravity Forms? =
 
@@ -61,9 +50,21 @@ No. This plugin adds a DPS Payment Express PxPay payment gateway to Gravity Form
 
 Any Gravity Forms license will do. You can use this plugin with the Personal, Business or Developer licenses.
 
+= How do I build a form with credit card payments? =
+
+* add one or more Product fields or a Total field to your form. The plugin will automatically detect the values assigned to these pricing fields
+* add customer name and contact information fields to your form. These fields can be mapped when creating a DPS PxPay feed
+* add a DPS PxPay feed, mapping your form fields to DPS PxPay transaction fields
+
 = What is the difference between Normal and Testing (Sandbox) mode? =
 
 Gravity Forms DPS PxPay enables you to store two pairs of User ID and User Key credentials. When you first signup for a PxPay account with DPS you will likely be issued development or testing credentials. Later, when you want to go live with your site, you will need to request a new User ID and User Key from DPS. Sandbox mode enables you to switch between your live and test credentials. If you only have testing credentials, both your User ID and Test ID and User Key and Test Key should be identical. In this instance, Sandbox mode can be switched either On or Off.
+
+Sandbox mode enables you to run tests without using real credit cards or bank accounts. You must use special test credit card details with using the test environment.
+
+=  Where can I find dummy Credit Card details for testing purposes? =
+
+[Visit this page](https://www.paymentexpress.com/support-merchant-frequently-asked-questions-testing-details)
 
 =  Where will the customer be directed after they complete their DPS Credit Card transaction? =
 
@@ -77,7 +78,7 @@ Successful transaction details including the DPS PxPay transaction number and ba
 
 Browse to your Gravity Form, select [Notifications](https://www.gravityhelp.com/documentation/article/configuring-notifications-in-gravity-forms/) and use the Insert Merge Tag dropdown (Payment Amount, Transaction Number and Auth Code will appear under Custom at the very bottom of the dropdown list).
 
-NB: these custom merge tags will only work if notifications are only sent after payment is accepted.
+NB: these custom merge tags will only work for notifications triggered by Payment Completed and Payment Failed events.
 
 = How do I change my currency type? =
 
@@ -94,10 +95,6 @@ Not yet.
 = Can I use Account2Account? =
 
 No. Account2Account debits a bank account directly, and Payment Express have told me that they cannot provide a full test environment for me to test in. A2A will never be integrated into the free version of this plugin. It might be integrated into the pro version sometime, but don't hold your breath.
-
-=  Where can I find dummy Credit Card details for testing purposes? =
-
-[Visit this page](https://www.paymentexpress.com/support-merchant-frequently-asked-questions-testing-details)
 
 = I get an SSL error when my form attempts to connect with DPS =
 
@@ -142,13 +139,17 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 2.0.0 =
+= 2.0.1 =
 
-MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
+fixed invalid argument warning on forms with no DPS PxPay feeds
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
+
+### 2.0.1, 2017-05-22
+
+* fixed: invalid argument warning in `pre_process_feeds()` on forms with no DPS PxPay feeds
 
 ### 2.0.0, 2017-02-28
 
