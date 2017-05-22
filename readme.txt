@@ -60,7 +60,7 @@ Any Gravity Forms license will do. You can use this plugin with the Personal, Bu
 
 Gravity Forms DPS PxPay enables you to store two pairs of User ID and User Key credentials. When you first signup for a PxPay account with DPS you will likely be issued development or testing credentials. Later, when you want to go live with your site, you will need to request a new User ID and User Key from DPS. Sandbox mode enables you to switch between your live and test credentials. If you only have testing credentials, both your User ID and Test ID and User Key and Test Key should be identical. In this instance, Sandbox mode can be switched either On or Off.
 
-Sandbox mode enables you to run tests without using real credit cards or bank accounts. You must use special test credit card details with using the test environment.
+Sandbox mode enables you to run tests without using real credit cards or bank accounts. You must use special test credit card details when using the test environment.
 
 =  Where can I find dummy Credit Card details for testing purposes? =
 
