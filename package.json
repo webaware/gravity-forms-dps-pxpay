@@ -1,6 +1,6 @@
 {
   "name": "gravity-forms-dps-pxpay",
-  "version": "2.0.1",
+  "version": "2.0.2-dev",
   "description": "Gravity Forms DPS PxPay",
   "main": "Gruntfile.js",
   "devDependencies": {
