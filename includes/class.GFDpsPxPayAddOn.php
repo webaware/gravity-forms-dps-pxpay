@@ -671,14 +671,20 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return boolean
 	*/
 	protected function hasFormBeenProcessed($form) {
-		global $wpdb;
+		$unique_id = RGFormsModel::get_form_unique_id($form['id']);
 
-		$unique_id = GFFormsModel::get_form_unique_id($form['id']);
+		$search = array(
+			'field_filters' => array(
+									array(
+										'key'		=> self::META_UNIQUE_ID,
+										'value'		=> $unique_id,
+									),
+								),
+		);
 
-		$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key = %s and meta_value = %s limit 1";
-		$lead_id = $wpdb->get_var($wpdb->prepare($sql, self::META_UNIQUE_ID, $unique_id));
+		$entries = GFAPI::get_entries($form['id'], $search);
 
-		return !empty($lead_id);
+		return !empty($entries);
 	}
 
 	/**
@@ -808,14 +814,22 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			$transactionNumber = $response->TxnId;
 
-			global $wpdb;
-			$sql = "select lead_id from {$wpdb->prefix}rg_lead_meta where meta_key=%s and meta_value = %s";
-			$lead_id = $wpdb->get_var($wpdb->prepare($sql, self::META_TRANSACTION_ID, $transactionNumber));
+			$search = array(
+				'field_filters' => array(
+										array(
+											'key'		=> self::META_TRANSACTION_ID,
+											'value'		=> $transactionNumber,
+										),
+									),
+			);
+			$entries = GFAPI::get_entries(0, $search);
 
-			// must have a lead ID, or nothing to do
-			if (empty($lead_id)) {
-				throw new GFDpsPxPayException(sprintf(__('Invalid entry ID: %s', 'gravity-forms-dps-pxpay'), $lead_id));
+			// must have an entry, or nothing to do
+			if (empty($entries)) {
+				throw new GFDpsPxPayException(sprintf(__('Invalid transaction number: %s', 'gravity-forms-dps-pxpay'), $transactionNumber));
 			}
+			$entry = $entries[0];
+			$lead_id = rgar($entry, 'id');
 
 			// attempt to lock entry
 			$lock_id = 'gfdpspxpay_elock_' . $lead_id;
@@ -827,7 +841,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				self::log_debug("entry $lead_id was locked");
 			}
 
-			$entry = GFFormsModel::get_lead($lead_id);
 			$form = GFFormsModel::get_form_meta($entry['form_id']);
 			$feed = $this->getFeed($lead_id);
 

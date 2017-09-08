@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.0.2, soon...
+
+* fixed: Gravity Forms 2.3 compatibility; don't directly access database tables
+
 ### 2.0.1, 2017-05-22
 
 * fixed: invalid argument warning in `pre_process_feeds()` on forms with no DPS PxPay feeds
