@@ -162,6 +162,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'label'			=> esc_html_x('User ID', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
 						'class'			=> 'medium',
+						'autocorrect'	=> 'off',
+						'autocapitalize' => 'off',
+						'spellcheck'	=> 'false',
 					),
 
 					array (
@@ -169,6 +172,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'label'			=> esc_html_x('User Key', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
 						'class'			=> 'large',
+						'autocorrect'	=> 'off',
+						'autocapitalize' => 'off',
+						'spellcheck'	=> 'false',
 					),
 
 				),
@@ -196,6 +202,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'label'			=> esc_html_x('Sandbox User ID', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
 						'class'			=> 'medium',
+						'autocorrect'	=> 'off',
+						'autocapitalize' => 'off',
+						'spellcheck'	=> 'false',
 					),
 
 					array (
@@ -203,6 +212,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'label'			=> esc_html_x('Sandbox User Key', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
 						'class'			=> 'large',
+						'autocorrect'	=> 'off',
+						'autocapitalize' => 'off',
+						'spellcheck'	=> 'false',
 					),
 
 					array(
