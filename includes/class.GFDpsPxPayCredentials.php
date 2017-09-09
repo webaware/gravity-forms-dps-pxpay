@@ -31,7 +31,7 @@ class GFDpsPxPayCredentials {
 		else {
 			$this->userID			= $addon->get_plugin_setting('testID');
 			$this->userKey			= $addon->get_plugin_setting('testKey');
-			$this->endpoint			= $addon->get_plugin_setting('testKey') === 'UAT' ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL;
+			$this->endpoint			= $addon->get_plugin_setting('testEnv') === 'UAT' ? self::PXPAY_APIV2_TEST_URL : self::PXPAY_APIV2_URL;
 		}
 	}
 
