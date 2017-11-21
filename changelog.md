@@ -6,6 +6,7 @@
 
 * fixed: Gravity Forms 2.3 compatibility; don't directly access database tables
 * fixed: UAT environment not used for test mode transactions when selected
+* added: custom merge tag `{date_created}` so that notification resends can show the entry date instead of the current date
 
 ### 2.0.1, 2017-05-22
 
