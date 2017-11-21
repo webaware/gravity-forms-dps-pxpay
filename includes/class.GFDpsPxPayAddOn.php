@@ -1357,6 +1357,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					array('label' => esc_html_x('Auth Code',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{authcode}'),
 					array('label' => esc_html_x('Payment Amount', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_amount}'),
 					array('label' => esc_html_x('Payment Status', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_status}'),
+					array('label' => esc_html_x('Entry Date',     'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{date_created}'),
 				);
 
 				foreach ($custom_tags as $custom) {
@@ -1405,13 +1406,23 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				'{payment_status}',
 				'{payment_amount}',
 				'{authcode}',
+				'{date_created}',
 			);
 			$values = array (
 				rgar($entry, 'transaction_id', ''),
 				rgar($entry, 'payment_status', ''),
 				$payment_amount,
 				!empty($authCode) ? $authCode : '',
+				GFCommon::format_date(rgar($entry, 'date_created'), false, '', false),
 			);
+
+			// maybe encode the results
+			if ($url_encode) {
+				$values = array_map('urlencode', $values);
+			}
+			elseif ($esc_html) {
+				$values = array_map('esc_html', $values);
+			}
 
 			$text = str_replace($tags, $values, $text);
 		}
