@@ -76,10 +76,10 @@ class GFDpsPxPayAdmin {
 	*/
 	public static function pluginDetailsLinks($links, $file) {
 		if ($file === GFDPSPXPAY_PLUGIN_NAME) {
-			$links[] = sprintf('<a href="https://wordpress.org/support/plugin/gravity-forms-dps-pxpay" target="_blank">%s</a>', _x('Get help', 'plugin details links', 'gravity-forms-dps-pxpay'));
-			$links[] = sprintf('<a href="https://wordpress.org/plugins/gravity-forms-dps-pxpay/" target="_blank">%s</a>', _x('Rating', 'plugin details links', 'gravity-forms-dps-pxpay'));
-			$links[] = sprintf('<a href="https://translate.wordpress.org/projects/wp-plugins/gravity-forms-dps-pxpay" target="_blank">%s</a>', _x('Translate', 'plugin details links', 'gravity-forms-dps-pxpay'));
-			$links[] = sprintf('<a href="https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay" target="_blank">%s</a>', _x('Donate', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://wordpress.org/support/plugin/gravity-forms-dps-pxpay" rel="noopener" target="_blank">%s</a>', _x('Get help', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://wordpress.org/plugins/gravity-forms-dps-pxpay/" rel="noopener" target="_blank">%s</a>', _x('Rating', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://translate.wordpress.org/projects/wp-plugins/gravity-forms-dps-pxpay" rel="noopener" target="_blank">%s</a>', _x('Translate', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay" rel="noopener" target="_blank">%s</a>', _x('Donate', 'plugin details links', 'gravity-forms-dps-pxpay'));
 		}
 
 		return $links;
