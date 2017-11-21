@@ -6,8 +6,8 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.3
-Tested up to: 4.7
-Stable tag: 2.0.1
+Tested up to: 4.9
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -139,26 +139,16 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 2.0.1 =
+= 2.0.2 =
 
-fixed invalid argument warning on forms with no DPS PxPay feeds
+Gravity Forms 2.3 compatibility; fix for UAT environment in test mode; added custom merge tag for Entry Date
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.0.1, 2017-05-22
+### 2.0.2, 2017-11-21
 
-* fixed: invalid argument warning in `pre_process_feeds()` on forms with no DPS PxPay feeds
-
-### 2.0.0, 2017-02-28
-
-* MAJOR CHANGE: upgraded to use the Gravity Forms add-on framework; please check your form, feed, and notifications settings after upgrading
-* fixed: undefined index errors on `gform_replace_merge_tags` hook, e.g. with GF User Registration login widget
-* changed: minimum requirements now Gravity Forms 2.0
-* changed: actions `gfdpspxpay_process_return` and `gfdpspxpay_process_return_parsed` have been removed; please review other available actions and filters
-* changed: each form feed can be independently set to Live or Test/Sandbox
-* added: support for notification events Payment Completed and Payment Failed
-* added: support for conditional logic in feeds
-* added: support for delayed execution of MailChimp, Zapier, and Salesforce feeds
-* added: additional detail in errors returned from payment gateway
+* fixed: Gravity Forms 2.3 compatibility; don't directly access database tables
+* fixed: UAT environment not used for test mode transactions when selected
+* added: custom merge tag `{date_created}` so that notification resends can show the entry date instead of the current date

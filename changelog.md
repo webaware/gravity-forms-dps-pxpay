@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.0.2, soon...
+### 2.0.2, 2017-11-21
 
 * fixed: Gravity Forms 2.3 compatibility; don't directly access database tables
 * fixed: UAT environment not used for test mode transactions when selected
