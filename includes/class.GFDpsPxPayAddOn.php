@@ -1298,10 +1298,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function get_entry_meta($entry_meta, $form_id) {
 		// not on feed admin screen
 		if (is_admin()) {
-			global $hook_suffix;
+			global $plugin_page;
 			$subview = isset($_GET['subview']) ? $_GET['subview'] : '';
 
-			if ($hook_suffix === 'toplevel_page_gf_edit_forms' && $subview === $this->_slug) {
+			if ($plugin_page === 'gf_edit_forms' && $subview === $this->_slug) {
 				return $entry_meta;
 			}
 		}
