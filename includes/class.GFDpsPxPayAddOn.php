@@ -1349,11 +1349,21 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		if ($form_id) {
 			$feeds = $this->get_feeds($form_id);
 			if (!empty($feeds)) {
-				// at least one feed for this add-on, so add our merge tags
-				$merge_tags[] = array('label' => esc_html_x('Transaction ID', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{transaction_id}');
-				$merge_tags[] = array('label' => esc_html_x('Auth Code',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{authcode}');
-				$merge_tags[] = array('label' => esc_html_x('Payment Amount', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_amount}');
-				$merge_tags[] = array('label' => esc_html_x('Payment Status', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_status}');
+				// at least one feed for this add-on, so add our merge tags if nobody else has already
+				$tags = array_flip(wp_list_pluck($merge_tags, 'tag'));
+
+				$custom_tags = array(
+					array('label' => esc_html_x('Transaction ID', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{transaction_id}'),
+					array('label' => esc_html_x('Auth Code',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{authcode}'),
+					array('label' => esc_html_x('Payment Amount', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_amount}'),
+					array('label' => esc_html_x('Payment Status', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_status}'),
+				);
+
+				foreach ($custom_tags as $custom) {
+					if (!isset($tags[$custom['tag']])) {
+						$merge_tags[] = $custom;
+					}
+				}
 			}
 		}
 
