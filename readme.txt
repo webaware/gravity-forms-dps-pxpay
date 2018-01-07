@@ -7,7 +7,7 @@ Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.3
 Tested up to: 4.9
-Stable tag: 2.0.2
+Stable tag: 2.1.0
 Requires PHP: 5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -140,16 +140,14 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 == Upgrade Notice ==
 
-= 2.0.2 =
+= 2.1.0 =
 
-Gravity Forms 2.3 compatibility; fix for UAT environment in test mode; added custom merge tag for Entry Date
+added merge tag support for the cancel URL
 
 == Changelog ==
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.0.2, 2017-11-21
+### 2.1.0, 2018-01-07
 
-* fixed: Gravity Forms 2.3 compatibility; don't directly access database tables
-* fixed: UAT environment not used for test mode transactions when selected
-* added: custom merge tag `{date_created}` so that notification resends can show the entry date instead of the current date
+* added: merge tag support for the cancel URL; thanks, [speedpro](https://github.com/speedpro)!

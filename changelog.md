@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.1.0, soon...
+### 2.1.0, 2018-01-07
 
 * added: merge tag support for the cancel URL; thanks, [speedpro](https://github.com/speedpro)!
 

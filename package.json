@@ -1,6 +1,6 @@
 {
   "name": "gravity-forms-dps-pxpay",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Gravity Forms DPS PxPay",
   "homepage": "https://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/",
   "main": "Gruntfile.js",
