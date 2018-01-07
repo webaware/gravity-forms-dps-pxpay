@@ -8,6 +8,7 @@ Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment ga
 Requires at least: 4.3
 Tested up to: 4.9
 Stable tag: 2.0.2
+Requires PHP: 5.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
