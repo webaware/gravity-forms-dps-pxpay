@@ -350,7 +350,6 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'label'			=> esc_html_x('Cancel URL', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
 						'class'  		=> 'large merge-tag-support mt-position-right mt-hide_all_fields mt-option-url',
-						// 'merge_tags' => "all",
 						'placeholder'	=> esc_html_x('Leave empty to use default Gravity Forms confirmation handler', 'field placeholder', 'gravity-forms-dps-pxpay'),
 						'tooltip'		=> esc_html__('Redirect to this URL if the transaction is canceled.', 'gravity-forms-dps-pxpay')
 										.  '<br/><br/>'
@@ -931,9 +930,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			if ($entry['payment_status'] === 'Failed' && $feed['meta']['cancelURL']) {
 				// on failure, redirect to failure page if set
+				// after first replacing any merge tags in the redirect URL
 				$redirect_url = $feed['meta']['cancelURL'];
 				$redirect_url = GFCommon::replace_variables( trim( $redirect_url ), $form, $entry, false, true, true, 'text' );
-				$redirect_url = esc_url_raw($redirect_url); // replace_variables already url_encoded it for us
+				$redirect_url = esc_url_raw($redirect_url);
 				wp_redirect($redirect_url);
 			}
 			else {
