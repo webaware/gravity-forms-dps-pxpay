@@ -9,7 +9,7 @@ module.exports = function (grunt) {
 			main: {
 				files: [
 					{
-						src: ["./**", "!./node_modules/**", "!./Gruntfile.js", "!./package.json"],
+						src: ["./**", "!./node_modules/**", "!./Gruntfile.js", "!./package*.json"],
 						dest: "dist/<%= pkg.name %>/"
 					}
 				]
@@ -42,7 +42,7 @@ module.exports = function (grunt) {
 			build: {
 				options: {
 					ASCIIOnly: true,
-					banner: "// <%= pkg.name %>\n// <%= pkg.homepage %>\n"
+					banner: "// <%= pkg.description %>\n// <%= pkg.homepage %>\n"
 				},
 				files: [{
 					expand: true,
