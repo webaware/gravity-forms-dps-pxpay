@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.2.0, soon...
+
+* added: feed setting for transaction type, can be Capture or Authorise
+
 ### 2.1.0, 2018-01-07
 
 * added: merge tag support for the cancel URL; thanks, [speedpro](https://github.com/speedpro)!

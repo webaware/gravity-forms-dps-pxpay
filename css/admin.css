@@ -1,5 +1,9 @@
 /* styles for Gravity Forms DPS PxPay admin pages */
 
+.column-feedItem_paymentMethod {
+	width: 10em;
+}
+
 .column-feedItem_useTest {
 	width: 6em;
 }

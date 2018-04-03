@@ -243,11 +243,33 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	public function feed_list_columns() {
 		$columns = array(
-			'feedName'				=> esc_html_x('Feed name', 'feed field name', 'gravity-forms-dps-pxpay'),
-			'feedItem_useTest'		=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
+			'feedName'					=> esc_html_x('Feed name', 'feed field name', 'gravity-forms-dps-pxpay'),
+			'feedItem_paymentMethod'	=> esc_html_x('Payment method', 'feed field name', 'gravity-forms-dps-pxpay'),
+			'feedItem_useTest'			=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
 		);
 
 		return $columns;
+	}
+
+	/**
+	* feed list value for payment mode
+	* @param array $item
+	* @return string
+	*/
+	protected function get_column_value_feedItem_paymentMethod($item) {
+		switch (rgars($item, 'meta/paymentMethod')) {
+
+			case 'authorize':
+				$value = esc_html_x('Authorize', 'payment method', 'gravity-forms-dps-pxpay');
+				break;
+
+			default:
+				$value = esc_html_x('Capture', 'payment method', 'gravity-forms-dps-pxpay');
+				break;
+
+		}
+
+		return $value;
 	}
 
 	/**
@@ -308,6 +330,20 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 							array('value' => '1', 'label' => esc_html_x('Test', 'payment transaction mode', 'gravity-forms-dps-pxpay')),
 						),
 						'default_value'	=> '1',
+					),
+
+					array(
+						'name'   		=> 'paymentMethod',
+						'label'  		=> esc_html_x('Payment Method', 'feed field name', 'gravity-forms-dps-pxpay'),
+						'type'   		=> 'radio',
+						'tooltip'		=> esc_html__("Capture processes the payment immediately. Authorize holds the amount on the customer's card for processing later.", 'gravity-forms-dps-pxpay')
+										.  '<br/><br/>'
+										.  esc_html__('Authorize transactions can be completed manually in Payline. Perform a transaction search, and look for its Complete button.', 'gravity-forms-dps-pxpay'),
+						'choices'		=> array(
+								array('value' => 'capture',   'label' => esc_html_x('Capture', 'payment method', 'gravity-forms-dps-pxpay')),
+								array('value' => 'authorize', 'label' => esc_html_x('Authorize', 'payment method', 'gravity-forms-dps-pxpay')),
+							),
+						'default_value'	=> 'capture',
 					),
 
 					array(
@@ -627,7 +663,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				$entry['payment_status']	= 'Failed';
 				$entry['payment_date']		= date('Y-m-d H:i:s');
 
-				$paymentMethod = rgar($feed['meta'], 'paymentMethod', 'debit');
+				$paymentMethod = rgar($feed['meta'], 'paymentMethod', 'capture');
 
 				$this->log_debug(sprintf('%s: failed', __FUNCTION__));
 
@@ -721,11 +757,13 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		// allow plugins/themes to modify transaction ID; NB: must remain unique for gateway account!
 		$transactionID = apply_filters('gfdpspxpay_invoice_trans_number', $transactionID, $form);
 
+		$capture = (rgar($feed['meta'], 'paymentMethod', 'capture') !== 'authorize');
+
 		$paymentReq->amount					= $formData['payment_amount'];
 		$paymentReq->currency				= GFCommon::get_currency();
 		$paymentReq->transactionNumber		= $transactionID;
 		$paymentReq->invoiceReference		= $formData['description'];
-		$paymentReq->txnType				= GFDpsPxPayAPI::TXN_TYPE_CAPTURE;
+		$paymentReq->txnType				= $capture ? GFDpsPxPayAPI::TXN_TYPE_CAPTURE : GFDpsPxPayAPI::TXN_TYPE_AUTHORISE;
 		$paymentReq->urlSuccess				= home_url($useTest ? self::ENDPOINT_RETURN_TEST : self::ENDPOINT_RETURN);
 		$paymentReq->urlFail				= $paymentReq->urlSuccess;		// NB: redirection will happen after transaction status is updated
 
@@ -859,7 +897,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			// capture current state of lead
 			$initial_status = $entry['payment_status'];
 
-			$capture = (rgar($feed['meta'], 'paymentMethod', 'debit') !== 'authorize');
+			$capture = (rgar($feed['meta'], 'paymentMethod', 'capture') !== 'authorize');
 
 			if (rgar($entry, 'payment_status') === 'Processing') {
 				// update lead entry, with success/fail details
