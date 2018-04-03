@@ -244,8 +244,8 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function feed_list_columns() {
 		$columns = array(
 			'feedName'					=> esc_html_x('Feed name', 'feed field name', 'gravity-forms-dps-pxpay'),
-			'feedItem_paymentMethod'	=> esc_html_x('Payment method', 'feed field name', 'gravity-forms-dps-pxpay'),
 			'feedItem_useTest'			=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
+			'feedItem_paymentMethod'	=> esc_html_x('Payment method', 'feed field name', 'gravity-forms-dps-pxpay'),
 		);
 
 		return $columns;
