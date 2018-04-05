@@ -430,7 +430,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'name'			=> 'condition',
 						'label'			=> esc_html_x('Payment Express condition', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'feed_condition',
-						'checkbox_label' => 'Enable',
+						'checkbox_label' => esc_html_x('Enable', 'checkbox label', 'gravity-forms-dps-pxpay'),
 						'instructions'	=> esc_html_x('Send to Payment Express if', 'feed conditions', 'gravity-forms-dps-pxpay'),
 						'tooltip'		=> esc_html__('When the Payment Express condition is enabled, form submissions will only be sent to Payment Express when the condition is met. When disabled, all form submissions will be sent to Payment Express.', 'gravity-forms-dps-pxpay'),
 					),
