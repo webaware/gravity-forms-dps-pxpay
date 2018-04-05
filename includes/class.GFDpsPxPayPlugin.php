@@ -38,7 +38,7 @@ class GFDpsPxPayPlugin {
 		spl_autoload_register(array(__CLASS__, 'autoload'));
 
 		add_action('gform_loaded', array($this, 'addonInit'));
-		add_action('init', array($this, 'loadTextDomain'));
+		add_action('init', array($this, 'loadTextDomain'), 8);	// use priority 8 to get in before our add-on uses translated text
 
 		if (is_admin()) {
 			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayAdmin.php';
@@ -61,15 +61,11 @@ class GFDpsPxPayPlugin {
 
 			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayAddOn.php';
 			GFAddOn::register('GFDpsPxPayAddOn');
-
-			// no need to load text domain now, Gravity Forms will do it for us
-			remove_action('init', array($this, 'loadTextDomain'));
 		}
 	}
 
 	/**
 	* load text translations
-	* Gravity Forms loads text domain for add-ons, so this won't be called if the add-on was registered
 	*/
 	public function loadTextDomain() {
 		load_plugin_textdomain('gravity-forms-dps-pxpay');

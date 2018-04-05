@@ -61,7 +61,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 		parent::__construct();
 
-		add_action('init', array($this, 'lateLocalise'), 50);
+		add_action('init', array($this, 'lateLocalise'), 9);
 		add_filter('gform_validation_message', array($this, 'gformValidationMessage'), 10, 2);
 		add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
 		add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
@@ -104,6 +104,12 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			// might be v1.x add-on needing upgrades
 			new GFDpsPxPayUpdateV1($this->_slug);
 		}
+	}
+
+	/**
+	* null the add-on framework load of text domain, because we already did it, thanks.
+	*/
+	public function load_text_domain() {
 	}
 
 	/**
