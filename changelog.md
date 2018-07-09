@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.1.0, 2018-01-07
+
+* added: merge tag support for the cancel URL; thanks, [speedpro](https://github.com/speedpro)!
+
 ### 2.0.2, 2017-11-21
 
 * fixed: Gravity Forms 2.3 compatibility; don't directly access database tables
