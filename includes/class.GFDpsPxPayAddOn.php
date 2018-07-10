@@ -604,7 +604,12 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	public function requestRedirectUrl($entry, $form) {
 		$feed				= $this->current_feed;
-		$submission_data	= $this->current_submission_data;
+		if ( !$this->current_submission_data ) {
+			$this->current_submission_data = $this->get_submission_data($feed, $form, $entry);
+		}
+
+		$submission_data = $this->current_submission_data;
+		$payment_amount  = $this->current_submission_data['payment_amount'] ? $this->current_submission_data['payment_amount'] : $entry['payment_amount'];
 
 		$this->log_debug('========= initiating transaction request');
 		$this->log_debug(sprintf('%s: feed #%d - %s', __FUNCTION__, $feed['id'], $feed['meta']['feedName']));
@@ -614,7 +619,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			// record some payment meta
 			gform_update_meta($entry['id'], self::META_TRANSACTION_ID, $paymentReq->transactionNumber);
+			$entry[self::META_TRANSACTION_ID] = $paymentReq->transactionNumber;
 			gform_update_meta($entry['id'], self::META_FEED_ID, $feed['id']);
+			$entry[self::META_FEED_ID] = $feed['id'];
 
 			$response = $paymentReq->requestSharedPage();
 
@@ -890,6 +897,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					$entry['payment_status']			=  'Failed';
 					$entry['payment_date']				=  date('Y-m-d H:i:s');
 					$entry['currency']					=  $response->CurrencySettlement;
+					// $entry['payment_amount']			=  $this->get_order_data( $this->getFeed( $entry['id'] ), $form, $entry )['payment_amount'];
 
 					// record empty bank authorisation code, so that we can test for it
 					$entry[self::META_AUTHCODE]			=  '';
@@ -1253,11 +1261,37 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
+				// var_dump($lead);
+
+				//if retrying, setup retry request and redirect to DPS
+
+				//if failed, display message, with retry link
+
 				// get confirmation page
 				if (!class_exists('GFFormDisplay', false)) {
 					require_once(GFCommon::get_base_path() . '/form_display.php');
 				}
 				$confirmation = GFFormDisplay::handle_confirmation($form, $lead, false);
+
+				if ($lead['payment_status'] != 'Paid') {
+					$this->current_feed = $this->getFeed($lead['id']);
+					if ( key_exists('retry_payment', $_GET) && $_GET['retry_payment'] ) {
+						$debug_var = $this->requestRedirectUrl($lead, $form);
+						wp_redirect($this->urlPaymentForm);
+						var_dump($debug_var);
+						die();
+					} else {
+						$submission_data = $this->get_submission_data($this->current_feed, $form, $lead);
+						$retry_link = http_build_query( array_merge( $_GET, array( 'retry_payment' => '1' ) ) );
+						ob_start();
+						include( GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-retry.php');
+						$confirmation = ob_get_clean();
+					}
+				}
+
+				// var_dump($lead);
+
+				
 
 				// preload the GF submission, ready for processing the confirmation message
 				GFFormDisplay::$submission[$form['id']] = array(
@@ -1266,6 +1300,8 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					'form'					=> $form,
 					'lead'					=> $lead,
 				);
+
+				// var_dump(GFFormDisplay::$submission);
 
 				// if it's a redirection (page or other URL) then do the redirect now
 				if (is_array($confirmation) && isset($confirmation['redirect'])) {
@@ -1440,7 +1476,8 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	protected function getFeed($lead_id) {
 		if ($this->feed !== false && (empty($this->feed['lead_id']) || $this->feed['lead_id'] != $lead_id)) {
-			$this->feed = $this->get_feed(gform_get_meta($lead_id, self::META_FEED_ID));
+			$form = gform_get_meta($lead_id, self::META_FEED_ID);
+			$this->feed = $this->get_feed($form);
 			if ($this->feed) {
 				$this->feed['lead_id'] = $lead_id;
 			}
