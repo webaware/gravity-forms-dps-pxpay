@@ -994,6 +994,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					'form_id'	=> $entry['form_id'],
 					'lead_id'	=> $entry['id'],
 				);
+				if ($entry['payment_status'] === 'Failed') {
+					$query['cancelled'] = $response->WasUserCancelled ? 1 : 0;
+				}
 				$hash = wp_hash(http_build_query($query));
 				$query['hash']	=  $hash;
 				$query = base64_encode(http_build_query($query));
@@ -1287,6 +1290,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				'form_id'	=> rgar($query, 'form_id'),
 				'lead_id'	=> rgar($query, 'lead_id'),
 			);
+			if (isset($query['cancelled'])) {
+				$check['cancelled'] = $query['cancelled'];
+			}
 
 			// make sure we have a match
 			if ($query && wp_hash(http_build_query($check)) === rgar($query, 'hash')) {

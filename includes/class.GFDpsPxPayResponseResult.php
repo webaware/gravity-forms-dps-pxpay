@@ -148,6 +148,12 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 	public $Cvc2ResultCode;
 
 	/**
+	* record whether transaction was user cancelled
+	* @var bool
+	*/
+	public $WasUserCancelled = false;
+
+	/**
 	* get 'invalid response' message for this response class
 	* @return string
 	*/
@@ -160,7 +166,13 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 	* @return string
 	*/
 	public function getProcessingMessages() {
-		return array($this->ResponseText);
+		$msg = $this->ResponseText;
+		if ($msg === 'DECLINED' && $this->CardHolderName === 'User Cancelled') {
+			$msg = 'User Cancelled';
+			$this->WasUserCancelled = true;
+		}
+
+		return array($msg);
 	}
 
 }
