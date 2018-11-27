@@ -646,6 +646,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	public function requestRedirectUrl($entry, $form) {
 		$feed				= $this->current_feed;
+
 		if ( !$this->current_submission_data ) {
 			$this->current_submission_data = $this->get_submission_data($feed, $form, $entry);
 		}
@@ -1326,22 +1327,32 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				if ($lead['payment_status'] != 'Paid') {
 					$this->current_feed = $this->getFeed($lead['id']);
 					if ( key_exists('retry_payment', $_GET) && $_GET['retry_payment'] ) {
-						$debug_var = $this->requestRedirectUrl($lead, $form);
-						wp_redirect($this->urlPaymentForm);
-						var_dump($debug_var);
-						die();
-					} else {
-						$submission_data = $this->get_submission_data($this->current_feed, $form, $lead);
-						$retry_link = http_build_query( array_merge( $_GET, array( 'retry_payment' => '1' ) ) );
-						ob_start();
-						include( GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-retry.php');
-						$confirmation = ob_get_clean();
+						$lead = $this->requestRedirectUrl($lead, $form);
+						if ($lead['payment_status'] === 'Processing') {
+							wp_redirect($this->urlPaymentForm);
+							exit;
+						}
 					}
+
+					$submission_data = $this->get_submission_data($this->current_feed, $form, $lead);
+					$retry_link = add_query_arg(array_merge( $_GET, array( 'retry_payment' => '1' ) ), $lead['source_url']);
+
+					$default_anchor = count(GFCommon::get_fields_by_type($form, array('page'))) > 0 ? 1 : 0;
+					$default_anchor = apply_filters('gform_confirmation_anchor_'.$form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
+					$anchor = $default_anchor ? "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>" : '';
+					$cssClass = rgar($form, 'cssClass');
+
+					if (!empty($query['cancelled'])) {
+						$error_msg = __('The transaction was canceled.', 'gravity-forms-dps-pxpay');
+					}
+					else {
+						$error_msg = __('There was an error with your payment. Please try again.', 'gravity-forms-dps-pxpay');
+					}
+
+					ob_start();
+					require GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-retry.php';
+					$confirmation = ob_get_clean();
 				}
-
-				// var_dump($lead);
-
-				
 
 				// preload the GF submission, ready for processing the confirmation message
 				GFFormDisplay::$submission[$form['id']] = array(
