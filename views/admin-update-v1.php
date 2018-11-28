@@ -11,13 +11,13 @@ if (!defined('ABSPATH')) {
 
 		<?php if ($this->update_feeds): ?>
 		<li style="list-style-type:disc" id="gfdpspxpay-updatev1-feeds">
-			<?php printf(_n('%s feed needs updating', '%s feeds need updating', $this->update_feeds, 'gravity-forms-dps-pxpay'), number_format_i18n($this->update_feeds, 0)); ?>
+			<?= esc_html(sprintf(_n('%s feed needs updating', '%s feeds need updating', $this->update_feeds, 'gravity-forms-dps-pxpay'), number_format_i18n($this->update_feeds, 0))); ?>
 		</li>
 		<?php endif; ?>
 
 		<?php if ($this->update_transactions): ?>
 		<li style="list-style-type:disc" id="gfdpspxpay-updatev1-txns">
-			<?php printf(_n('%s transaction needs updating', '%s transactions need updating', $this->update_transactions, 'gravity-forms-dps-pxpay'), number_format_i18n($this->update_transactions, 0)); ?>
+			<?= esc_html(sprintf(_n('%s transaction needs updating', '%s transactions need updating', $this->update_transactions, 'gravity-forms-dps-pxpay'), number_format_i18n($this->update_transactions, 0))); ?>
 		</li>
 		<?php endif; ?>
 
