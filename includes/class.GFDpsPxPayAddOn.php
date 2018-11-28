@@ -943,7 +943,6 @@ class AddOn extends \GFPaymentAddOn {
 					$entry['payment_status']			=  'Failed';
 					$entry['payment_date']				=  date('Y-m-d H:i:s');
 					$entry['currency']					=  $response->CurrencySettlement;
-					// $entry['payment_amount']			=  $this->get_order_data( $this->getFeed( $entry['id'] ), $form, $entry )['payment_amount'];
 
 					// record empty bank authorisation code, so that we can test for it
 					$entry[self::META_AUTHCODE]			=  '';
@@ -1313,8 +1312,6 @@ class AddOn extends \GFPaymentAddOn {
 
 				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
-				// var_dump($lead);
-
 				//if retrying, setup retry request and redirect to DPS
 
 				//if failed, display message, with retry link
@@ -1362,8 +1359,6 @@ class AddOn extends \GFPaymentAddOn {
 					'form'					=> $form,
 					'lead'					=> $lead,
 				];
-
-				// var_dump(GFFormDisplay::$submission);
 
 				// if it's a redirection (page or other URL) then do the redirect now
 				if (is_array($confirmation) && isset($confirmation['redirect'])) {
