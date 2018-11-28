@@ -1,10 +1,17 @@
 <?php
+namespace webaware\gf_dpspxpay;
+
 if (!defined('ABSPATH')) {
 	exit;
 }
 ?>
 
 <div class="notice notice-error">
-	<p><?php printf(__('Gravity Forms DPS PxPay requires <a rel="noopener" target="_blank" href="%1$s">Gravity Forms</a> version %2$s or higher; your website has Gravity Forms version %3$s', 'gravity-forms-dps-pxpay'),
-		'https://webaware.com.au/get-gravity-forms', esc_html(GFDpsPxPayPlugin::MIN_VERSION_GF), esc_html(GFCommon::$version)); ?></p>
+	<p>
+		<?= gf_dpspxpay_external_link(
+				sprintf(esc_html__('Gravity Forms DPS PxPay requires {{a}}Gravity Forms{{/a}} version %1$s or higher; your website has Gravity Forms version %2$s.', 'gravity-forms-dps-pxpay'),
+					esc_html(MIN_VERSION_GF), esc_html(GFCommon::$version)),
+				'https://webaware.com.au/get-gravity-forms'
+			); ?>
+	</p>
 </div>

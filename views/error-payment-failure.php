@@ -1,4 +1,6 @@
 <?php
+namespace webaware\gf_dpspxpay;
+
 // error message displayed on failure of payment request
 // replaces confirmation text
 

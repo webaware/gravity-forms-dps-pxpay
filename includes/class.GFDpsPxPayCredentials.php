@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;

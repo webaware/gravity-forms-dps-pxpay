@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
@@ -59,13 +60,13 @@ class GFDpsPxPayUpdateV1 {
 	protected function updateSettings() {
 		$old_settings = get_option(self::OLD_SETTINGS_NAME);
 
-		$settings = array(
+		$settings = [
 			'userID'	=> rgar($old_settings, 'userID',  ''),
 			'userKey'	=> rgar($old_settings, 'userKey', ''),
 			'testEnv'	=> rgar($old_settings, 'testEnv', 'UAT'),
 			'testID'	=> rgar($old_settings, 'testID',  ''),
 			'testKey'	=> rgar($old_settings, 'testKey', ''),
-		);
+		];
 
 		// if add-on was installed before the test environment setting became available, set default environment to SEC for backwards compatibility
 		if (isset($old_settings['userID']) && !isset($old_settings['testEnv'])) {
@@ -92,7 +93,7 @@ class GFDpsPxPayUpdateV1 {
 			update_option(self::OLD_SETTINGS_NAME, $old_settings);
 		}
 		else {
-			add_action('admin_notices', array($this, 'showUpdate'));
+			add_action('admin_notices', [$this, 'showUpdate']);
 			$this->update_feeds = count($feeds);
 		}
 	}
@@ -111,7 +112,7 @@ class GFDpsPxPayUpdateV1 {
 			update_option(self::OLD_SETTINGS_NAME, $old_settings);
 		}
 		else {
-			add_action('admin_notices', array($this, 'showUpdate'));
+			add_action('admin_notices', [$this, 'showUpdate']);
 			$this->update_transactions = count($txns);
 		}
 	}
@@ -121,19 +122,19 @@ class GFDpsPxPayUpdateV1 {
 	* @return array
 	*/
 	public static function getFeedsUnconverted() {
-		$args = array(
+		$args = [
 			'post_type'			=> self::POST_TYPE_FEED,
 			'posts_per_page'	=> -1,
 			'fields'			=> 'ids',
-			'meta_query'		=> array(
-				array(
+			'meta_query'		=> [
+				[
 					'key'			=> self::META_CONVERTED,
 					'compare'		=> 'NOT EXISTS',
-				),
-			),
-		);
+				],
+			],
+		];
 
-		$query = new WP_Query($args);
+		$query = new \WP_Query($args);
 
 		return $query->posts;
 	}
@@ -163,9 +164,9 @@ class GFDpsPxPayUpdateV1 {
 		$ver = SCRIPT_DEBUG ? time() : GFDPSPXPAY_PLUGIN_VERSION;
 
 		wp_enqueue_style('gfdpspxpay_admin');
-		wp_enqueue_script('gfdpspxpay_updatev1', plugins_url("js/admin-update-v1$min.js", GFDPSPXPAY_PLUGIN_FILE), array('jquery'), $ver, true);
+		wp_enqueue_script('gfdpspxpay_updatev1', plugins_url("js/admin-update-v1$min.js", GFDPSPXPAY_PLUGIN_FILE), ['jquery'], $ver, true);
 
-		$steps = array();
+		$steps = [];
 		if ($this->update_feeds)			$steps[] = 'feeds';
 		if ($this->update_transactions)		$steps[] = 'transactions';
 		$steps[] = 'end';
@@ -183,37 +184,37 @@ class GFDpsPxPayUpdateV1 {
 			switch (rgget('step')) {
 
 				case 'feeds_list':
-					$ids = GFDpsPxPayUpdateV1::getFeedsUnconverted();
-					$response = array('step' => 'feeds', 'ids' => $ids);
+					$ids = self::getFeedsUnconverted();
+					$response = ['step' => 'feeds', 'ids' => $ids];
 					break;
 
 				case 'feeds':
 					$id = rgget('id');
 					self::upgradeFeed($id);
-					$response = array('step' => 'feeds', 'next' => absint(rgget('next')));
+					$response = ['step' => 'feeds', 'next' => absint(rgget('next'))];
 					break;
 
 				case 'transactions_list':
-					$ids = GFDpsPxPayUpdateV1::getTxnUnconverted();
-					$response = array('step' => 'transactions', 'ids' => $ids);
+					$ids = self::getTxnUnconverted();
+					$response = ['step' => 'transactions', 'ids' => $ids];
 					break;
 
 				case 'transactions':
-					$ids = GFDpsPxPayUpdateV1::getTxnUnconverted();
+					$ids = self::getTxnUnconverted();
 					self::upgradeTransactions();
-					$response = array('step' => 'transactions', 'next' => count($ids) + 1);
+					$response = ['step' => 'transactions', 'next' => count($ids) + 1];
 					break;
 
 				default:
-					throw new Exception(__('Unknown upgrade step passed.', 'gravity-forms-dps-pxpay'));
+					throw new \Exception(__('Unknown upgrade step passed.', 'gravity-forms-dps-pxpay'));
 					break;
 
 			}
 
 			wp_send_json_success($response);
 		}
-		catch (Exception $e) {
-			wp_send_json_error(array('error' => $e->getMessage()));
+		catch (\Exception $e) {
+			wp_send_json_error(['error' => $e->getMessage()]);
 		}
 
 		exit;
@@ -222,20 +223,20 @@ class GFDpsPxPayUpdateV1 {
 	/**
 	* upgrade a feed for a form
 	* @param int $id id of old feed post
-	* @throws Exception
+	* @throws \Exception
 	*/
 	protected static function upgradeFeed($id) {
-		$addon			= GFDpsPxPayAddOn::get_instance();
+		$addon			= AddOn::get_instance();
 		$old_settings	= get_option(self::OLD_SETTINGS_NAME);
 		$post			= get_post($id);
 		$form_id		= get_post_meta($id, '_gfdpspxpay_form', true);
 
 		if (empty($post) || empty($form_id)) {
 			$addon->log_error("old feed $id not found or not linked to form");
-			throw new Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+			throw new \Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
-		$meta = array(
+		$meta = [
 			'feedName'									=> $post->post_title,
 			'useTest'									=> empty($old_settings['useTest']) ? '0' : '1',
 			'transactionType'							=> 'product',
@@ -252,10 +253,10 @@ class GFDpsPxPayUpdateV1 {
 			'delay_gravityformszapier'					=> '',
 			'execDelayed'								=> self::upgradeFeedExecDelayed($id),
 			'feed_condition_conditional_logic'			=> '',
-			'feed_condition_conditional_logic_object'	=> array(),
-		);
+			'feed_condition_conditional_logic_object'	=> [],
+		];
 
-		$feed_id = GFAPI::add_feed($form_id, $meta, $addon->get_slug());
+		$feed_id = \GFAPI::add_feed($form_id, $meta, $addon->get_slug());
 
 		if (empty($feed_id) || is_wp_error($feed_id)) {
 			if (is_wp_error($feed_id)) {
@@ -264,7 +265,7 @@ class GFDpsPxPayUpdateV1 {
 			else {
 				$addon->log_error("old feed $id cannot be upgraded to add-on feed; null feed id.");
 			}
-			throw new Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+			throw new \Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
 		self::upgradeFeedNotifications($id, $form_id);
@@ -324,7 +325,7 @@ class GFDpsPxPayUpdateV1 {
 		$delayAutorespond	= get_post_meta($id, '_gfdpspxpay_delay_autorespond', true);
 
 		if ($delayNotify || $delayAutorespond) {
-			$form = GFAPI::get_form($form_id);
+			$form = \GFAPI::get_form($form_id);
 
 			foreach ($form['notifications'] as $key => $notification) {
 				if (trim($notification['to']) === '{admin_email}') {
@@ -343,7 +344,7 @@ class GFDpsPxPayUpdateV1 {
 		}
 
 		if ($modified) {
-			GFAPI::update_form($form);
+			\GFAPI::update_form($form);
 		}
 	}
 
@@ -353,7 +354,7 @@ class GFDpsPxPayUpdateV1 {
 	protected static function upgradeTransactions() {
 		global $wpdb;
 
-		$addon = GFDpsPxPayAddOn::get_instance();
+		$addon = AddOn::get_instance();
 
 		$sql = "
 			insert into {$wpdb->prefix}gf_addon_payment_transaction (lead_id, transaction_type, transaction_id, is_recurring, amount, date_created)
@@ -376,7 +377,7 @@ class GFDpsPxPayUpdateV1 {
 
 		if (!$success) {
 			$addon->log_error("Error upgrading transactions from version 1 of add-on: " . $wpdb->last_error);
-			throw new Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+			throw new \Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
 		// update old payment status from Approved to Paid

@@ -34,8 +34,14 @@ if (!defined('ABSPATH')) {
 define('GFDPSPXPAY_PLUGIN_ROOT', dirname(__FILE__) . '/');
 define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__FILE__));
 define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
+define('GFDPSPXPAY_PLUGIN_MIN_PHP', '5.6');
 define('GFDPSPXPAY_PLUGIN_VERSION', '2.2.0-dev');
 
-// instantiate the plug-in
-require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayPlugin.php';
-GFDpsPxPayPlugin::getInstance();
+require GFDPSPXPAY_PLUGIN_ROOT . 'includes/functions-global.php';
+
+if (version_compare(PHP_VERSION, GFDPSPXPAY_PLUGIN_MIN_PHP, '<')) {
+	add_action('admin_notices', 'gf_dpspxpay_fail_php_version');
+	return;
+}
+
+require GFDPSPXPAY_PLUGIN_ROOT . 'includes/bootstrap.php';

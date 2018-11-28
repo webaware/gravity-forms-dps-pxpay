@@ -1,21 +1,14 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
 }
 
 /**
-* custom exception types
-*/
-class GFDpsPxPayException extends Exception {}
-
-/**
 * class for managing the plugin
 */
-class GFDpsPxPayPlugin {
-
-	// minimum versions required
-	const MIN_VERSION_GF	= '2.0';
+class Plugin {
 
 	/**
 	* static method for getting the instance of this singleton object
@@ -24,7 +17,7 @@ class GFDpsPxPayPlugin {
 	public static function getInstance() {
 		static $instance = null;
 
-		if (is_null($instance)) {
+		if ($instance === null) {
 			$instance = new self();
 		}
 
@@ -32,19 +25,20 @@ class GFDpsPxPayPlugin {
 	}
 
 	/**
+	* hide constructor
+	*/
+	private function __construct() {}
+
+	/**
 	* initialise plugin
 	*/
-	private function __construct() {
-		spl_autoload_register(array(__CLASS__, 'autoload'));
+	public function pluginStart() {
+		add_action('gform_loaded', [$this, 'addonInit']);
+		add_action('init', 'gf_dpspxpay_load_text_domain', 8);	// use priority 8 to get in before our add-on uses translated text
+		add_action('admin_notices', [$this, 'checkPrerequisites']);
+		add_filter('plugin_row_meta', [$this, 'pluginDetailsLinks'], 10, 2);
 
-		add_action('gform_loaded', array($this, 'addonInit'));
-		add_action('init', array($this, 'loadTextDomain'), 8);	// use priority 8 to get in before our add-on uses translated text
-
-		if (is_admin()) {
-			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayAdmin.php';
-			new GFDpsPxPayAdmin();
-		}
-
+		add_action('wp_ajax_gfdpspxpay_upgradev1', [__NAMESPACE__ . '\\GFDpsPxPayUpdateV1', 'ajaxUpgrade']);
 	}
 
 	/**
@@ -55,62 +49,52 @@ class GFDpsPxPayPlugin {
 			return;
 		}
 
-		if (self::hasMinimumGF()) {
+		if (has_required_gravityforms()) {
 			// load add-on framework and hook our add-on
-			GFForms::include_payment_addon_framework();
+			\GFForms::include_payment_addon_framework();
 
 			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayAddOn.php';
-			GFAddOn::register('GFDpsPxPayAddOn');
+			\GFAddOn::register(__NAMESPACE__ . '\\AddOn');
 		}
 	}
 
 	/**
-	* load text translations
+	* check for required prerequisites, tell admin if any are missing
 	*/
-	public function loadTextDomain() {
-		load_plugin_textdomain('gravity-forms-dps-pxpay');
-	}
-
-	/**
-	* compare Gravity Forms version against target
-	* @param string $target
-	* @param string $operator
-	* @return bool
-	*/
-	public static function versionCompareGF($target, $operator) {
-		if (class_exists('GFCommon', false)) {
-			return version_compare(GFCommon::$version, $target, $operator);
+	public function checkPrerequisites() {
+		if (!gf_dpspxpay_can_show_admin_notices()) {
+			return;
 		}
 
-		return false;
-	}
-
-	/**
-	* compare Gravity Forms version against minimum required version
-	* @return bool
-	*/
-	public static function hasMinimumGF() {
-		return self::versionCompareGF(self::MIN_VERSION_GF, '>=');
-	}
-
-	/**
-	* autoload classes as/when needed
-	*
-	* @param string $class_name name of class to attempt to load
-	*/
-	public static function autoload($class_name) {
-		static $classMap = array (
-			'GFDpsPxPayAPI'							=> 'includes/class.GFDpsPxPayAPI.php',
-			'GFDpsPxPayCredentials'					=> 'includes/class.GFDpsPxPayCredentials.php',
-			'GFDpsPxPayResponse'					=> 'includes/class.GFDpsPxPayResponse.php',
-			'GFDpsPxPayResponseRequest'				=> 'includes/class.GFDpsPxPayResponseRequest.php',
-			'GFDpsPxPayResponseResult'				=> 'includes/class.GFDpsPxPayResponseResult.php',
-			'GFDpsPxPayUpdateV1'					=> 'includes/class.GFDpsPxPayUpdateV1.php',
-		);
-
-		if (isset($classMap[$class_name])) {
-			require GFDPSPXPAY_PLUGIN_ROOT . $classMap[$class_name];
+		// need these PHP extensions
+		$missing = array_filter(['libxml', 'SimpleXML', 'xmlwriter'], function($ext) {
+			return !extension_loaded($ext);
+		});
+		if (!empty($missing)) {
+			include GFDPSPXPAY_PLUGIN_ROOT . 'views/requires-extensions.php';
 		}
+
+		// and of course, we need Gravity Forms
+		if (!class_exists('GFCommon', false)) {
+			include GFDPSPXPAY_PLUGIN_ROOT . 'views/requires-gravity-forms.php';
+		}
+		elseif (!has_required_gravityforms()) {
+			include GFDPSPXPAY_PLUGIN_ROOT . 'views/requires-gravity-forms-upgrade.php';
+		}
+	}
+
+	/**
+	* add plugin details links
+	*/
+	public static function pluginDetailsLinks($links, $file) {
+		if ($file === GFDPSPXPAY_PLUGIN_NAME) {
+			$links[] = sprintf('<a href="https://wordpress.org/support/plugin/gravity-forms-dps-pxpay" rel="noopener" target="_blank">%s</a>', _x('Get help', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://wordpress.org/plugins/gravity-forms-dps-pxpay/" rel="noopener" target="_blank">%s</a>', _x('Rating', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://translate.wordpress.org/projects/wp-plugins/gravity-forms-dps-pxpay" rel="noopener" target="_blank">%s</a>', _x('Translate', 'plugin details links', 'gravity-forms-dps-pxpay'));
+			$links[] = sprintf('<a href="https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay" rel="noopener" target="_blank">%s</a>', _x('Donate', 'plugin details links', 'gravity-forms-dps-pxpay'));
+		}
+
+		return $links;
 	}
 
 }

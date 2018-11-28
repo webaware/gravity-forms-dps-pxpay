@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
@@ -162,8 +163,8 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 	}
 
 	/**
-	* get processing message
-	* @return string
+	* get an array of processing messages
+	* @return array
 	*/
 	public function getProcessingMessages() {
 		$msg = $this->ResponseText;
@@ -172,7 +173,7 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 			$this->WasUserCancelled = true;
 		}
 
-		return array($msg);
+		return [$msg];
 	}
 
 }

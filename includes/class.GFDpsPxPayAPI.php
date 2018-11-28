@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
@@ -190,7 +191,7 @@ class GFDpsPxPayAPI {
 	* @throws GFDpsPxPayException
 	*/
 	protected function validate() {
-		$errors = array();
+		$errors = [];
 
 		if (strlen($this->userID) === 0) {
 			$errors[] = _x('userID cannot be empty.', 'validation error', 'gravity-forms-dps-pxpay');
@@ -231,7 +232,7 @@ class GFDpsPxPayAPI {
 	* @return string
 	*/
 	public function getPaymentXML() {
-		$xml = new XMLWriter();
+		$xml = new \XMLWriter();
 		$xml->openMemory();
 		$xml->startDocument('1.0', 'UTF-8');
 		$xml->startElement('GenerateRequest');
@@ -300,7 +301,7 @@ class GFDpsPxPayAPI {
 	* @return string
 	*/
 	protected function getResultXML() {
-		$xml = new XMLWriter();
+		$xml = new \XMLWriter();
 		$xml->openMemory();
 		$xml->startDocument('1.0', 'UTF-8');
 		$xml->startElement('ProcessResponse');
@@ -323,15 +324,15 @@ class GFDpsPxPayAPI {
 	*/
 	protected function xmlPostRequest($url, $request) {
 		// execute the request, and retrieve the response
-		$response = wp_remote_post($url, array(
+		$response = wp_remote_post($url, [
 			'user-agent'	=> $this->httpUserAgent,
 			'sslverify'		=> $this->sslVerifyPeer,
 			'timeout'		=> 30,
-			'headers'		=> array(
-									'Content-Type'		=> 'text/xml; charset=utf-8',
-							   ),
+			'headers'		=> [
+								'Content-Type'		=> 'text/xml; charset=utf-8',
+							],
 			'body'			=> $request,
-		));
+		]);
 
 		// check for http error
 		$this->checkHttpResponse($response);

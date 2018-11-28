@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
@@ -7,7 +8,7 @@ if (!defined('ABSPATH')) {
 /**
 * implement a Gravity Forms Payment Add-on instance
 */
-class GFDpsPxPayAddOn extends GFPaymentAddOn {
+class AddOn extends \GFPaymentAddOn {
 
 	protected $dpsReturnArgs;							// data returned in Payment Express callback
 	protected $validationMessages;						// any validation messages picked up for the form as a whole
@@ -34,7 +35,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public static function get_instance() {
 		static $instance = null;
 
-		if (is_null($instance)) {
+		if ($instance === null) {
 			$instance = new self();
 		}
 
@@ -46,7 +47,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	public function __construct() {
 		$this->_version						= GFDPSPXPAY_PLUGIN_VERSION;
-		$this->_min_gravityforms_version	= GFDpsPxPayPlugin::MIN_VERSION_GF;
+		$this->_min_gravityforms_version	= MIN_VERSION_GF;
 		$this->_slug						= 'gravity-forms-dps-pxpay';
 		$this->_path						= GFDPSPXPAY_PLUGIN_NAME;
 		$this->_full_path					= GFDPSPXPAY_PLUGIN_FILE;
@@ -61,17 +62,17 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 		parent::__construct();
 
-		add_action('init', array($this, 'lateLocalise'), 9);
-		add_filter('gform_validation_message', array($this, 'gformValidationMessage'), 10, 2);
-		add_filter('gform_custom_merge_tags', array($this, 'gformCustomMergeTags'), 10, 4);
-		add_filter('gform_replace_merge_tags', array($this, 'gformReplaceMergeTags'), 10, 7);
-		add_action('wp', array($this, 'processFormConfirmation'), 5);		// process redirect to GF confirmation
-		add_action('gform_payment_details', array($this, 'gformPaymentDetails'), 9, 2);
+		add_action('init', [$this, 'lateLocalise'], 9);
+		add_filter('gform_validation_message', [$this, 'gformValidationMessage'], 10, 2);
+		add_filter('gform_custom_merge_tags', [$this, 'gformCustomMergeTags'], 10, 4);
+		add_filter('gform_replace_merge_tags', [$this, 'gformReplaceMergeTags'], 10, 7);
+		add_action('wp', [$this, 'processFormConfirmation'], 5);		// process redirect to GF confirmation
+		add_action('gform_payment_details', [$this, 'gformPaymentDetails'], 9, 2);
 
 		// handle deferrals
-		add_filter('gform_is_delayed_pre_process_feed', array($this, 'gformIsDelayed'), 10, 4);
-		add_filter('gform_disable_post_creation', array($this, 'gformDelayPost'), 10, 3);
-		add_action('gform_after_submission', array($this, 'gformDelayOther'), 5, 2);
+		add_filter('gform_is_delayed_pre_process_feed', [$this, 'gformIsDelayed'], 10, 4);
+		add_filter('gform_disable_post_creation', [$this, 'gformDelayPost'], 10, 3);
+		add_action('gform_after_submission', [$this, 'gformDelayOther'], 5, 2);
 	}
 
 	/**
@@ -88,8 +89,8 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function init_admin() {
 		parent::init_admin();
 
-		add_action('gform_payment_status', array($this, 'gformPaymentStatus' ), 10, 3);
-		add_action('gform_after_update_entry', array($this, 'gformAfterUpdateEntry' ), 10, 2);
+		add_action('gform_payment_status', [$this, 'gformPaymentStatus'], 10, 3);
+		add_action('gform_after_update_entry', [$this, 'gformAfterUpdateEntry'], 10, 2);
 	}
 
 	/**
@@ -118,21 +119,21 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function styles() {
 		$ver = SCRIPT_DEBUG ? time() : GFDPSPXPAY_PLUGIN_VERSION;
 
-		$styles = array(
+		$styles = [
 
-			array(
+			[
 				'handle'		=> 'gfdpspxpay_admin',
 				'src'			=> plugins_url('css/admin.css', GFDPSPXPAY_PLUGIN_FILE),
 				'version'		=> $ver,
-				'enqueue'		=> array(
-										array(
-											'admin_page'	=> array('plugin_settings', 'form_settings'),
-											'tab'			=> array($this->_slug),
-										),
-									),
-			),
+				'enqueue'		=> [
+										[
+											'admin_page'	=> ['plugin_settings', 'form_settings'],
+											'tab'			=> [$this->_slug],
+										],
+									],
+			],
 
-		);
+		];
 
 		return array_merge(parent::styles(), $styles);
 	}
@@ -158,12 +159,12 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return array
 	*/
 	public function plugin_settings_fields() {
-		$settings = array (
-			array (
+		$settings = [
+			[
 				'title'					=> esc_html__('Live gateway settings', 'gravity-forms-dps-pxpay'),
-				'fields'				=> array (
+				'fields'				=> [
 
-					array (
+					[
 						'name'			=> 'userID',
 						'label'			=> esc_html_x('User ID', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
@@ -171,9 +172,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'autocorrect'	=> 'off',
 						'autocapitalize' => 'off',
 						'spellcheck'	=> 'false',
-					),
+					],
 
-					array (
+					[
 						'name'			=> 'userKey',
 						'label'			=> esc_html_x('User Key', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
@@ -181,29 +182,29 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'autocorrect'	=> 'off',
 						'autocapitalize' => 'off',
 						'spellcheck'	=> 'false',
-					),
+					],
 
-				),
-			),
+				],
+			],
 
-			array (
+			[
 				'title'					=> esc_html__('Sandbox gateway settings', 'gravity-forms-dps-pxpay'),
 				'description'			=> esc_html__('When your feed is configured for Test (Sandbox), it will send transactions to this gateway instead of the live gateway.', 'gravity-forms-dps-pxpay'),
-				'fields'				=> array (
+				'fields'				=> [
 
-					array (
+					[
 						'name'			=> 'testEnv',
 						'label'			=> esc_html_x('Sandbox Environment', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'radio',
 						'tooltip'		=> esc_html__('When DPS Payment Express sent you your user ID and password, they will have told you to use either SEC or UAT for your sandbox.', 'gravity-forms-dps-pxpay'),
-						'choices'		=> array(
-							array('value' => 'SEC', 'label' => 'SEC'),
-							array('value' => 'UAT', 'label' => 'UAT'),
-						),
+						'choices'		=> [
+							['value' => 'SEC', 'label' => 'SEC'],
+							['value' => 'UAT', 'label' => 'UAT'],
+						],
 						'default_value'	=> 'UAT',
-					),
+					],
 
-					array (
+					[
 						'name'			=> 'testID',
 						'label'			=> esc_html_x('Sandbox User ID', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
@@ -211,9 +212,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'autocorrect'	=> 'off',
 						'autocapitalize' => 'off',
 						'spellcheck'	=> 'false',
-					),
+					],
 
-					array (
+					[
 						'name'			=> 'testKey',
 						'label'			=> esc_html_x('Sandbox User Key', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
@@ -221,16 +222,16 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'autocorrect'	=> 'off',
 						'autocapitalize' => 'off',
 						'spellcheck'	=> 'false',
-					),
+					],
 
-					array(
+					[
 						'type'			=> 'save',
-						'messages'		=> array('success' => esc_html__('Settings updated', 'gravity-forms-dps-pxpay')),
-					)
+						'messages'		=> ['success' => esc_html__('Settings updated', 'gravity-forms-dps-pxpay')],
+					],
 
-				),
-			),
-		);
+				],
+			],
+		];
 
 		return $settings;
 	}
@@ -248,11 +249,11 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return array
 	*/
 	public function feed_list_columns() {
-		$columns = array(
+		$columns = [
 			'feedName'					=> esc_html_x('Feed name', 'feed field name', 'gravity-forms-dps-pxpay'),
 			'feedItem_useTest'			=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
 			'feedItem_paymentMethod'	=> esc_html_x('Payment method', 'feed field name', 'gravity-forms-dps-pxpay'),
-		);
+		];
 
 		return $columns;
 	}
@@ -310,84 +311,84 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function feed_settings_fields() {
 		$this->setFeedDefaultFieldMap();
 
-		$fields = array(
+		$fields = [
 
 			#region "core settings"
 
-			array(
-				'fields' => array(
+			[
+				'fields' => [
 
-					array(
+					[
 						'name'   		=> 'feedName',
 						'label'  		=> esc_html_x('Feed name', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'   		=> 'text',
 						'class'			=> 'medium',
 						'tooltip'		=> esc_html__('Give this feed a name, to differentiate it from other feeds.', 'gravity-forms-dps-pxpay'),
 						'required'		=> '1',
-					),
+					],
 
-					array(
+					[
 						'name'   		=> 'useTest',
 						'label'  		=> esc_html_x('Mode', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'   		=> 'radio',
 						'tooltip'		=> esc_html__('Credit cards will not be processed in Test mode. Special card numbers must be used.', 'gravity-forms-dps-pxpay'),
-						'choices'		=> array(
-							array('value' => '0', 'label' => esc_html_x('Live', 'payment transaction mode', 'gravity-forms-dps-pxpay')),
-							array('value' => '1', 'label' => esc_html_x('Test', 'payment transaction mode', 'gravity-forms-dps-pxpay')),
-						),
+						'choices'		=> [
+							['value' => '0', 'label' => esc_html_x('Live', 'payment transaction mode', 'gravity-forms-dps-pxpay')],
+							['value' => '1', 'label' => esc_html_x('Test', 'payment transaction mode', 'gravity-forms-dps-pxpay')],
+						],
 						'default_value'	=> '1',
-					),
+					],
 
-					array(
+					[
 						'name'   		=> 'paymentMethod',
 						'label'  		=> esc_html_x('Payment Method', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'   		=> 'radio',
 						'tooltip'		=> esc_html__("Capture processes the payment immediately. Authorize holds the amount on the customer's card for processing later.", 'gravity-forms-dps-pxpay')
 										.  '<br/><br/>'
 										.  esc_html__('Authorize transactions can be completed manually in Payline. Perform a transaction search, and look for its Complete button.', 'gravity-forms-dps-pxpay'),
-						'choices'		=> array(
-								array('value' => 'capture',   'label' => esc_html_x('Capture', 'payment method', 'gravity-forms-dps-pxpay')),
-								array('value' => 'authorize', 'label' => esc_html_x('Authorize', 'payment method', 'gravity-forms-dps-pxpay')),
-							),
+						'choices'		=> [
+							['value' => 'capture',   'label' => esc_html_x('Capture', 'payment method', 'gravity-forms-dps-pxpay')],
+							['value' => 'authorize', 'label' => esc_html_x('Authorize', 'payment method', 'gravity-forms-dps-pxpay')],
+						],
 						'default_value'	=> 'capture',
-					),
+					],
 
-					array(
+					[
 						'name'   		=> 'transactionType',
 						'type'   		=> 'hidden',
 						'default_value'	=> 'product',
-					),
+					],
 
-				),
-			),
+				],
+			],
 
 			#endregion "core settings"
 
 			#region "mapped fields"
 
-			array(
+			[
 				'title'					=> esc_html__('Mapped Field Settings', 'gravity-forms-dps-pxpay'),
-				'fields'				=> array(
+				'fields'				=> [
 
-					array(
+					[
 						'name'			=> 'billingInformation',
 						'type'			=> 'field_map',
 						'field_map'		=> $this->billing_info_fields(),
-					),
+					],
 
-				),
-			),
+				],
+			],
 
 			#endregion "mapped fields"
 
 			#region "hosted page settings"
 
-			array(
+			[
 				'title'					=> esc_html__('Hosted Page Settings', 'gravity-forms-dps-pxpay'),
 				'id'					=> 'gfdpspxpay-settings-shared',
-				'fields'				=> array(
+				'fields'				=> [
 
-					array(
+					[
 						'name'			=> 'cancelURL',
 						'label'			=> esc_html_x('Cancel URL', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'text',
@@ -396,9 +397,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'tooltip'		=> esc_html__('Redirect to this URL if the transaction is canceled.', 'gravity-forms-dps-pxpay')
 										.  '<br/><br/>'
 										.  esc_html__('Please note: standard Gravity Forms submission logic applies if the transaction is successful.', 'gravity-forms-dps-pxpay'),
-					),
+					],
 
-					array(
+					[
 						'name'			=> 'post_payment_actions',
 						'label'			=> esc_html_x('Post Payment Actions', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'checkbox',
@@ -406,47 +407,47 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 						'tooltip'		=> esc_html__('Select which actions should only occur after transaction has been completed.', 'gravity-forms-dps-pxpay')
 										.  '<br/><br/>'
 										.  esc_html__('By default, the transaction must be successful to trigger these actions, or there must be no transaction. You can change that with the Delayed Execute setting.', 'gravity-forms-dps-pxpay'),
-					),
+					],
 
-					array(
+					[
 						'name'			=> 'execDelayed',
 						'label'			=> esc_html_x('Delayed Execute', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'   		=> 'radio',
 						'tooltip'		=> __('The delayed actions above will be processed according to these options.', 'gravity-forms-dps-pxpay'),
-						'choices'		=> array(
-							array('value' => 'success',      'label' => esc_html_x('Execute if transaction was successful, or if there was no transaction', 'delayed execute mode', 'gravity-forms-dps-pxpay')),
-							array('value' => 'always',       'label' => esc_html_x('Delay until transaction completes, and then always execute', 'delayed execute mode', 'gravity-forms-dps-pxpay')),
-							array('value' => 'success_only', 'label' => esc_html_x('Only execute if there was a successful transaction (overrides other feeds)', 'delayed execute mode', 'gravity-forms-dps-pxpay')),
-						),
+						'choices'		=> [
+							['value' => 'success',      'label' => esc_html_x('Execute if transaction was successful, or if there was no transaction', 'delayed execute mode', 'gravity-forms-dps-pxpay')],
+							['value' => 'always',       'label' => esc_html_x('Delay until transaction completes, and then always execute', 'delayed execute mode', 'gravity-forms-dps-pxpay')],
+							['value' => 'success_only', 'label' => esc_html_x('Only execute if there was a successful transaction (overrides other feeds)', 'delayed execute mode', 'gravity-forms-dps-pxpay')],
+						],
 						'default_value'	=> 'success',
-					),
+					],
 
-				),
-			),
+				],
+			],
 
 			#endregion "hosted page settings"
 
 			#region "conditional processing settings"
 
-			array(
+			[
 				'title'					=> esc_html__('Feed Conditions', 'gravity-forms-dps-pxpay'),
-				'fields'				=> array(
+				'fields'				=> [
 
-					array(
+					[
 						'name'			=> 'condition',
 						'label'			=> esc_html_x('Payment Express condition', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'feed_condition',
 						'checkbox_label' => esc_html_x('Enable', 'checkbox label', 'gravity-forms-dps-pxpay'),
 						'instructions'	=> esc_html_x('Send to Payment Express if', 'feed conditions', 'gravity-forms-dps-pxpay'),
 						'tooltip'		=> esc_html__('When the Payment Express condition is enabled, form submissions will only be sent to Payment Express when the condition is met. When disabled, all form submissions will be sent to Payment Express.', 'gravity-forms-dps-pxpay'),
-					),
+					],
 
-				),
-			),
+				],
+			],
 
 			#endregion "conditional processing settings"
 
-		);
+		];
 
 		return $fields;
 	}
@@ -463,10 +464,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* build map of field types to fields, for default field mappings
 	*/
 	protected function setFeedDefaultFieldMap() {
-		$this->feedDefaultFieldMap = array();
+		$this->feedDefaultFieldMap = [];
 
 		$form_id = rgget( 'id' );
-		$form = GFFormsModel::get_form_meta( $form_id );
+		$form = \GFFormsModel::get_form_meta( $form_id );
 
 		if (!isset($this->feedDefaultFieldMap['billingInformation_description'])) {
 			$this->feedDefaultFieldMap['billingInformation_description']			= 'form_title';
@@ -494,33 +495,33 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	 * @return array
 	 */
 	public function billing_info_fields() {
-		$fields = array(
-			array(
+		$fields = [
+			[
 				'name' => 'description',
 				'label' => esc_html_x('Invoice Description', 'mapped field name', 'gravity-forms-dps-pxpay'),
 				'required' => false,
-			),
-			array(
+			],
+			[
 				'name' => 'txn_data1',
 				'label' => esc_html_x('TxnData1', 'mapped field name', 'gravity-forms-dps-pxpay'),
 				'required' => false,
-			),
-			array(
+			],
+			[
 				'name' => 'txn_data2',
 				'label' => esc_html_x('TxnData2', 'mapped field name', 'gravity-forms-dps-pxpay'),
 				'required' => false,
-			),
-			array(
+			],
+			[
 				'name' => 'txn_data3',
 				'label' => esc_html_x('TxnData3', 'mapped field name', 'gravity-forms-dps-pxpay'),
 				'required' => false,
-			),
-			array(
+			],
+			[
 				'name' => 'email',
 				'label' => esc_html_x('Email Address', 'mapped field name', 'gravity-forms-dps-pxpay'),
 				'required' => false,
-			),
-		);
+			],
+		];
 
 		return $fields;
 	}
@@ -543,28 +544,28 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return array
 	*/
 	protected function getDelayedActionFields() {
-		return array (
-			array(
+		return [
+			[
 				'name' => 'delayPost',
 				'label' => esc_html__('Create post only when transaction completes', 'gravity-forms-dps-pxpay'),
-			),
-			array(
+			],
+			[
 				'name' => 'delay_gravityformsmailchimp',
 				'label' => esc_html__('Subscribe user to MailChimp only when transaction completes', 'gravity-forms-dps-pxpay'),
-			),
-			array(
+			],
+			[
 				'name' => 'delay_gravity-forms-salesforce',
 				'label' => esc_html__('Send feed to Salesforce only when transaction completes', 'gravity-forms-dps-pxpay'),
-			),
-			array(
+			],
+			[
 				'name' => 'delay_gravityformsuserregistration',
 				'label' => esc_html__('Register user only when transaction completes', 'gravity-forms-dps-pxpay'),
-			),
-			array(
+			],
+			[
 				'name' => 'delay_gravityformszapier',
 				'label' => esc_html__('Send feed to Zapier only when transaction completes', 'gravity-forms-dps-pxpay'),
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -600,7 +601,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				}
 
 				// set hook to request redirect URL
-				add_filter('gform_entry_post_save', array( $this, 'requestRedirectUrl' ), 9, 2);
+				add_filter('gform_entry_post_save', [$this, 'requestRedirectUrl'], 9, 2);
 			}
 		}
 		catch (GFDpsPxPayException $e) {
@@ -623,7 +624,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		if (is_array($feeds)) {
 			foreach ($feeds as $feed) {
 				// feed must be active and meet feed conditions, if any
-				if (!$feed['is_active'] || !$this->is_feed_condition_met($feed, $form, array())) {
+				if (!$feed['is_active'] || !$this->is_feed_condition_met($feed, $form, [])) {
 					continue;
 				}
 
@@ -670,7 +671,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			if ($response->isValid && !empty($response->URI)) {
 				$this->urlPaymentForm = $response->URI;
-				GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
+				\GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
 				$entry['payment_status']	= 'Processing';
 			}
 			else {
@@ -683,21 +684,21 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 				$error_msg = esc_html__('Transaction request failed', 'gravity-forms-dps-pxpay');
 
-				$note = $this->getFailureNote($paymentMethod, array($error_msg));
+				$note = $this->getFailureNote($paymentMethod, [$error_msg]);
 				$this->add_note($entry['id'], $note, 'error');
 
 				// record payment failure, and set hook for displaying error message
 				$this->error_msg = $error_msg;
-				add_filter('gform_confirmation', array($this, 'displayPaymentFailure'), 1000, 4);
+				add_filter('gform_confirmation', [$this, 'displayPaymentFailure'], 1000, 4);
 			}
 		}
 		catch (GFDpsPxPayException $e) {
 			$this->log_error(__FUNCTION__ . ': exception = ' . $e->getMessage());
 
 			// record payment failure, and set hook for displaying error message
-			GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Failed');
+			\GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Failed');
 			$this->error_msg = $e->getMessage();
-			add_filter('gform_confirmation', array($this, 'displayPaymentFailure'), 1000, 4);
+			add_filter('gform_confirmation', [$this, 'displayPaymentFailure'], 1000, 4);
 		}
 
 		return $entry;
@@ -713,10 +714,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	public function displayPaymentFailure($confirmation, $form, $entry, $ajax) {
 		// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-		gform_update_meta($entry['id'], self::META_UNIQUE_ID, GFFormsModel::get_form_unique_id($form['id']));
+		gform_update_meta($entry['id'], self::META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
 
 		// create a "confirmation message" in which to display the error
-		$default_anchor = count(GFCommon::get_fields_by_type($form, array('page'))) > 0 ? 1 : 0;
+		$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
 		$default_anchor = apply_filters('gform_confirmation_anchor_'.$form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
 		$anchor = $default_anchor ? "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>" : '';
 		$cssClass = rgar($form, 'cssClass');
@@ -733,18 +734,18 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	* @return boolean
 	*/
 	protected function hasFormBeenProcessed($form) {
-		$unique_id = RGFormsModel::get_form_unique_id($form['id']);
+		$unique_id = \GFFormsModel::get_form_unique_id($form['id']);
 
-		$search = array(
-			'field_filters' => array(
-									array(
-										'key'		=> self::META_UNIQUE_ID,
-										'value'		=> $unique_id,
-									),
-								),
-		);
+		$search = [
+			'field_filters' => [
+				[
+					'key'		=> self::META_UNIQUE_ID,
+					'value'		=> $unique_id,
+				],
+			],
+		];
 
-		$entries = GFAPI::get_entries($form['id'], $search);
+		$entries = \GFAPI::get_entries($form['id'], $search);
 
 		return !empty($entries);
 	}
@@ -774,7 +775,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		$capture = (rgar($feed['meta'], 'paymentMethod', 'capture') !== 'authorize');
 
 		$paymentReq->amount					= $formData['payment_amount'];
-		$paymentReq->currency				= GFCommon::get_currency();
+		$paymentReq->currency				= \GFCommon::get_currency();
 		$paymentReq->transactionNumber		= $transactionID;
 		$paymentReq->invoiceReference		= $formData['description'];
 		$paymentReq->txnType				= $capture ? GFDpsPxPayAPI::TXN_TYPE_CAPTURE : GFDpsPxPayAPI::TXN_TYPE_AUTHORISE;
@@ -821,7 +822,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	public function redirect_url($feed, $submission_data, $form, $entry) {
 		if ($this->urlPaymentForm) {
 			// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-			gform_update_meta($entry['id'], self::META_UNIQUE_ID, GFFormsModel::get_form_unique_id($form['id']));
+			gform_update_meta($entry['id'], self::META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
 		}
 
 		return $this->urlPaymentForm;
@@ -878,15 +879,15 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			$transactionNumber = $response->TxnId;
 
-			$search = array(
-				'field_filters' => array(
-										array(
-											'key'		=> self::META_TRANSACTION_ID,
-											'value'		=> $transactionNumber,
-										),
-									),
-			);
-			$entries = GFAPI::get_entries(0, $search);
+			$search = [
+				'field_filters' => [
+					[
+						'key'		=> self::META_TRANSACTION_ID,
+						'value'		=> $transactionNumber,
+					],
+				],
+			];
+			$entries = \GFAPI::get_entries(0, $search);
 
 			// must have an entry, or nothing to do
 			if (empty($entries)) {
@@ -905,7 +906,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				self::log_debug("entry $lead_id was locked");
 			}
 
-			$form = GFFormsModel::get_form_meta($entry['form_id']);
+			$form = \GFFormsModel::get_form_meta($entry['form_id']);
 			$feed = $this->getFeed($lead_id);
 
 			// capture current state of lead
@@ -916,14 +917,14 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			if (rgar($entry, 'payment_status') === 'Processing') {
 				// update lead entry, with success/fail details
 				if ($response->Success) {
-					$action = array(
+					$action = [
 						'type'							=> 'complete_payment',
 						'payment_status'				=> $capture ? 'Paid' : 'Pending',
 						'payment_date'					=> date('Y-m-d H:i:s'),
 						'amount'						=> $response->AmountSettlement,
 						'currency'						=> $response->CurrencySettlement,
 						'transaction_id'				=> $response->DpsTxnRef,
-					);
+					];
 					$action['note']						=  $this->getPaymentNote($capture, $action, $response->getProcessingMessages());
 					$entry[self::META_AUTHCODE]			=  $response->AuthCode;
 					$entry[self::META_GATEWAY_TXN_ID]	=  $response->DpsTxnRef;
@@ -949,15 +950,15 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 					if (!$entry_was_locked) {
 						// fail_payment() below doesn't update whole entry, so we need to do it here
-						GFAPI::update_entry($entry);
+						\GFAPI::update_entry($entry);
 
 						$note = $this->getFailureNote($capture, $response->getProcessingMessages());
 
-						$action = array(
+						$action = [
 							'type'							=> 'fail_payment',
 							'payment_status'				=> 'Failed',
 							'note'							=> $note,
-						);
+						];
 						$this->fail_payment($entry, $action);
 					}
 
@@ -985,16 +986,16 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				// on failure, redirect to failure page if set
 				// after first replacing any merge tags in the redirect URL
 				$redirect_url = $feed['meta']['cancelURL'];
-				$redirect_url = GFCommon::replace_variables( trim( $redirect_url ), $form, $entry, false, true, true, 'text' );
+				$redirect_url = \GFCommon::replace_variables( trim( $redirect_url ), $form, $entry, false, true, true, 'text' );
 				$redirect_url = esc_url_raw($redirect_url);
 				wp_redirect($redirect_url);
 			}
 			else {
 				// otherwise, redirect to Gravity Forms page, passing form and lead IDs, encoded to deter simple attacks
-				$query = array(
+				$query = [
 					'form_id'	=> $entry['form_id'],
 					'lead_id'	=> $entry['id'],
-				);
+				];
 				if ($entry['payment_status'] === 'Failed') {
 					$query['cancelled'] = $response->WasUserCancelled ? 1 : 0;
 				}
@@ -1022,12 +1023,12 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	protected function formHasSuccessOnly($form_id, $action) {
 		if (!is_array($this->cacheHasSuccessOnly)) {
-			$this->cacheHasSuccessOnly = array();
+			$this->cacheHasSuccessOnly = [];
 		}
 
 		if (!isset($this->cacheHasSuccessOnly[$form_id])) {
 
-			$this->cacheHasSuccessOnly[$form_id] = array();
+			$this->cacheHasSuccessOnly[$form_id] = [];
 			$feeds = $this->get_active_feeds($form_id);
 			$fields = $this->getDelayedActionFields();
 
@@ -1151,16 +1152,16 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		}
 
 		if (($is_delayed && !empty($feed['meta']['delay_gravityformszapier'])) || $this->formHasSuccessOnly($form['id'], 'delay_gravityformszapier')) {
-			if (has_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'))) {
+			if (has_action('gform_after_submission', ['GFZapier', 'send_form_data_to_zapier'])) {
 				$this->log_debug(sprintf('delay gravityformszapier feeds: form id %s, lead id %s', $form['id'], $entry['id']));
-				remove_action('gform_after_submission', array('GFZapier', 'send_form_data_to_zapier'), 10, 2);
+				remove_action('gform_after_submission', ['GFZapier', 'send_form_data_to_zapier'], 10, 2);
 			}
 		}
 
 		if (($is_delayed && !empty($feed['meta']['delay_gravity-forms-salesforce'])) || $this->formHasSuccessOnly($form['id'], 'delay_gravity-forms-salesforce')) {
-			if (has_action('gform_after_submission', array('GFSalesforce', 'export'))) {
+			if (has_action('gform_after_submission', ['GFSalesforce', 'export'])) {
 				$this->log_debug(sprintf('delay gravity-forms-salesforce feeds: form id %s, lead id %s', $form['id'], $entry['id']));
-				remove_action('gform_after_submission', array('GFSalesforce', 'export'), 10, 2);
+				remove_action('gform_after_submission', ['GFSalesforce', 'export'], 10, 2);
 			}
 
 		}
@@ -1182,7 +1183,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				break;
 
 			default:
-				$execute_delayed = in_array($entry['payment_status'], array('Paid', 'Pending'));
+				$execute_delayed = in_array($entry['payment_status'], ['Paid', 'Pending']);
 				break;
 
 		}
@@ -1190,13 +1191,13 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		if (!empty($feed['meta']['delayPost'])) {
 			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
 				$this->log_debug(sprintf('executing delayed post creation; form id %s, lead id %s', $form['id'], $entry['id']));
-				GFFormsModel::create_post($form, $entry);
+				\GFFormsModel::create_post($form, $entry);
 			}
 		}
 
 		if ($execute_delayed) {
 			if (!empty($feed['meta']['delay_gravity-forms-salesforce'])) {
-				add_action('gform_paypal_fulfillment', array($this, 'maybeExecuteSalesforce'), 10, 4);
+				add_action('gform_paypal_fulfillment', [$this, 'maybeExecuteSalesforce'], 10, 4);
 			}
 
 			$this->log_debug(sprintf('calling gform_paypal_fulfillment action; form id %s, lead id %s', $form['id'], $entry['id']));
@@ -1213,9 +1214,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 	*/
 	public function maybeExecuteSalesforce($entry, $feed, $transaction_id, $payment_amount) {
 		if (class_exists('GFSalesforce', false) && method_exists('GFSalesforce', 'export')) {
-			$form = GFFormsModel::get_form_meta($entry['form_id']);
+			$form = \GFFormsModel::get_form_meta($entry['form_id']);
 			$this->log_debug(sprintf('executing delayed gravity-forms-salesforce feed: form id %s, lead id %s', $form['id'], $entry['id']));
-			GFSalesforce::export($entry, $form);
+			\GFSalesforce::export($entry, $form);
 		}
 	}
 
@@ -1247,7 +1248,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		// make sure we have permission
 		check_admin_referer('gforms_save_entry', 'gforms_save_entry');
 
-		$entry = GFFormsModel::get_lead($entry_id);
+		$entry = \GFFormsModel::get_lead($entry_id);
 
 		// make sure that we're editing the entry and are allowed to change it
 		if (!$this->canEditPaymentDetails($entry, 'update')) {
@@ -1270,10 +1271,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		}
 
 
-		GFAPI::update_entry($entry);
+		\GFAPI::update_entry($entry);
 
 		$user = wp_get_current_user();
-		GFFormsModel::add_note($entry['id'], $user->ID, $user->display_name, esc_html($note));
+		\GFFormsModel::add_note($entry['id'], $user->ID, $user->display_name, esc_html($note));
 	}
 
 	/**
@@ -1287,10 +1288,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			// decode the encoded form and lead parameters
 			parse_str(base64_decode($_GET[self::ENDPOINT_CONFIRMATION]), $query);
 
-			$check = array(
+			$check = [
 				'form_id'	=> rgar($query, 'form_id'),
 				'lead_id'	=> rgar($query, 'lead_id'),
-			);
+			];
 			if (isset($query['cancelled'])) {
 				$check['cancelled'] = $query['cancelled'];
 			}
@@ -1300,15 +1301,15 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 				// stop WordPress SEO from stripping off our query parameters and redirecting the page
 				if (isset($GLOBALS['wpseo_front'])) {
-					remove_action('template_redirect', array($GLOBALS['wpseo_front'], 'clean_permalink'), 1);
+					remove_action('template_redirect', [$GLOBALS['wpseo_front'], 'clean_permalink'], 1);
 				}
 				elseif (class_exists('WPSEO_Frontend', false) && method_exists('WPSEO_Frontend', 'get_instance')) {
-					remove_action('template_redirect', array(WPSEO_Frontend::get_instance(), 'clean_permalink'), 1);
+					remove_action('template_redirect', [WPSEO_Frontend::get_instance(), 'clean_permalink'], 1);
 				}
 
 				// load form and lead data
-				$form = GFFormsModel::get_form_meta($query['form_id']);
-				$lead = GFFormsModel::get_lead($query['lead_id']);
+				$form = \GFFormsModel::get_form_meta($query['form_id']);
+				$lead = \GFFormsModel::get_lead($query['lead_id']);
 
 				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
@@ -1320,9 +1321,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 				// get confirmation page
 				if (!class_exists('GFFormDisplay', false)) {
-					require_once(GFCommon::get_base_path() . '/form_display.php');
+					require_once(\GFCommon::get_base_path() . '/form_display.php');
 				}
-				$confirmation = GFFormDisplay::handle_confirmation($form, $lead, false);
+				$confirmation = \GFFormDisplay::handle_confirmation($form, $lead, false);
 
 				if ($lead['payment_status'] != 'Paid') {
 					$this->current_feed = $this->getFeed($lead['id']);
@@ -1335,9 +1336,9 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 					}
 
 					$submission_data = $this->get_submission_data($this->current_feed, $form, $lead);
-					$retry_link = add_query_arg(array_merge( $_GET, array( 'retry_payment' => '1' ) ), $lead['source_url']);
+					$retry_link = add_query_arg(array_merge($_GET, ['retry_payment' => '1']), $lead['source_url']);
 
-					$default_anchor = count(GFCommon::get_fields_by_type($form, array('page'))) > 0 ? 1 : 0;
+					$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
 					$default_anchor = apply_filters('gform_confirmation_anchor_'.$form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
 					$anchor = $default_anchor ? "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>" : '';
 					$cssClass = rgar($form, 'cssClass');
@@ -1355,12 +1356,12 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				}
 
 				// preload the GF submission, ready for processing the confirmation message
-				GFFormDisplay::$submission[$form['id']] = array(
+				\GFFormDisplay::$submission[$form['id']] = [
 					'is_confirmation'		=> true,
 					'confirmation_message'	=> $confirmation,
 					'form'					=> $form,
 					'lead'					=> $lead,
-				);
+				];
 
 				// var_dump(GFFormDisplay::$submission);
 
@@ -1383,10 +1384,10 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			return false;
 		}
 
-		return array(
+		return [
 			'complete_payment'		=> esc_html_x('Payment Completed', 'notification event', 'gravity-forms-dps-pxpay'),
 			'fail_payment'			=> esc_html_x('Payment Failed', 'notification event', 'gravity-forms-dps-pxpay'),
-		);
+		];
 	}
 
 	/**
@@ -1407,32 +1408,32 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 		}
 
 		// duplicate of transaction_id as meta, so that it can be passed to other integrations (like Zapier)
-		$entry_meta['gateway_txn_id'] = array(
+		$entry_meta['gateway_txn_id'] = [
 			'label'					=> esc_html_x('Transaction ID', 'entry meta label', 'gravity-forms-dps-pxpay'),
 			'is_numeric'			=> false,
 			'is_default_column'		=> false,
-			'filter'				=> array(
-											'operators' => array('is', 'isnot')
-										),
-		);
+			'filter'				=> [
+										'operators' => ['is', 'isnot'],
+									],
+		];
 
-		$entry_meta['payment_gateway'] = array(
+		$entry_meta['payment_gateway'] = [
 			'label'					=> esc_html_x('Payment Gateway', 'entry meta label', 'gravity-forms-dps-pxpay'),
 			'is_numeric'			=> false,
 			'is_default_column'		=> false,
-			'filter'				=> array(
-											'operators' => array('is', 'isnot')
-										),
-		);
+			'filter'				=> [
+										'operators' => ['is', 'isnot'],
+									],
+		];
 
-		$entry_meta[self::META_AUTHCODE] = array(
+		$entry_meta[self::META_AUTHCODE] = [
 			'label'					=> esc_html_x('AuthCode', 'entry meta label', 'gravity-forms-dps-pxpay'),
 			'is_numeric'			=> false,
 			'is_default_column'		=> false,
-			'filter'				=> array(
-											'operators' => array('is', 'isnot')
-										),
-		);
+			'filter'				=> [
+										'operators' => ['is', 'isnot'],
+									],
+		];
 
 		return $entry_meta;
 	}
@@ -1452,13 +1453,13 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 				// at least one feed for this add-on, so add our merge tags if nobody else has already
 				$tags = array_flip(wp_list_pluck($merge_tags, 'tag'));
 
-				$custom_tags = array(
-					array('label' => esc_html_x('Transaction ID', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{transaction_id}'),
-					array('label' => esc_html_x('Auth Code',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{authcode}'),
-					array('label' => esc_html_x('Payment Amount', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_amount}'),
-					array('label' => esc_html_x('Payment Status', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_status}'),
-					array('label' => esc_html_x('Entry Date',     'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{date_created}'),
-				);
+				$custom_tags = [
+					['label' => esc_html_x('Transaction ID', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{transaction_id}'],
+					['label' => esc_html_x('Auth Code',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{authcode}'],
+					['label' => esc_html_x('Payment Amount', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_amount}'],
+					['label' => esc_html_x('Payment Status', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_status}'],
+					['label' => esc_html_x('Entry Date',     'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{date_created}'],
+				];
 
 				foreach ($custom_tags as $custom) {
 					if (!isset($tags[$custom['tag']])) {
@@ -1495,26 +1496,26 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 
 			// format payment amount as currency
 			if (isset($entry['payment_amount'])) {
-				$payment_amount = GFCommon::format_number($entry['payment_amount'], 'currency', rgar($entry, 'currency', ''));
+				$payment_amount = \GFCommon::format_number($entry['payment_amount'], 'currency', rgar($entry, 'currency', ''));
 			}
 			else {
 				$payment_amount = '';
 			}
 
-			$tags = array (
+			$tags = [
 				'{transaction_id}',
 				'{payment_status}',
 				'{payment_amount}',
 				'{authcode}',
 				'{date_created}',
-			);
-			$values = array (
+			];
+			$values = [
 				rgar($entry, 'transaction_id', ''),
 				rgar($entry, 'payment_status', ''),
 				$payment_amount,
 				!empty($authCode) ? $authCode : '',
-				GFCommon::format_date(rgar($entry, 'date_created'), false, '', false),
-			);
+				\GFCommon::format_date(rgar($entry, 'date_created'), false, '', false),
+			];
 
 			// maybe encode the results
 			if ($url_encode) {
@@ -1603,7 +1604,7 @@ class GFDpsPxPayAddOn extends GFPaymentAddOn {
 			$message = esc_html__('Payment has been authorized successfully. Amount: %1$s. Transaction ID: %2$s.', 'gravity-forms-dps-pxpay');
 		}
 
-		$amount = GFCommon::to_money($results['amount'], $results['currency']);
+		$amount = \GFCommon::to_money($results['amount'], $results['currency']);
 
 		$note = sprintf($message, $amount, $results['transaction_id']);
 		if (!empty($messages)) {

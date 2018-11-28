@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
@@ -36,7 +37,7 @@ class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 		parent::loadResponse($response);
 
 		if (empty($this->URI) && (!empty($this->Reco) || !empty($this->ResponseText))) {
-			$errors = array();
+			$errors = [];
 			if (!empty($this->ResponseText)) {
 				$errors[] = $this->ResponseText;
 			}

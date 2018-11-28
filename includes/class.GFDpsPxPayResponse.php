@@ -1,4 +1,5 @@
 <?php
+namespace webaware\gf_dpspxpay;
 
 if (!defined('ABSPATH')) {
 	exit;
@@ -28,7 +29,7 @@ abstract class GFDpsPxPayResponse {
 		try {
 			$xml = simplexml_load_string($response);
 			if ($xml === false) {
-				$errors = array();
+				$errors = [];
 				foreach (libxml_get_errors() as $error) {
 					$errors[] = $error->message;
 				}
