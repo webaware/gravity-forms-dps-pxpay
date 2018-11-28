@@ -1,8 +1,8 @@
 (function($) {
 
-	var clicked = false;
-	var ids = [];
-	var step_next = 0;
+	let clicked = false;
+	let ids = [];
+	let step_next = 0;
 
 	$("#gfdpspxpay-upgrade").on("click", function() {
 		if (!clicked) {
@@ -12,7 +12,7 @@
 	});
 
 	function processStep() {
-		var step = gfdpspxpay_updatev1[step_next];
+		const step = gfdpspxpay_updatev1[step_next];
 
 		if (step === "end") {
 			$("#gfdpspxpay-upgrade").replaceWith("<strong>Done.</strong>");
@@ -42,10 +42,11 @@
 
 	function processItem(response) {
 		if (response && response.success) {
-			var pcnt = Math.floor(response.data.next / ids.length * 100) + "%";
+			const next = response.data.next;
+			let pcnt;
 
-			var next = response.data.next;
 			if (next < ids.length) {
+				pcnt = Math.floor(next / ids.length * 100) + "%";
 				processNext(next, response.data.step);
 			}
 			else {
@@ -57,7 +58,7 @@
 			$("#gfdpspxpay-updatev1-progress > div").css({width : pcnt}).text(pcnt);
 		}
 		else {
-			var error = response.data.error || "ERROR";
+			const error = response.data.error || "ERROR";
 			$("#gfdpspxpay-updatev1-progress > div").css({width : "100%", backgroundColor: "transparent"}).text(error);
 		}
 	}
