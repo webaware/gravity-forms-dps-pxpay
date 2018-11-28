@@ -17,17 +17,6 @@ class AddOn extends \GFPaymentAddOn {
 	protected $feedDefaultFieldMap;						// map of default fields for feed
 	protected $cacheHasSuccessOnly;						// a cache of form IDs with whether they have execDelayed = success_only
 
-	const META_UNIQUE_ID					= 'gfdpspxpay_unique_id';	// unique form submission
-	const META_TRANSACTION_ID				= 'gfdpspxpay_txn_id';		// merchant's transaction ID (invoice number, etc.)
-	const META_GATEWAY_TXN_ID				= 'gateway_txn_id';			// duplicate of transaction_id to enable passing to integrations (e.g. Zapier)
-	const META_FEED_ID						= 'gfdpspxpay_feed_id';		// link to feed under which the transaction was processed
-	const META_AUTHCODE						= 'authcode';				// bank authorisation code
-
-	// end points for return to website
-	const ENDPOINT_RETURN					= '__gfpxpayreturn';
-	const ENDPOINT_RETURN_TEST				= '__gfpxpayreturntest';	// return from test environment
-	const ENDPOINT_CONFIRMATION				= '__gfpxpayconfirm';
-
 	/**
 	* static method for getting the instance of this singleton object
 	* @return self
@@ -662,10 +651,10 @@ class AddOn extends \GFPaymentAddOn {
 			$paymentReq = $this->getPaymentRequest($submission_data, $feed, $form, $entry);
 
 			// record some payment meta
-			gform_update_meta($entry['id'], self::META_TRANSACTION_ID, $paymentReq->transactionNumber);
-			$entry[self::META_TRANSACTION_ID] = $paymentReq->transactionNumber;
-			gform_update_meta($entry['id'], self::META_FEED_ID, $feed['id']);
-			$entry[self::META_FEED_ID] = $feed['id'];
+			gform_update_meta($entry['id'], META_TRANSACTION_ID, $paymentReq->transactionNumber);
+			$entry[META_TRANSACTION_ID] = $paymentReq->transactionNumber;
+			gform_update_meta($entry['id'], META_FEED_ID, $feed['id']);
+			$entry[META_FEED_ID] = $feed['id'];
 
 			$response = $paymentReq->requestSharedPage();
 
@@ -714,7 +703,7 @@ class AddOn extends \GFPaymentAddOn {
 	*/
 	public function displayPaymentFailure($confirmation, $form, $entry, $ajax) {
 		// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-		gform_update_meta($entry['id'], self::META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
+		gform_update_meta($entry['id'], META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
 
 		// create a "confirmation message" in which to display the error
 		$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
@@ -739,7 +728,7 @@ class AddOn extends \GFPaymentAddOn {
 		$search = [
 			'field_filters' => [
 				[
-					'key'		=> self::META_UNIQUE_ID,
+					'key'		=> META_UNIQUE_ID,
 					'value'		=> $unique_id,
 				],
 			],
@@ -779,7 +768,7 @@ class AddOn extends \GFPaymentAddOn {
 		$paymentReq->transactionNumber		= $transactionID;
 		$paymentReq->invoiceReference		= $formData['description'];
 		$paymentReq->txnType				= $capture ? GFDpsPxPayAPI::TXN_TYPE_CAPTURE : GFDpsPxPayAPI::TXN_TYPE_AUTHORISE;
-		$paymentReq->urlSuccess				= home_url($useTest ? self::ENDPOINT_RETURN_TEST : self::ENDPOINT_RETURN);
+		$paymentReq->urlSuccess				= home_url($useTest ? ENDPOINT_RETURN_TEST : ENDPOINT_RETURN);
 		$paymentReq->urlFail				= $paymentReq->urlSuccess;		// NB: redirection will happen after transaction status is updated
 
 		// billing details
@@ -822,7 +811,7 @@ class AddOn extends \GFPaymentAddOn {
 	public function redirect_url($feed, $submission_data, $form, $entry) {
 		if ($this->urlPaymentForm) {
 			// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-			gform_update_meta($entry['id'], self::META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
+			gform_update_meta($entry['id'], META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
 		}
 
 		return $this->urlPaymentForm;
@@ -835,7 +824,7 @@ class AddOn extends \GFPaymentAddOn {
 		$request_uri = parse_url($_SERVER['REQUEST_URI']);
 
 		// path must contain our callback slug
-		if (empty($request_uri['path']) || strpos($request_uri['path'], self::ENDPOINT_RETURN) === false) {
+		if (empty($request_uri['path']) || strpos($request_uri['path'], ENDPOINT_RETURN) === false) {
 			return false;
 		}
 
@@ -852,7 +841,7 @@ class AddOn extends \GFPaymentAddOn {
 
 		// set up for processing the callback after everything has loaded properly
 		$this->dpsReturnArgs = wp_unslash($args);
-		$this->dpsReturnArgs['useTest'] = strpos($request_uri['path'], self::ENDPOINT_RETURN_TEST) !== false;
+		$this->dpsReturnArgs['useTest'] = strpos($request_uri['path'], ENDPOINT_RETURN_TEST) !== false;
 
 		// stop WooCommerce Payment Express Gateway from intercepting other integrations' transactions!
 		unset($_GET['userid']);
@@ -882,7 +871,7 @@ class AddOn extends \GFPaymentAddOn {
 			$search = [
 				'field_filters' => [
 					[
-						'key'		=> self::META_TRANSACTION_ID,
+						'key'		=> META_TRANSACTION_ID,
 						'value'		=> $transactionNumber,
 					],
 				],
@@ -926,8 +915,8 @@ class AddOn extends \GFPaymentAddOn {
 						'transaction_id'				=> $response->DpsTxnRef,
 					];
 					$action['note']						=  $this->getPaymentNote($capture, $action, $response->getProcessingMessages());
-					$entry[self::META_AUTHCODE]			=  $response->AuthCode;
-					$entry[self::META_GATEWAY_TXN_ID]	=  $response->DpsTxnRef;
+					$entry[META_AUTHCODE]			=  $response->AuthCode;
+					$entry[META_GATEWAY_TXN_ID]	=  $response->DpsTxnRef;
 					$entry['currency']					=  $response->CurrencySettlement;
 
 					if (!$entry_was_locked) {
@@ -945,7 +934,7 @@ class AddOn extends \GFPaymentAddOn {
 					$entry['currency']					=  $response->CurrencySettlement;
 
 					// record empty bank authorisation code, so that we can test for it
-					$entry[self::META_AUTHCODE]			=  '';
+					$entry[META_AUTHCODE]			=  '';
 
 					if (!$entry_was_locked) {
 						// fail_payment() below doesn't update whole entry, so we need to do it here
@@ -1001,7 +990,7 @@ class AddOn extends \GFPaymentAddOn {
 				$hash = wp_hash(http_build_query($query));
 				$query['hash']	=  $hash;
 				$query = base64_encode(http_build_query($query));
-				$redirect_url = esc_url_raw(add_query_arg(self::ENDPOINT_CONFIRMATION, $query, $entry['source_url']));
+				$redirect_url = esc_url_raw(add_query_arg(ENDPOINT_CONFIRMATION, $query, $entry['source_url']));
 				wp_safe_redirect($redirect_url);
 			}
 			exit;
@@ -1281,11 +1270,11 @@ class AddOn extends \GFPaymentAddOn {
 	*/
 	public function processFormConfirmation() {
 		// check for redirect to Gravity Forms page with our encoded parameters
-		if (isset($_GET[self::ENDPOINT_CONFIRMATION])) {
+		if (isset($_GET[ENDPOINT_CONFIRMATION])) {
 			do_action('gfdpspxpay_process_confirmation');
 
 			// decode the encoded form and lead parameters
-			parse_str(base64_decode($_GET[self::ENDPOINT_CONFIRMATION]), $query);
+			parse_str(base64_decode($_GET[ENDPOINT_CONFIRMATION]), $query);
 
 			$check = [
 				'form_id'	=> rgar($query, 'form_id'),
@@ -1421,7 +1410,7 @@ class AddOn extends \GFPaymentAddOn {
 									],
 		];
 
-		$entry_meta[self::META_AUTHCODE] = [
+		$entry_meta[META_AUTHCODE] = [
 			'label'					=> esc_html_x('AuthCode', 'entry meta label', 'gravity-forms-dps-pxpay'),
 			'is_numeric'			=> false,
 			'is_default_column'		=> false,
@@ -1533,7 +1522,7 @@ class AddOn extends \GFPaymentAddOn {
 	*/
 	protected function getFeed($lead_id) {
 		if ($this->feed !== false && (empty($this->feed['lead_id']) || $this->feed['lead_id'] != $lead_id)) {
-			$form = gform_get_meta($lead_id, self::META_FEED_ID);
+			$form = gform_get_meta($lead_id, META_FEED_ID);
 			$this->feed = $this->get_feed($form);
 			if ($this->feed) {
 				$this->feed['lead_id'] = $lead_id;
@@ -1551,7 +1540,7 @@ class AddOn extends \GFPaymentAddOn {
 	public function gformPaymentDetails($form_id, $entry) {
 		$payment_gateway = gform_get_meta($entry['id'], 'payment_gateway');
 		if ($payment_gateway === $this->_slug) {
-			$authCode		= gform_get_meta($entry['id'], self::META_AUTHCODE);
+			$authCode		= gform_get_meta($entry['id'], META_AUTHCODE);
 
 			require GFDPSPXPAY_PLUGIN_ROOT . 'views/admin-entry-payment-details.php';
 		}
