@@ -20,7 +20,7 @@ function gf_dpspxpay_fail_php_version() {
 * @return bool
 */
 function gf_dpspxpay_can_show_admin_notices() {
-	global $pagenow, $hook_suffix;
+	global $pagenow;
 
 	// only on specific pages
 	$is_gf_page = class_exists('GFForms', false) ? !!(GFForms::get_page()) : false;
