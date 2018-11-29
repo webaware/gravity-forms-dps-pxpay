@@ -89,9 +89,13 @@ NB: these custom merge tags will only work for notifications triggered by Paymen
 
 Use your Gravity Forms Settings page to select the currency type to pass to DPS. Please ensure your currency type is supported by DPS
 
-### Purchase or Auth?
+### Capture or Authorize?
 
-DPS PxPay supports two transaction types - Purchase and Auth. The Gravity Forms DPS PxPay plugin only supports the Purchase transaction type
+DPS PxPay supports two transaction types - Purchase and Auth. The Gravity Forms DPS PxPay plugin calls them Capture and Authorize, terminology used in most other payment integrations.
+
+Capture processes the payment immediately. Authorize holds the amount on the customer's card for processing later.
+
+Authorize transactions can be completed manually in Payline. Perform a transaction search, and look for its Complete button.
 
 ### Can I do recurring payments?
 
