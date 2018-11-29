@@ -2,13 +2,15 @@
 
 ## Changelog
 
-### 2.2.0, soon...
+### 2.2.0, 2018-11-29
 
 * added: feed setting for transaction type, can be Capture or Authorise
+* added: feed setting for transaction retry, default is on; thanks, [@speedpro](https://github.com/speedpro)!
+* changed: minimum required PHP version is now 5.6; recommended version is PHP 7.2 or higher
 
 ### 2.1.0, 2018-01-07
 
-* added: merge tag support for the cancel URL; thanks, [speedpro](https://github.com/speedpro)!
+* added: merge tag support for the cancel URL; thanks, [@speedpro](https://github.com/speedpro)!
 
 ### 2.0.2, 2017-11-21
 
