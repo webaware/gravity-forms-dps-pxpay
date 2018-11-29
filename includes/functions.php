@@ -62,3 +62,36 @@ function get_form_confirmation_anchor($form) {
 
 	return $default_anchor;
 }
+
+/**
+* encode some values to pass back from the callback to the confirmation page safely
+* @param array $values
+* @return string
+*/
+function encode_confirmation_values($values) {
+	$hash = wp_hash(http_build_query($values));
+	$values['hash']	= $hash;
+	return base64_encode(http_build_query($values));
+}
+
+/**
+* decode values passed from the callback to the confirmation page
+* @param string $values
+* @return array|false
+*/
+function decode_confirmation_values($encoded) {
+	parse_str(base64_decode($encoded), $decoded);
+
+	if (!empty($decoded) && count($decoded) > 1 && isset($decoded['hash'])) {
+		//  get a copy of the array without the hash element
+		$values = array_filter($decoded, function($key) {
+			return $key !== 'hash';
+		}, ARRAY_FILTER_USE_KEY);
+
+		if (wp_hash(http_build_query($values)) === rgar($decoded, 'hash')) {
+			return $values;
+		}
+	}
+
+	return false;
+}

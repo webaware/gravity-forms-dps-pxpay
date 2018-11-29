@@ -985,9 +985,7 @@ class AddOn extends \GFPaymentAddOn {
 				if ($entry['payment_status'] === 'Failed') {
 					$query['cancelled'] = $response->WasUserCancelled ? 1 : 0;
 				}
-				$hash = wp_hash(http_build_query($query));
-				$query['hash']	=  $hash;
-				$query = base64_encode(http_build_query($query));
+				$query = encode_confirmation_values($query);
 				$redirect_url = esc_url_raw(add_query_arg(ENDPOINT_CONFIRMATION, $query, $entry['source_url']));
 				wp_safe_redirect($redirect_url);
 			}
@@ -1271,19 +1269,11 @@ class AddOn extends \GFPaymentAddOn {
 		if (isset($_GET[ENDPOINT_CONFIRMATION])) {
 			do_action('gfdpspxpay_process_confirmation');
 
-			// decode the encoded form and lead parameters
-			parse_str(base64_decode($_GET[ENDPOINT_CONFIRMATION]), $query);
-
-			$check = [
-				'form_id'	=> rgar($query, 'form_id'),
-				'lead_id'	=> rgar($query, 'lead_id'),
-			];
-			if (isset($query['cancelled'])) {
-				$check['cancelled'] = $query['cancelled'];
-			}
+			// decode the encoded form and lead parameters passed from the callback
+			$query = decode_confirmation_values($_GET[ENDPOINT_CONFIRMATION]);
 
 			// make sure we have a match
-			if ($query && wp_hash(http_build_query($check)) === rgar($query, 'hash')) {
+			if ($query) {
 
 				// stop WordPress SEO from stripping off our query parameters and redirecting the page
 				if (isset($GLOBALS['wpseo_front'])) {
@@ -1299,18 +1289,16 @@ class AddOn extends \GFPaymentAddOn {
 
 				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
-				//if retrying, setup retry request and redirect to DPS
-
-				//if failed, display message, with retry link
-
-				// get confirmation page
+				// ensure that we can set up the confirmation page
 				if (!class_exists('GFFormDisplay', false)) {
 					require_once(\GFCommon::get_base_path() . '/form_display.php');
 				}
-				$confirmation = \GFFormDisplay::handle_confirmation($form, $lead, false);
 
+				// check for failed payment (error / cancellation) but not if we've already asked and customer has cancelled
 				if ($lead['payment_status'] !== 'Paid' && empty($_GET['cancel_payment'])) {
 					$this->current_feed = $this->getFeed($lead['id']);
+
+					// if asked to retry the payment, set up the transaction request and redirect to DPS
 					if (!empty($_GET['retry_payment'])) {
 						$lead = $this->requestRedirectUrl($lead, $form);
 						if ($lead['payment_status'] === 'Processing') {
@@ -1337,6 +1325,10 @@ class AddOn extends \GFPaymentAddOn {
 					ob_start();
 					require GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-retry.php';
 					$confirmation = ob_get_clean();
+				}
+				else {
+					// regular confirmation as configured for the form
+					$confirmation = \GFFormDisplay::handle_confirmation($form, $lead, false);
 				}
 
 				// preload the GF submission, ready for processing the confirmation message
