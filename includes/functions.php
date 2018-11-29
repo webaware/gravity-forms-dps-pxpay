@@ -46,3 +46,19 @@ function gform_version_compare($target, $operator) {
 function has_required_gravityforms() {
 	return gform_version_compare(MIN_VERSION_GF, '>=');
 }
+
+/**
+* get confirmation block anchor HTML
+* @param array $form
+* @return string
+*/
+function get_form_confirmation_anchor($form) {
+	$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
+	$default_anchor = apply_filters('gform_confirmation_anchor_' . $form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
+
+	if (empty($default_anchor)) {
+		$default_anchor = "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>";
+	}
+
+	return $default_anchor;
+}

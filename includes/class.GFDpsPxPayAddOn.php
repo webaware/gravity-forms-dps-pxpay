@@ -706,10 +706,8 @@ class AddOn extends \GFPaymentAddOn {
 		gform_update_meta($entry['id'], META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
 
 		// create a "confirmation message" in which to display the error
-		$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
-		$default_anchor = apply_filters('gform_confirmation_anchor_'.$form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
-		$anchor = $default_anchor ? "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>" : '';
-		$cssClass = rgar($form, 'cssClass');
+		$anchor = get_form_confirmation_anchor($form);
+		$cssClass = rgar($form, 'cssClass') . ' gfdpspxpay-transaction-message gfdpspxpay-request-failure';
 		$error_msg = wpautop($this->error_msg);
 
 		ob_start();
@@ -1311,9 +1309,9 @@ class AddOn extends \GFPaymentAddOn {
 				}
 				$confirmation = \GFFormDisplay::handle_confirmation($form, $lead, false);
 
-				if ($lead['payment_status'] != 'Paid') {
+				if ($lead['payment_status'] !== 'Paid' && empty($_GET['cancel_payment'])) {
 					$this->current_feed = $this->getFeed($lead['id']);
-					if ( key_exists('retry_payment', $_GET) && $_GET['retry_payment'] ) {
+					if (!empty($_GET['retry_payment'])) {
 						$lead = $this->requestRedirectUrl($lead, $form);
 						if ($lead['payment_status'] === 'Processing') {
 							wp_redirect($this->urlPaymentForm);
@@ -1321,20 +1319,20 @@ class AddOn extends \GFPaymentAddOn {
 						}
 					}
 
-					$submission_data = $this->get_submission_data($this->current_feed, $form, $lead);
-					$retry_link = add_query_arg(array_merge($_GET, ['retry_payment' => '1']), $lead['source_url']);
-
-					$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
-					$default_anchor = apply_filters('gform_confirmation_anchor_'.$form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
-					$anchor = $default_anchor ? "<a id='gf_{$form["id"]}' name='gf_{$form["id"]}' class='gform_anchor' ></a>" : '';
-					$cssClass = rgar($form, 'cssClass');
+					$submission_data	= $this->get_submission_data($this->current_feed, $form, $lead);
+					$retry_link			= add_query_arg(array_merge($_GET, ['retry_payment' => '1']), $lead['source_url']);
+					$cancel_link		= add_query_arg(array_merge($_GET, ['cancel_payment' => '1']), $lead['source_url']);
 
 					if (!empty($query['cancelled'])) {
-						$error_msg = __('The transaction was canceled.', 'gravity-forms-dps-pxpay');
+						$error_msg = _x('The transaction was canceled.', 'retry payment message', 'gravity-forms-dps-pxpay');
 					}
 					else {
-						$error_msg = __('There was an error with your payment. Please try again.', 'gravity-forms-dps-pxpay');
+						$error_msg = _x('There was an error with your payment. Please try again.', 'retry payment message', 'gravity-forms-dps-pxpay');
 					}
+
+					// create a "confirmation message" in which to display the error
+					$anchor = get_form_confirmation_anchor($form);
+					$cssClass = rgar($form, 'cssClass') . ' gfdpspxpay-transaction-message gfdpspxpay-transaction-failure';
 
 					ob_start();
 					require GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-retry.php';
