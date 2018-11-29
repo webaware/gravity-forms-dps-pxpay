@@ -558,21 +558,6 @@ class AddOn extends \GFPaymentAddOn {
 	}
 
 	/**
-	* test form for product fields
-	* @param array $form
-	* @return bool
-	*/
-	protected static function hasProductFields($form) {
-		foreach ($form['fields'] as $field) {
-			if ($field->type === 'shipping' || $field->type === 'product') {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	* process form validation
 	* @param array $data an array with elements is_valid (boolean) and form (array of form elements)
 	* @return array
@@ -585,7 +570,7 @@ class AddOn extends \GFPaymentAddOn {
 				$form  = $data['form'];
 
 				// make sure form hasn't already been submitted / processed
-				if ($this->hasFormBeenProcessed($form)) {
+				if (has_form_been_processed($form['id'])) {
 					throw new GFDpsPxPayException(__('Payment already submitted and processed - please close your browser window.', 'gravity-forms-dps-pxpay'));
 				}
 
@@ -713,28 +698,6 @@ class AddOn extends \GFPaymentAddOn {
 		ob_start();
 		require GFDPSPXPAY_PLUGIN_ROOT . 'views/error-payment-failure.php';
 		return ob_get_clean();
-	}
-
-	/**
-	* check whether this form entry's unique ID has already been used; if so, we've already done/doing a payment attempt.
-	* @param array $form
-	* @return boolean
-	*/
-	protected function hasFormBeenProcessed($form) {
-		$unique_id = \GFFormsModel::get_form_unique_id($form['id']);
-
-		$search = [
-			'field_filters' => [
-				[
-					'key'		=> META_UNIQUE_ID,
-					'value'		=> $unique_id,
-				],
-			],
-		];
-
-		$entries = \GFAPI::get_entries($form['id'], $search);
-
-		return !empty($entries);
 	}
 
 	/**
