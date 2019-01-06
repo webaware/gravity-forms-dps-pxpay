@@ -1256,7 +1256,7 @@ class AddOn extends \GFPaymentAddOn {
 					remove_action('template_redirect', [$GLOBALS['wpseo_front'], 'clean_permalink'], 1);
 				}
 				elseif (class_exists('WPSEO_Frontend', false) && method_exists('WPSEO_Frontend', 'get_instance')) {
-					remove_action('template_redirect', [WPSEO_Frontend::get_instance(), 'clean_permalink'], 1);
+					remove_action('template_redirect', [\WPSEO_Frontend::get_instance(), 'clean_permalink'], 1);
 				}
 
 				// load form and lead data
