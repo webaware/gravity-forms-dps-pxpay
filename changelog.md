@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.2.1, 2019-01-07
+
+* fixed: fatal error on successful payment when Yoast SEO is active
+
 ### 2.2.0, 2018-11-29
 
 * added: feed setting for transaction type, can be Capture or Authorise

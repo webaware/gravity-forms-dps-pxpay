@@ -2,12 +2,13 @@
 Contributors: webaware
 Plugin Name: Gravity Forms DPS PxPay
 Plugin URI: https://wordpress.org/plugins/gravity-forms-dps-pxpay/
+Author: WebAware
 Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.3
 Tested up to: 5.0
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -53,7 +54,7 @@ No. This plugin adds a DPS Payment Express PxPay payment gateway to Gravity Form
 
 ### What Gravity Forms license do I need?
 
-Any Gravity Forms license will do. You can use this plugin with the Personal, Business or Developer licenses.
+Any Gravity Forms license will do. You can use this plugin with the Basic, Pro, or Elite licenses.
 
 ### How do I build a form with credit card payments?
 
@@ -144,18 +145,16 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.2.0
+### 2.2.1
 
-minimum required PHP version is now 5.6; supports transaction retry; supports both Capture and Authorize transactions
+fixes fatal error on successful payment when Yoast SEO is active
 
 ## Changelog
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.2.0
+### 2.2.1
 
-Released 2018-11-29
+Released 2019-01-07
 
-* added: feed setting for transaction type, can be Capture or Authorize
-* added: feed setting for transaction retry, default is on; thanks, [@speedpro](https://github.com/speedpro)!
-* changed: minimum required PHP version is now 5.6; recommended version is PHP 7.2 or higher
+* fixed: fatal error on successful payment when Yoast SEO is active
