@@ -828,7 +828,7 @@ class AddOn extends \GFPaymentAddOn {
 	* process the gateway callback
 	*/
 	public function callback() {
-		self::log_debug('========= processing transaction result');
+		$this->log_debug('========= processing transaction result');
 
 		try {
 			$creds				= new GFDpsPxPayCredentials($this, rgar($this->dpsReturnArgs, 'useTest', false));
@@ -866,7 +866,7 @@ class AddOn extends \GFPaymentAddOn {
 				set_transient($lock_id, time(), 90);
 			}
 			else {
-				self::log_debug("entry $lead_id was locked");
+				$this->log_debug("entry $lead_id was locked");
 			}
 
 			$form = \GFFormsModel::get_form_meta($entry['form_id']);
@@ -970,7 +970,7 @@ class AddOn extends \GFPaymentAddOn {
 		catch (GFDpsPxPayException $e) {
 			// TODO: what now?
 			echo nl2br(esc_html($e->getMessage()));
-			self::log_error(__FUNCTION__ . ': ' . $e->getMessage());
+			$this->log_error(__FUNCTION__ . ': ' . $e->getMessage());
 			exit;
 		}
 	}
