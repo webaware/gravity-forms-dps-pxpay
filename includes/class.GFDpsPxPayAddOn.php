@@ -889,8 +889,8 @@ class AddOn extends \GFPaymentAddOn {
 						'transaction_id'				=> $response->DpsTxnRef,
 					];
 					$action['note']						=  $this->getPaymentNote($capture, $action, $response->getProcessingMessages());
-					$entry[META_AUTHCODE]			=  $response->AuthCode;
-					$entry[META_GATEWAY_TXN_ID]	=  $response->DpsTxnRef;
+					$entry[META_AUTHCODE]				=  $response->AuthCode;
+					$entry[META_GATEWAY_TXN_ID]			=  $response->DpsTxnRef;
 					$entry['currency']					=  $response->CurrencySettlement;
 
 					if (!$entry_was_locked) {
