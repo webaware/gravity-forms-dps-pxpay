@@ -15,7 +15,6 @@ class AddOn extends \GFPaymentAddOn {
 	protected $urlPaymentForm;							// URL for payment form where purchaser will enter credit card details
 	protected $feed = null;								// current feed mapping form fields to payment fields
 	protected $feedDefaultFieldMap;						// map of default fields for feed
-	protected $cacheHasSuccessOnly;						// a cache of form IDs with whether they have execDelayed = success_only
 
 	/**
 	* static method for getting the instance of this singleton object
@@ -59,6 +58,7 @@ class AddOn extends \GFPaymentAddOn {
 		add_action('gform_payment_details', [$this, 'gformPaymentDetails'], 9, 2);
 
 		// handle deferrals
+		add_filter("gform_{$this->_slug}_feed_settings_fields", [$this, 'gformAddSettingsDelayed']);
 		add_filter('gform_is_delayed_pre_process_feed', [$this, 'gformIsDelayed'], 10, 4);
 		add_filter('gform_disable_post_creation', [$this, 'gformDelayPost'], 10, 3);
 		add_action('gform_after_submission', [$this, 'gformDelayOther'], 5, 2);
@@ -405,7 +405,9 @@ class AddOn extends \GFPaymentAddOn {
 						'name'			=> 'post_payment_actions',
 						'label'			=> esc_html_x('Post Payment Actions', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'checkbox',
-						'choices'		=> $this->getDelayedActionFields(),
+						'choices'		=> [
+							['name' => 'delayPost', 'label' => esc_html__('Create post only when payment is received.', 'gravity-forms-dps-pxpay')],
+						],
 						'tooltip'		=> esc_html__('Select which actions should only occur after transaction has been completed.', 'gravity-forms-dps-pxpay')
 										.  '<br/><br/>'
 										.  esc_html__('By default, the transaction must be successful to trigger these actions, or there must be no transaction. You can change that with the Delayed Execute setting.', 'gravity-forms-dps-pxpay'),
@@ -542,32 +544,41 @@ class AddOn extends \GFPaymentAddOn {
 	}
 
 	/**
-	* get list of checkbox fields for delayed actions
+	* add fields for delayed actions
+	* @param array $fields
 	* @return array
 	*/
-	protected function getDelayedActionFields() {
-		return [
-			[
-				'name' => 'delayPost',
-				'label' => esc_html__('Create post only when transaction completes', 'gravity-forms-dps-pxpay'),
-			],
-			[
-				'name' => 'delay_gravityformsmailchimp',
-				'label' => esc_html__('Subscribe user to MailChimp only when transaction completes', 'gravity-forms-dps-pxpay'),
-			],
-			[
-				'name' => 'delay_gravity-forms-salesforce',
-				'label' => esc_html__('Send feed to Salesforce only when transaction completes', 'gravity-forms-dps-pxpay'),
-			],
-			[
-				'name' => 'delay_gravityformsuserregistration',
-				'label' => esc_html__('Register user only when transaction completes', 'gravity-forms-dps-pxpay'),
-			],
-			[
-				'name' => 'delay_gravityformszapier',
-				'label' => esc_html__('Send feed to Zapier only when transaction completes', 'gravity-forms-dps-pxpay'),
-			],
-		];
+	public function gformAddSettingsDelayed($fields) {
+		$addons = self::get_registered_addons();
+
+		// handle add-ons that support delayed payment conventions
+		foreach ($addons as $class_name) {
+			if (method_exists($class_name, 'get_instance')) {
+				$method = "\\$class_name::get_instance";
+				$addon = $method();
+				if (!empty($addon->delayed_payment_integration)) {
+					$fields = $addon->add_paypal_post_payment_actions($fields);
+				}
+			}
+		}
+
+		// manually add some supported add-ons that don't comply with delayed payment conventions
+		if (class_exists('GFZapier', false)) {
+			$fields = \GFZapier::add_paypal_post_payment_actions($fields, $this);
+		}
+
+		// manually add the old free Salesforce integration if installed, for backwards compatibility
+		if (class_exists('KWS_GF_Salesforce', false)) {
+			$field = $this->get_field('post_payment_actions', $fields);
+			$field['choices'][] = [
+				'name'		=> 'delay_gravity-forms-salesforce',
+				'label'		=> esc_html__('Send feed to Salesforce only when payment is received', 'gravity-forms-dps-pxpay'),
+				'tooltip'	=> esc_html__('Supports the legacy free Gravity Forms Salesforce add-on by Zack Katz.', 'gravity-forms-dps-pxpay'),
+			];
+			$fields = $this->replace_field('post_payment_actions', $field, $fields);
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -982,30 +993,30 @@ class AddOn extends \GFPaymentAddOn {
 	* @return bool
 	*/
 	protected function formHasSuccessOnly($form_id, $action) {
-		if (!is_array($this->cacheHasSuccessOnly)) {
-			$this->cacheHasSuccessOnly = [];
-		}
+		static $cacheHasSuccessOnly = [];
 
-		if (!isset($this->cacheHasSuccessOnly[$form_id])) {
+		if (!isset($cacheHasSuccessOnly[$form_id])) {
 
-			$this->cacheHasSuccessOnly[$form_id] = [];
+			$cacheHasSuccessOnly[$form_id] = [];
 			$feeds = $this->get_active_feeds($form_id);
-			$fields = $this->getDelayedActionFields();
 
 			foreach ($feeds as $feed) {
 				$success_only = rgar($feed['meta'], 'execDelayed', 'success') === 'success_only';
 
-				foreach ($fields as $field) {
-					$name = $field['name'];
-					if (empty($this->cacheHasSuccessOnly[$form_id][$name])) {
-						$this->cacheHasSuccessOnly[$form_id][$name] = $success_only && !empty($feed['meta'][$name]);
+				foreach ($feed['meta'] as $name => $value) {
+					if ($name !== 'delayPost' && substr($name, 0, 6) !== 'delay_') {
+						continue;
+					}
+
+					if (empty($cacheHasSuccessOnly[$form_id][$name])) {
+						$cacheHasSuccessOnly[$form_id][$name] = $success_only && !empty($value);
 					}
 				}
 			}
 
 		}
 
-		return !empty($this->cacheHasSuccessOnly[$form_id][$action]);
+		return !empty($cacheHasSuccessOnly[$form_id][$action]);
 	}
 
 	/**
@@ -1019,18 +1030,16 @@ class AddOn extends \GFPaymentAddOn {
 		if (!$is_delayed) {
 			if ($this->formHasSuccessOnly($form['id'], 'delayPost')) {
 				$is_delayed = true;
-				$this->log_debug(sprintf('delay post creation: form id %s, lead id %s', $form['id'], $entry['id']));
 			}
 			else {
-				$feed = $this->get_payment_feed($entry);
+				$feed = $this->get_single_submission_feed($entry);
 
 				if ($feed) {
 					switch (rgar($feed['meta'], 'execDelayed', 'success')) {
 
 						case 'success':		// delay if there is something to charge, and execute if transaction was successful
 						case 'always':		// delay if there is something to charge, and then always execute
-							$is_delayed = !empty($this->current_submission_data['payment_amount']) && !empty($feed['meta']['delayPost']);
-							$this->log_debug(sprintf('delay post creation: form id %s, lead id %s', $form['id'], $entry['id']));
+							$is_delayed = $entry['payment_status'] === 'Processing' && !empty($feed['meta']['delayPost']);
 							break;
 
 						default:
@@ -1039,6 +1048,9 @@ class AddOn extends \GFPaymentAddOn {
 
 					}
 				}
+			}
+			if ($is_delayed) {
+				$this->log_debug(sprintf('delay post creation: form id %s, lead id %s', $form['id'], $entry['id']));
 			}
 		}
 
@@ -1064,14 +1076,14 @@ class AddOn extends \GFPaymentAddOn {
 				$is_delayed = true;
 			}
 			else {
-				$feed = $this->get_payment_feed($entry);
+				$feed = $this->get_single_submission_feed($entry);
 
 				if ($feed) {
 					switch (rgar($feed['meta'], 'execDelayed', 'success')) {
 
 						case 'success':		// delay if there is something to charge, and execute if transaction was successful
 						case 'always':		// delay if there is something to charge, and then always execute
-							$is_delayed = !empty($this->current_submission_data['payment_amount']) && !empty($feed['meta']['delay_' . $addon_slug]);
+							$is_delayed = $entry['payment_status'] === 'Processing' && !empty($feed['meta']['delay_' . $addon_slug]);
 							break;
 
 						default:
@@ -1081,18 +1093,21 @@ class AddOn extends \GFPaymentAddOn {
 					}
 				}
 			}
+			if ($is_delayed) {
+				$this->log_debug(sprintf('delay %s: form id %s, lead id %s', $addon_slug, $form['id'], $entry['id']));
+			}
 		}
 
 		return $is_delayed;
 	}
 
 	/**
-	* disable "feeds" that don't subclass the feed add-on, like Zapier
+	* disable "feeds" that don't subclass the feed add-on, like Salesforce
 	* @param array $entry
 	* @param array $form
 	*/
 	public function gformDelayOther($entry, $form) {
-		$feed = $this->get_payment_feed($entry);
+		$feed = $this->get_single_submission_feed($entry);
 
 		$is_delayed = false;
 
@@ -1101,20 +1116,13 @@ class AddOn extends \GFPaymentAddOn {
 
 				case 'success':		// delay if there is something to charge, and execute if transaction was successful
 				case 'always':		// delay if there is something to charge, and then always execute
-					$is_delayed = !empty($this->current_submission_data['payment_amount']);
+					$is_delayed = $entry['payment_status'] === 'Processing';
 					break;
 
 				default:
 					// success_only is handled separately
 					break;
 
-			}
-		}
-
-		if (($is_delayed && !empty($feed['meta']['delay_gravityformszapier'])) || $this->formHasSuccessOnly($form['id'], 'delay_gravityformszapier')) {
-			if (has_action('gform_after_submission', ['GFZapier', 'send_form_data_to_zapier'])) {
-				$this->log_debug(sprintf('delay gravityformszapier feeds: form id %s, lead id %s', $form['id'], $entry['id']));
-				remove_action('gform_after_submission', ['GFZapier', 'send_form_data_to_zapier'], 10, 2);
 			}
 		}
 
