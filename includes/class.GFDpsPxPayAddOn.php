@@ -1250,15 +1250,6 @@ class AddOn extends \GFPaymentAddOn {
 
 			// make sure we have a match
 			if ($query) {
-
-				// stop WordPress SEO from stripping off our query parameters and redirecting the page
-				if (isset($GLOBALS['wpseo_front'])) {
-					remove_action('template_redirect', [$GLOBALS['wpseo_front'], 'clean_permalink'], 1);
-				}
-				elseif (class_exists('WPSEO_Frontend', false) && method_exists('WPSEO_Frontend', 'get_instance')) {
-					remove_action('template_redirect', [\WPSEO_Frontend::get_instance(), 'clean_permalink'], 1);
-				}
-
 				// load form and lead data
 				$form = \GFFormsModel::get_form_meta($query['form_id']);
 				$lead = \GFFormsModel::get_lead($query['lead_id']);
