@@ -13,11 +13,11 @@ Requires PHP: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Easily create online payment forms with Gravity Forms and DPS Payment Express PxPay
+Easily create online payment forms with Gravity Forms and DPS Payment Express (Windcave) PxPay
 
 ## Description
 
-Easily create online payment forms with Gravity Forms and DPS Payment Express PxPay
+Easily create online payment forms with Gravity Forms and DPS Payment Express (Windcave) PxPay
 
 Gravity Forms DPS PxPay integrates the [DPS Payment Express PxPay credit card payment gateway](https://www.paymentexpress.com/merchant-ecommerce-pxpay) with [Gravity Forms](https://webaware.com.au/get-gravity-forms) advanced form builder.
 

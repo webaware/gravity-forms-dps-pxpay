@@ -2,7 +2,7 @@
 /*
 Plugin Name: Gravity Forms DPS PxPay
 Plugin URI: https://wordpress.org/plugins/gravity-forms-dps-pxpay/
-Description: Easily create online payment forms with Gravity Forms and DPS Payment Express PxPay
+Description: Easily create online payment forms with Gravity Forms and DPS Payment Express (Windcave) PxPay
 Version: 2.3.0-dev
 Author: WebAware
 Author URI: https://shop.webaware.com.au/
