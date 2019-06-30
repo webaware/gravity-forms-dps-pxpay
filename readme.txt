@@ -6,9 +6,9 @@ Author: WebAware
 Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
-Requires at least: 4.3
+Requires at least: 4.9
 Tested up to: 5.0
-Stable tag: 2.2.1
+Stable tag: 2.3.0
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,16 +145,16 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.2.1
+### 2.3.0
 
-fixes fatal error on successful payment when Yoast SEO is active
+support all Gravity Forms add-ons that register delayed action support through the Add-on framework
 
 ## Changelog
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.2.1
+### 2.3.0
 
-Released 2019-01-07
+Released 2019-07-01
 
-* fixed: fatal error on successful payment when Yoast SEO is active
+* changed: support all Gravity Forms add-ons that register delayed action support through the Add-on framework

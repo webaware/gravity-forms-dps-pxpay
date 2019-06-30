@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.3.0, 2019-07-01
+
+* changed: support all Gravity Forms add-ons that register delayed action support through the Add-on framework
+
 ### 2.2.1, 2019-01-07
 
 * fixed: fatal error on successful payment when Yoast SEO is active
