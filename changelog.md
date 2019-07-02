@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.3.1, soon...
+
+* changed: detection of add-ons that support delay until after payment now uses `call_user_func()`
+
 ### 2.3.0, 2019-07-01
 
 * changed: support all Gravity Forms add-ons that register delayed action support through the Add-on framework

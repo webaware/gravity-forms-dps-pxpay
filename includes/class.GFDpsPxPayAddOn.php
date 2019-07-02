@@ -554,8 +554,7 @@ class AddOn extends \GFPaymentAddOn {
 		// handle add-ons that support delayed payment conventions
 		foreach ($addons as $class_name) {
 			if (method_exists($class_name, 'get_instance')) {
-				$method = "\\$class_name::get_instance";
-				$addon = $method();
+				call_user_func([$class_name, 'get_instance']);
 				if (!empty($addon->delayed_payment_integration)) {
 					$fields = $addon->add_paypal_post_payment_actions($fields);
 				}
