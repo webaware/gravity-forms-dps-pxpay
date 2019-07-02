@@ -2,10 +2,10 @@
 
 ## Changelog
 
-### 2.3.1, soon...
+### 2.3.1, 2019-07-03
 
-* changed: detection of add-ons that support delay until after payment now uses `call_user_func()`
-* changed: transaction lock changed from transient to option
+* fixed: crash on PHP 5.6 when adding a new feed to a form
+* fixed: duplicate emails (from double-processing a transaction) -- yes, again
 
 ### 2.3.0, 2019-07-01
 
