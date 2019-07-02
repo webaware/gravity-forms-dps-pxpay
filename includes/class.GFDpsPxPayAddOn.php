@@ -871,9 +871,9 @@ class AddOn extends \GFPaymentAddOn {
 
 			// attempt to lock entry
 			$lock_id = 'gfdpspxpay_elock_' . $lead_id;
-			$entry_was_locked = get_transient($lock_id);
+			$entry_was_locked = get_option($lock_id);
 			if (!$entry_was_locked) {
-				set_transient($lock_id, time(), 90);
+				update_option($lock_id, time());
 			}
 			else {
 				$this->log_debug("entry $lead_id was locked");
@@ -951,7 +951,7 @@ class AddOn extends \GFPaymentAddOn {
 
 			// clear lock if we set one
 			if (!$entry_was_locked) {
-				delete_transient($lock_id);
+				delete_option($lock_id);
 			}
 
 			if ($entry['payment_status'] === 'Failed' && $feed['meta']['cancelURL']) {

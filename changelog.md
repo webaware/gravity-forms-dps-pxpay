@@ -5,6 +5,7 @@
 ### 2.3.1, soon...
 
 * changed: detection of add-ons that support delay until after payment now uses `call_user_func()`
+* changed: transaction lock changed from transient to option
 
 ### 2.3.0, 2019-07-01
 
