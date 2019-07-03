@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.3.2, 2019-07-03
+
+* fixed: editing a feed loses detected delayed actions for add-ons using the Add-on framework
+
 ### 2.3.1, 2019-07-03
 
 * fixed: crash on PHP 5.6 when adding a new feed to a form
