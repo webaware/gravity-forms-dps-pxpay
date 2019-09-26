@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.3.3, 2019-09-27
+
+* fixed: Gravity Forms 2.4.14 breaks delayed actions
+
 ### 2.3.2, 2019-07-03
 
 * fixed: editing a feed loses detected delayed actions for add-ons using the Add-on framework

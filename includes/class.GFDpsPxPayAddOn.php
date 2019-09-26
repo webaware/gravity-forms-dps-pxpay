@@ -544,6 +544,18 @@ class AddOn extends \GFPaymentAddOn {
 	}
 
 	/**
+	* specify where the "Post Payment Action" setting should appear on the payment add-on feed
+	* @param string $feed_slug
+	* @return array
+	*/
+	public function get_post_payment_actions_config( $feed_slug ) {
+		return [
+			'position' => 'after',
+			'setting'  => 'options',
+		];
+	}
+
+	/**
 	* add fields for delayed actions
 	* @param array $fields
 	* @return array
@@ -551,18 +563,22 @@ class AddOn extends \GFPaymentAddOn {
 	public function gformAddSettingsDelayed($fields) {
 		$addons = self::get_registered_addons();
 
-		// handle add-ons that support delayed payment conventions
-		foreach ($addons as $class_name) {
-			if (method_exists($class_name, 'get_instance')) {
-				$addon = call_user_func([$class_name, 'get_instance']);
-				if (!empty($addon->delayed_payment_integration)) {
-					$fields = $addon->add_paypal_post_payment_actions($fields);
+		// detect Gravity Forms < 2.4.14 (which added automatic support for post payment actions to non-PayPal payment add-ons)
+		if (!method_exists($this, 'add_post_payment_actions')) {
+			// handle add-ons that support delayed payment conventions
+			foreach ($addons as $class_name) {
+				if (method_exists($class_name, 'get_instance')) {
+					$addon = call_user_func([$class_name, 'get_instance']);
+					if (!empty($addon->delayed_payment_integration)) {
+						$fields = $addon->add_paypal_post_payment_actions($fields);
+					}
 				}
 			}
 		}
 
 		// manually add some supported add-ons that don't comply with delayed payment conventions
-		if (class_exists('GFZapier', false)) {
+		if (method_exists('GFZapier', 'add_paypal_post_payment_actions')) {
+			// Zapier add-on versions 1.6 - 3.1
 			$fields = \GFZapier::add_paypal_post_payment_actions($fields, $this);
 		}
 
@@ -1150,7 +1166,6 @@ class AddOn extends \GFPaymentAddOn {
 	*/
 	protected function processDelayed($feed, $entry, $form) {
 		// default to only performing delayed actions if payment was successful, unless feed opts to always execute
-		// can filter each delayed action to permit / deny execution
 		switch (rgar($feed['meta'], 'execDelayed', 'success')) {
 
 			case 'always':
@@ -1175,22 +1190,31 @@ class AddOn extends \GFPaymentAddOn {
 				add_action('gform_paypal_fulfillment', [$this, 'maybeExecuteSalesforce'], 10, 4);
 			}
 
-			$this->log_debug(sprintf('calling gform_paypal_fulfillment action; form id %s, lead id %s', $form['id'], $entry['id']));
-			do_action('gform_paypal_fulfillment', $entry, $feed, rgar($entry, 'transaction_id'), rgar($entry, 'payment_amount'));
+			if (method_exists($this, 'trigger_payment_delayed_feeds')) {
+				// Gravity Forms 2.4.13+
+				$this->trigger_payment_delayed_feeds($entry['transaction_id'], $feed, $entry, $form);
+			}
+			else {
+				// Gravity Forms < 2.4.13
+				if (has_action('gform_paypal_fulfillment')) {
+					$this->log_debug(sprintf('calling gform_paypal_fulfillment action; form id %s, entry id %s', $form['id'], $entry['id']));
+					do_action('gform_paypal_fulfillment', $entry, $feed, rgar($entry, 'transaction_id'), rgar($entry, 'payment_amount'));
+				}
+			}
+
+			$this->maybeExecuteSalesforce($feed, $entry, $form);
 		}
 	}
 
 	/**
 	* maybe execute delayed Salesforce feed, if there is one
+	* @param array $feed
 	* @param array $entry
 	* @param array $form
-	* @param string $transaction_id
-	* @param float $payment_amount
 	*/
-	public function maybeExecuteSalesforce($entry, $feed, $transaction_id, $payment_amount) {
-		if (class_exists('GFSalesforce', false) && method_exists('GFSalesforce', 'export')) {
-			$form = \GFFormsModel::get_form_meta($entry['form_id']);
-			$this->log_debug(sprintf('executing delayed gravity-forms-salesforce feed: form id %s, lead id %s', $form['id'], $entry['id']));
+	public function maybeExecuteSalesforce($feed, $entry, $form) {
+		if (!empty($feed['meta']['delay_gravity-forms-salesforce']) && method_exists('GFSalesforce', 'export')) {
+			$this->log_debug(sprintf('executing delayed gravity-forms-salesforce feed: form id %s, entry id %s', $form['id'], $entry['id']));
 			\GFSalesforce::export($entry, $form);
 		}
 	}
