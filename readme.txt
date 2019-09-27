@@ -8,7 +8,7 @@ Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.9
 Tested up to: 5.2
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,29 +145,16 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.3.2
+### 2.3.3
 
-fixed crash on PHP 5.6 when adding a new feed to a form in v2.3.0; prevent duplicate emails / feed processing
+fixed Gravity Forms 2.4.14 and Zapier 3.2 which broke delayed actions
 
 ## Changelog
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.3.2
+### 2.3.3
 
-Released 2019-07-03
+Released 2019-09-27
 
-* fixed: editing a feed loses detected delayed actions for add-ons using the Add-on framework
-
-### 2.3.1
-
-Released 2019-07-03
-
-* fixed: crash on PHP 5.6 when adding a new feed to a form
-* fixed: duplicate emails (from double-processing a transaction) -- yes, again
-
-### 2.3.0
-
-Released 2019-07-01
-
-* changed: support all Gravity Forms add-ons that register delayed action support through the Add-on framework
+* fixed: Gravity Forms 2.4.14 and Zapier 3.2 broke delayed actions

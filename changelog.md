@@ -4,7 +4,7 @@
 
 ### 2.3.3, 2019-09-27
 
-* fixed: Gravity Forms 2.4.14 breaks delayed actions
+* fixed: Gravity Forms 2.4.14 and Zapier 3.2 broke delayed actions
 
 ### 2.3.2, 2019-07-03
 
