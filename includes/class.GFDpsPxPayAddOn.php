@@ -1186,10 +1186,6 @@ class AddOn extends \GFPaymentAddOn {
 		}
 
 		if ($execute_delayed) {
-			if (!empty($feed['meta']['delay_gravity-forms-salesforce'])) {
-				add_action('gform_paypal_fulfillment', [$this, 'maybeExecuteSalesforce'], 10, 4);
-			}
-
 			if (method_exists($this, 'trigger_payment_delayed_feeds')) {
 				// Gravity Forms 2.4.13+
 				$this->trigger_payment_delayed_feeds($entry['transaction_id'], $feed, $entry, $form);
