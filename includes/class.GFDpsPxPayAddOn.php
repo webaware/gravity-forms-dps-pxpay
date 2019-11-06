@@ -567,11 +567,11 @@ class AddOn extends \GFPaymentAddOn {
 	* @return array
 	*/
 	public function gformAddSettingsDelayed($fields) {
-		$addons = self::get_registered_addons();
 
 		// detect Gravity Forms < 2.4.14 (which added automatic support for post payment actions to non-PayPal payment add-ons)
 		if (!method_exists($this, 'add_post_payment_actions')) {
 			// handle add-ons that support delayed payment conventions
+			$addons = self::get_registered_addons();
 			foreach ($addons as $class_name) {
 				if (method_exists($class_name, 'get_instance')) {
 					$addon = call_user_func([$class_name, 'get_instance']);
