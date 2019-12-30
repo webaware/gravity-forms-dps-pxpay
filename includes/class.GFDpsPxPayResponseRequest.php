@@ -146,7 +146,7 @@ class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 
 		}
 
-		return apply_filters('dps_pxpay_wpsc_code_description', $msg, $code);
+		return apply_filters('dps_pxpay_gf_code_description', $msg, $code);
 	}
 
 }
