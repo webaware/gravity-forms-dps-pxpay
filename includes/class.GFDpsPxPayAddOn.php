@@ -15,6 +15,7 @@ class AddOn extends \GFPaymentAddOn {
 	protected $urlPaymentForm;							// URL for payment form where purchaser will enter credit card details
 	protected $feed = null;								// current feed mapping form fields to payment fields
 	protected $feedDefaultFieldMap;						// map of default fields for feed
+	protected $error_msg;								// error message stored between steps
 
 	/**
 	* static method for getting the instance of this singleton object
