@@ -1346,7 +1346,7 @@ class AddOn extends \GFPaymentAddOn {
 			return false;
 		}
 
-		if (rgar($this->current_feed['meta'], 'allowRetry', '') === '0') {
+		if (rgar($this->current_feed['meta'], 'allowRetry', '') === '') {
 			// feed is configured for no retry
 			return false;
 		}

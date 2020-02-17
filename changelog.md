@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.3.5, soon...
+
+* fixed: retrying failed transactions could not be turned off with feed settings
+
 ### 2.3.4, 2019-09-30
 
 * fixed: GF User Registration 4.4 breaks new feeds
