@@ -5,6 +5,7 @@
 ### 2.3.5, soon...
 
 * fixed: retrying failed transactions could not be turned off with feed settings
+* changed: don't call `libxml_disable_entity_loader()` in PHP 8.0 (now deprecated)
 
 ### 2.3.4, 2019-09-30
 
