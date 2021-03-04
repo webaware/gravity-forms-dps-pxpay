@@ -7,8 +7,8 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.9
-Tested up to: 5.3
-Stable tag: 2.3.4
+Tested up to: 5.7
+Stable tag: 2.3.5
 Requires PHP: 5.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -145,20 +145,18 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.3.4
+### 2.3.5
 
-fixed Gravity Forms 2.4.14 and Zapier 3.2 which broke delayed actions, and GF User Registration 4.4 which broke new feeds
+can turn off retrying failed transactions in feed settings; fixed PHP 8 deprecated notice; Gravity Forms 2.5 compatible
 
 ## Changelog
 
 The full changelog can be found [on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.3.4, 2019-09-30
+### 2.3.5
 
-* fixed: GF User Registration 4.4 breaks new feeds
+Released 2021-03-04
 
-### 2.3.3
-
-Released 2019-09-27
-
-* fixed: Gravity Forms 2.4.14 and Zapier 3.2 broke delayed actions
+* fixed: retrying failed transactions could not be turned off with feed settings
+* fixed: Gravity Forms 2.5 compatibility
+* changed: don't call `libxml_disable_entity_loader()` in PHP 8.0 (now deprecated)

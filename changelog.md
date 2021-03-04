@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.3.5, soon...
+### 2.3.5, 2021-03-04
 
 * fixed: retrying failed transactions could not be turned off with feed settings
 * fixed: Gravity Forms 2.5 compatibility
