@@ -17,10 +17,24 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 	public $Success;
 
 	/**
-	* total amount of payment as processed, in dollars and cents as a floating-point number
+	* requested amount of payment as settled, in dollars and cents as a floating-point number, excluding surcharges
 	* @var float
 	*/
 	public $AmountSettlement;
+
+	/**
+	* total amount of payment as processed, in dollars and cents as a floating-point number, including surcharges
+	* if there is no surcharge, this field will be omitted
+	* @var float
+	*/
+	public $TotalAmount;
+
+	/**
+	* surcharge amount added to requested payment amount, in dollars and cents as a floating-point number
+	* if there is no surcharge, this field will be omitted
+	* @var float
+	*/
+	public $AmountSurcharge;
 
 	/**
 	* If the transaction is successful, this is the bank authorisation number.

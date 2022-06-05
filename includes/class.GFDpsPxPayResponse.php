@@ -63,7 +63,9 @@ abstract class GFDpsPxPayResponse {
 				switch ($name) {
 
 					case 'AmountSettlement':
-						$this->AmountSettlement = (float) $value;
+					case 'TotalAmount':
+					case 'AmountSurcharge':
+						$this->$name = (float) $value;
 						break;
 
 					case 'Success':

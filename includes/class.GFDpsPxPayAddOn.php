@@ -936,7 +936,7 @@ class AddOn extends \GFPaymentAddOn {
 						'type'							=> 'complete_payment',
 						'payment_status'				=> $capture ? 'Paid' : 'Pending',
 						'payment_date'					=> date('Y-m-d H:i:s'),
-						'amount'						=> $response->AmountSettlement,
+						'amount'						=> empty($response->TotalAmount) ? $response->AmountSettlement : $response->TotalAmount,
 						'currency'						=> $response->CurrencySettlement,
 						'transaction_id'				=> $response->DpsTxnRef,
 					];
@@ -944,6 +944,9 @@ class AddOn extends \GFPaymentAddOn {
 					$entry[META_AUTHCODE]				=  $response->AuthCode;
 					$entry[META_GATEWAY_TXN_ID]			=  $response->DpsTxnRef;
 					$entry['currency']					=  $response->CurrencySettlement;
+					if (!empty($response->AmountSurcharge)) {
+						$entry[META_SURCHARGE]			=  $response->AmountSurcharge;
+					}
 
 					if (!$entry_was_locked) {
 						$this->complete_payment($entry, $action);
@@ -1484,6 +1487,15 @@ class AddOn extends \GFPaymentAddOn {
 									],
 		];
 
+		$entry_meta[META_SURCHARGE] = [
+			'label'					=> esc_html_x('Surcharge', 'entry meta label', 'gravity-forms-dps-pxpay'),
+			'is_numeric'			=> true,
+			'is_default_column'		=> false,
+			'filter'				=> [
+										'operators' => ['is', 'isnot', '>', '<'],
+									],
+		];
+
 		return $entry_meta;
 	}
 
@@ -1507,6 +1519,7 @@ class AddOn extends \GFPaymentAddOn {
 					['label' => esc_html_x('Auth Code',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{authcode}'],
 					['label' => esc_html_x('Payment Amount', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_amount}'],
 					['label' => esc_html_x('Payment Status', 'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{payment_status}'],
+					['label' => esc_html_x('Surcharge',      'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{surcharge}'],
 					['label' => esc_html_x('Entry Date',     'merge tag label', 'gravity-forms-dps-pxpay'), 'tag' => '{date_created}'],
 				];
 
@@ -1541,7 +1554,8 @@ class AddOn extends \GFPaymentAddOn {
 		$gateway = gform_get_meta($entry['id'], 'payment_gateway');
 
 		if ($gateway === $this->_slug) {
-			$authCode = gform_get_meta($entry['id'], 'authcode');
+			$authCode  = gform_get_meta($entry['id'], META_AUTHCODE);
+			$surcharge = gform_get_meta($entry['id'], META_SURCHARGE);
 
 			// format payment amount as currency
 			if (isset($entry['payment_amount'])) {
@@ -1551,10 +1565,14 @@ class AddOn extends \GFPaymentAddOn {
 				$payment_amount = '';
 			}
 
+			// format surcharge amount as currency
+			$surcharge = empty($surcharge) ? '' : \GFCommon::format_number($surcharge, 'currency', rgar($entry, 'currency', ''));
+
 			$tags = [
 				'{transaction_id}',
 				'{payment_status}',
 				'{payment_amount}',
+				'{surcharge}',
 				'{authcode}',
 				'{date_created}',
 			];
@@ -1562,6 +1580,7 @@ class AddOn extends \GFPaymentAddOn {
 				rgar($entry, 'transaction_id', ''),
 				rgar($entry, 'payment_status', ''),
 				$payment_amount,
+				$surcharge ?: '',
 				!empty($authCode) ? $authCode : '',
 				\GFCommon::format_date(rgar($entry, 'date_created'), false, '', false),
 			];

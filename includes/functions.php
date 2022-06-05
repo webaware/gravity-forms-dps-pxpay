@@ -14,6 +14,7 @@ const META_TRANSACTION_ID				= 'gfdpspxpay_txn_id';		// merchant's transaction I
 const META_GATEWAY_TXN_ID				= 'gateway_txn_id';			// duplicate of transaction_id to enable passing to integrations (e.g. Zapier)
 const META_FEED_ID						= 'gfdpspxpay_feed_id';		// link to feed under which the transaction was processed
 const META_AUTHCODE						= 'authcode';				// bank authorisation code
+const META_SURCHARGE					= 'gfdpspxpay_surcharge';	// optional surcharge added by the payment gateway
 
 // end points for return to website
 const ENDPOINT_RETURN					= '__gfpxpayreturn';
