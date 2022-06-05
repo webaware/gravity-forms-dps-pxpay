@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.4.0, soon...
+
+* added: support for transactions with surcharges levied by the hosted payment page
+
 ### 2.3.5, 2021-03-04
 
 * fixed: retrying failed transactions could not be turned off with feed settings
