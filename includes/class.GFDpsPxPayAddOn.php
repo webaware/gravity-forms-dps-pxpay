@@ -113,7 +113,7 @@ class AddOn extends \GFPaymentAddOn {
 
 			[
 				'handle'		=> 'gfdpspxpay_admin',
-				'src'			=> plugins_url('css/admin.css', GFDPSPXPAY_PLUGIN_FILE),
+				'src'			=> plugins_url('static/css/admin.css', GFDPSPXPAY_PLUGIN_FILE),
 				'version'		=> $ver,
 				'enqueue'		=> [
 										[
@@ -157,7 +157,7 @@ class AddOn extends \GFPaymentAddOn {
 	* @return string
 	*/
 	protected function get_svg_icon() {
-		return file_get_contents(GFDPSPXPAY_PLUGIN_ROOT . '/images/menu-icon.svg');
+		return file_get_contents(GFDPSPXPAY_PLUGIN_ROOT . '/static/images/menu-icon.svg');
 	}
 
 	/**

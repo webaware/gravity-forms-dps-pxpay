@@ -164,7 +164,7 @@ class GFDpsPxPayUpdateV1 {
 		$ver = SCRIPT_DEBUG ? time() : GFDPSPXPAY_PLUGIN_VERSION;
 
 		wp_enqueue_style('gfdpspxpay_admin');
-		wp_enqueue_script('gfdpspxpay_updatev1', plugins_url("js/admin-update-v1$min.js", GFDPSPXPAY_PLUGIN_FILE), ['jquery'], $ver, true);
+		wp_enqueue_script('gfdpspxpay_updatev1', plugins_url("static/js/admin-update-v1$min.js", GFDPSPXPAY_PLUGIN_FILE), ['jquery'], $ver, true);
 
 		$steps = [];
 		if ($this->update_feeds)			$steps[] = 'feeds';
@@ -207,7 +207,6 @@ class GFDpsPxPayUpdateV1 {
 
 				default:
 					throw new \Exception(__('Unknown upgrade step passed.', 'gravity-forms-dps-pxpay'));
-					break;
 
 			}
 
@@ -376,7 +375,7 @@ class GFDpsPxPayUpdateV1 {
 		}
 
 		if (!$success) {
-			$addon->log_error("Error upgrading transactions from version 1 of add-on: " . $wpdb->last_error);
+			$addon->log_error('Error upgrading transactions from version 1 of add-on: ' . $wpdb->last_error);
 			throw new \Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
