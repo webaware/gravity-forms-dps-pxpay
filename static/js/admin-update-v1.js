@@ -1,5 +1,3 @@
-"use strict";
-
 (function ($) {
   var clicked = false;
   var ids = [];
