@@ -1,6 +1,8 @@
 <?php
 namespace webaware\gf_dpspxpay;
 
+use XMLWriter;
+
 if (!defined('ABSPATH')) {
 	exit;
 }
@@ -232,7 +234,7 @@ class GFDpsPxPayAPI {
 	* @return string
 	*/
 	public function getPaymentXML() {
-		$xml = new \XMLWriter();
+		$xml = new XMLWriter();
 		$xml->openMemory();
 		$xml->startDocument('1.0', 'UTF-8');
 		$xml->startElement('GenerateRequest');
@@ -301,7 +303,7 @@ class GFDpsPxPayAPI {
 	* @return string
 	*/
 	protected function getResultXML() {
-		$xml = new \XMLWriter();
+		$xml = new XMLWriter();
 		$xml->openMemory();
 		$xml->startDocument('1.0', 'UTF-8');
 		$xml->startElement('ProcessResponse');

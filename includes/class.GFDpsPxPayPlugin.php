@@ -1,6 +1,9 @@
 <?php
 namespace webaware\gf_dpspxpay;
 
+use GFAddOn;
+use GFForms;
+
 if (!defined('ABSPATH')) {
 	exit;
 }
@@ -51,10 +54,10 @@ class Plugin {
 
 		if (has_required_gravityforms()) {
 			// load add-on framework and hook our add-on
-			\GFForms::include_payment_addon_framework();
+			GFForms::include_payment_addon_framework();
 
 			require GFDPSPXPAY_PLUGIN_ROOT . 'includes/class.GFDpsPxPayAddOn.php';
-			\GFAddOn::register(__NAMESPACE__ . '\\AddOn');
+			GFAddOn::register(__NAMESPACE__ . '\\AddOn');
 		}
 	}
 

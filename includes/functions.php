@@ -1,6 +1,11 @@
 <?php
 namespace webaware\gf_dpspxpay;
 
+use GFAPI;
+use GFCommon;
+use GFFormsModel;
+use Exception;
+
 if (!defined('ABSPATH')) {
 	exit;
 }
@@ -24,7 +29,7 @@ const ENDPOINT_CONFIRMATION				= '__gfpxpayconfirm';
 /**
 * custom exception types
 */
-class GFDpsPxPayException extends \Exception {}
+class GFDpsPxPayException extends Exception {}
 
 /**
 * compare Gravity Forms version against target
@@ -34,7 +39,7 @@ class GFDpsPxPayException extends \Exception {}
 */
 function gform_version_compare($target, $operator) {
 	if (class_exists('GFCommon', false)) {
-		return version_compare(\GFCommon::$version, $target, $operator);
+		return version_compare(GFCommon::$version, $target, $operator);
 	}
 
 	return false;
@@ -54,7 +59,7 @@ function has_required_gravityforms() {
 * @return string
 */
 function get_form_confirmation_anchor($form) {
-	$default_anchor = count(\GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
+	$default_anchor = count(GFCommon::get_fields_by_type($form, ['page'])) > 0 ? 1 : 0;
 	$default_anchor = apply_filters('gform_confirmation_anchor_' . $form['id'], apply_filters('gform_confirmation_anchor', $default_anchor));
 
 	if (empty($default_anchor)) {
@@ -103,7 +108,7 @@ function decode_confirmation_values($encoded) {
 * @return boolean
 */
 function has_form_been_processed($form_id) {
-	$unique_id = \GFFormsModel::get_form_unique_id($form_id);
+	$unique_id = GFFormsModel::get_form_unique_id($form_id);
 
 	$search = [
 		'field_filters' => [
@@ -114,7 +119,7 @@ function has_form_been_processed($form_id) {
 		],
 	];
 
-	$entries = \GFAPI::get_entries($form_id, $search);
+	$entries = GFAPI::get_entries($form_id, $search);
 
 	return !empty($entries);
 }

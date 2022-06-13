@@ -1,6 +1,10 @@
 <?php
 namespace webaware\gf_dpspxpay;
 
+use Exception;
+use GFAPI;
+use WP_Query;
+
 if (!defined('ABSPATH')) {
 	exit;
 }
@@ -134,7 +138,7 @@ class GFDpsPxPayUpdateV1 {
 			],
 		];
 
-		$query = new \WP_Query($args);
+		$query = new WP_Query($args);
 
 		return $query->posts;
 	}
@@ -206,13 +210,13 @@ class GFDpsPxPayUpdateV1 {
 					break;
 
 				default:
-					throw new \Exception(__('Unknown upgrade step passed.', 'gravity-forms-dps-pxpay'));
+					throw new Exception(__('Unknown upgrade step passed.', 'gravity-forms-dps-pxpay'));
 
 			}
 
 			wp_send_json_success($response);
 		}
-		catch (\Exception $e) {
+		catch (Exception $e) {
 			wp_send_json_error(['error' => $e->getMessage()]);
 		}
 
@@ -222,7 +226,7 @@ class GFDpsPxPayUpdateV1 {
 	/**
 	* upgrade a feed for a form
 	* @param int $id id of old feed post
-	* @throws \Exception
+	* @throws Exception
 	*/
 	protected static function upgradeFeed($id) {
 		$addon			= AddOn::get_instance();
@@ -232,7 +236,7 @@ class GFDpsPxPayUpdateV1 {
 
 		if (empty($post) || empty($form_id)) {
 			$addon->log_error("old feed $id not found or not linked to form");
-			throw new \Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+			throw new Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
 		$meta = [
@@ -255,7 +259,7 @@ class GFDpsPxPayUpdateV1 {
 			'feed_condition_conditional_logic_object'	=> [],
 		];
 
-		$feed_id = \GFAPI::add_feed($form_id, $meta, $addon->get_slug());
+		$feed_id = GFAPI::add_feed($form_id, $meta, $addon->get_slug());
 
 		if (empty($feed_id) || is_wp_error($feed_id)) {
 			if (is_wp_error($feed_id)) {
@@ -264,7 +268,7 @@ class GFDpsPxPayUpdateV1 {
 			else {
 				$addon->log_error("old feed $id cannot be upgraded to add-on feed; null feed id.");
 			}
-			throw new \Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+			throw new Exception(__('Error upgrading feed from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
 		self::upgradeFeedNotifications($id, $form_id);
@@ -324,7 +328,7 @@ class GFDpsPxPayUpdateV1 {
 		$delayAutorespond	= get_post_meta($id, '_gfdpspxpay_delay_autorespond', true);
 
 		if ($delayNotify || $delayAutorespond) {
-			$form = \GFAPI::get_form($form_id);
+			$form = GFAPI::get_form($form_id);
 
 			foreach ($form['notifications'] as $key => $notification) {
 				if (trim($notification['to']) === '{admin_email}') {
@@ -343,7 +347,7 @@ class GFDpsPxPayUpdateV1 {
 		}
 
 		if ($modified) {
-			\GFAPI::update_form($form);
+			GFAPI::update_form($form);
 		}
 	}
 
@@ -376,7 +380,7 @@ class GFDpsPxPayUpdateV1 {
 
 		if (!$success) {
 			$addon->log_error('Error upgrading transactions from version 1 of add-on: ' . $wpdb->last_error);
-			throw new \Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
+			throw new Exception(__('Error upgrading transactions from version 1 of add-on', 'gravity-forms-dps-pxpay'));
 		}
 
 		// update old payment status from Approved to Paid
