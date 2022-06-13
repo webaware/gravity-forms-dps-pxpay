@@ -1,10 +1,11 @@
-# Gravity Forms DPS PxPay
+# GF Windcave Free
 
 ## Changelog
 
-### 2.4.0, soon...
+### 2.4.0, 2022-06-13
 
 * added: support for transactions with surcharges levied by the hosted payment page
+* changed: the plugin is now called GF Windcave Free
 
 ### 2.3.5, 2021-03-04
 

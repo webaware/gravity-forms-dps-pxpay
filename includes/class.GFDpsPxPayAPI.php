@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
-* DPS PxPay payment request
+* Windcave payment request
 */
 class GFDpsPxPayAPI {
 
@@ -30,19 +30,19 @@ class GFDpsPxPayAPI {
 	public $httpUserAgent;
 
 	/**
-	* Payment Express endpoint to post to
+	* Windcave endpoint to post to
 	* @var string
 	*/
 	public $endpoint;
 
 	/**
-	* account name / email address at DPS PxPay
+	* account name / email address at Windcave
 	* @var string max. 8 characters
 	*/
 	public $userID;
 
 	/**
-	* account name / email address at DPS PxPay
+	* account name / email address at Windcave
 	* @var string max. 8 characters
 	*/
 	public $userKey;
@@ -134,7 +134,7 @@ class GFDpsPxPayAPI {
 	#region "result specific members"
 
 	/**
-	* encrypted transaction result, to be decrypted by DPS PxPay service
+	* encrypted transaction result, to be decrypted by Windcave service
 	* @var string
 	*/
 	public $result;
@@ -151,14 +151,14 @@ class GFDpsPxPayAPI {
 		$this->userID			= $creds->userID;
 		$this->userKey			= $creds->userKey;
 		$this->endpoint			= $creds->endpoint;
-		$this->httpUserAgent	= 'Gravity Forms DPS PxPay v' . GFDPSPXPAY_PLUGIN_VERSION;
+		$this->httpUserAgent	= 'GF Windcave Free v' . GFDPSPXPAY_PLUGIN_VERSION;
 
 		// default to single payment, not recurring
 		$this->enableRecurring	= false;
 	}
 
 	/**
-	* process a payment request against DPS PxPay; throws exception on error with error described in exception message.
+	* process a payment request against Windcave; throws exception on error with error described in exception message.
 	* @return GFDpsPxPayResponseRequest
 	* @throws GFDpsPxPayException
 	*/
@@ -174,7 +174,7 @@ class GFDpsPxPayAPI {
 	}
 
 	/**
-	* process a result against DPS PxPay; throws exception on error with error described in exception message.
+	* process a result against Windcave; throws exception on error with error described in exception message.
 	* @return GFDpsPxPayResponseResult
 	* @throws GFDpsPxPayException
 	*/
@@ -351,7 +351,7 @@ class GFDpsPxPayAPI {
 		// failure to handle the http request
 		if (is_wp_error($response)) {
 			$msg = $response->get_error_message();
-			throw new GFDpsPxPayException(sprintf(__('Error posting DPS Payment Express request: %s', 'gravity-forms-dps-pxpay'), $msg));
+			throw new GFDpsPxPayException(sprintf(__('Error posting Windcave request: %s', 'gravity-forms-dps-pxpay'), $msg));
 		}
 
 		// error code returned by request
@@ -360,11 +360,11 @@ class GFDpsPxPayAPI {
 			$msg = wp_remote_retrieve_response_message($response);
 
 			if (empty($msg)) {
-				$msg = sprintf(__('Error posting DPS Payment Express request: %s', 'gravity-forms-dps-pxpay'), $code);
+				$msg = sprintf(__('Error posting Windcave request: %s', 'gravity-forms-dps-pxpay'), $code);
 			}
 			else {
 				/* translators: 1. the error code; 2. the error message */
-				$msg = sprintf(__('Error posting DPS Payment Express request: %1$s, %2$s', 'gravity-forms-dps-pxpay'), $code, $msg);
+				$msg = sprintf(__('Error posting Windcave request: %1$s, %2$s', 'gravity-forms-dps-pxpay'), $code, $msg);
 			}
 			throw new GFDpsPxPayException($msg);
 		}

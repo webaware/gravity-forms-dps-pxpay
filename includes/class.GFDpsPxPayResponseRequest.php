@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
-* DPS PxPay payment request response
+* Windcave payment request response
 */
 class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 
@@ -29,8 +29,8 @@ class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 	public $ResponseText;
 
 	/**
-	* load DPS PxPay response data as XML string
-	* @param string $response DPS PxPay response as a string (hopefully of XML data)
+	* load Windcave response data as XML string
+	* @param string $response Windcave response as a string (hopefully of XML data)
 	* @throws GFDpsPxPayException
 	*/
 	public function loadResponse($response) {
@@ -53,7 +53,7 @@ class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 	* @return string
 	*/
 	protected function getMessageInvalid() {
-		return __('Invalid response from Payment Express for payment request', 'gravity-forms-dps-pxpay');
+		return __('Invalid response from Windcave for payment request', 'gravity-forms-dps-pxpay');
 	}
 
 	/**
@@ -113,11 +113,11 @@ class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 				break;
 
 			case 'NL':
-				$msg = _x('User not enabled. Contact Payment Express.', 'DPS coded response', 'gravity-forms-dps-pxpay');
+				$msg = _x('User not enabled. Contact Windcave.', 'DPS coded response', 'gravity-forms-dps-pxpay');
 				break;
 
 			case 'NM':
-				$msg = _x('User not enabled. Contact Payment Express.', 'DPS coded response', 'gravity-forms-dps-pxpay');
+				$msg = _x('User not enabled. Contact Windcave.', 'DPS coded response', 'gravity-forms-dps-pxpay');
 				break;
 
 			case 'NN':
@@ -133,7 +133,7 @@ class GFDpsPxPayResponseRequest extends GFDpsPxPayResponse {
 				break;
 
 			case 'NQ':
-				$msg = _x('User not enabled for PxPay 2.0. Contact Payment Express.', 'DPS coded response', 'gravity-forms-dps-pxpay');
+				$msg = _x('User not enabled for PxPay 2.0. Contact Windcave.', 'DPS coded response', 'gravity-forms-dps-pxpay');
 				break;
 
 			case 'NT':

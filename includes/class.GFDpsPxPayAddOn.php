@@ -18,7 +18,7 @@ if (!defined('ABSPATH')) {
 */
 class AddOn extends GFPaymentAddOn {
 
-	protected $dpsReturnArgs;							// data returned in Payment Express callback
+	protected $dpsReturnArgs;							// data returned in Windcave callback
 	protected $validationMessages;						// any validation messages picked up for the form as a whole
 	protected $urlPaymentForm;							// URL for payment form where purchaser will enter credit card details
 	protected $feed = null;								// current feed mapping form fields to payment fields
@@ -48,8 +48,8 @@ class AddOn extends GFPaymentAddOn {
 		$this->_slug						= 'gravity-forms-dps-pxpay';
 		$this->_path						= GFDPSPXPAY_PLUGIN_NAME;
 		$this->_full_path					= GFDPSPXPAY_PLUGIN_FILE;
-		$this->_title						= 'DPS PxPay';					// NB: no localisation yet
-		$this->_short_title					= 'DPS PxPay';					// NB: no localisation yet
+		$this->_title						= 'Windcave Free';				// NB: no localisation yet
+		$this->_short_title					= 'Windcave Free';				// NB: no localisation yet
 		$this->_supports_callbacks			= true;
 
 		// define capabilities in case role/permissions have been customised (e.g. Members plugin)
@@ -77,8 +77,8 @@ class AddOn extends GFPaymentAddOn {
 	* late localisation of strings, after load_plugin_textdomain() has been called
 	*/
 	public function lateLocalise() {
-		$this->_title			= esc_html_x('DPS PxPay', 'add-on full title', 'gravity-forms-dps-pxpay');
-		$this->_short_title		= esc_html_x('DPS PxPay', 'add-on short title', 'gravity-forms-dps-pxpay');
+		$this->_title			= esc_html_x('Windcave Free', 'add-on full title', 'gravity-forms-dps-pxpay');
+		$this->_short_title		= esc_html_x('Windcave Free', 'add-on short title', 'gravity-forms-dps-pxpay');
 	}
 
 	/**
@@ -141,7 +141,7 @@ class AddOn extends GFPaymentAddOn {
 	* @return string
 	*/
 	public function plugin_settings_title() {
-		return esc_html__('DPS Payment Express PxPay settings', 'gravity-forms-dps-pxpay');
+		return esc_html__('Windcave Free settings', 'gravity-forms-dps-pxpay');
 	}
 
 	/**
@@ -210,7 +210,7 @@ class AddOn extends GFPaymentAddOn {
 						'name'			=> 'testEnv',
 						'label'			=> esc_html_x('Sandbox Environment', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'radio',
-						'tooltip'		=> esc_html__('When DPS Payment Express sent you your user ID and password, they will have told you to use either SEC or UAT for your sandbox.', 'gravity-forms-dps-pxpay'),
+						'tooltip'		=> esc_html__('When Windcave sent you your user ID and password, they will have told you to use either SEC or UAT for your sandbox.', 'gravity-forms-dps-pxpay'),
 						'choices'		=> [
 							['value' => 'SEC', 'label' => 'SEC'],
 							['value' => 'UAT', 'label' => 'UAT'],
@@ -255,7 +255,7 @@ class AddOn extends GFPaymentAddOn {
 	* @return string
 	*/
 	public function feed_settings_title() {
-		return esc_html__('DPS Payment Express PxPay transaction settings', 'gravity-forms-dps-pxpay');
+		return esc_html__('Windcave Free transaction settings', 'gravity-forms-dps-pxpay');
 	}
 
 	/**
@@ -470,11 +470,11 @@ class AddOn extends GFPaymentAddOn {
 
 					[
 						'name'			=> 'condition',
-						'label'			=> esc_html_x('Payment Express condition', 'feed field name', 'gravity-forms-dps-pxpay'),
+						'label'			=> esc_html_x('Windcave condition', 'feed field name', 'gravity-forms-dps-pxpay'),
 						'type'			=> 'feed_condition',
 						'checkbox_label' => esc_html_x('Enable', 'checkbox label', 'gravity-forms-dps-pxpay'),
-						'instructions'	=> esc_html_x('Send to Payment Express if', 'feed conditions', 'gravity-forms-dps-pxpay'),
-						'tooltip'		=> esc_html__('When the Payment Express condition is enabled, form submissions will only be sent to Payment Express when the condition is met. When disabled, all form submissions will be sent to Payment Express.', 'gravity-forms-dps-pxpay'),
+						'instructions'	=> esc_html_x('Send to Windcave if', 'feed conditions', 'gravity-forms-dps-pxpay'),
+						'tooltip'		=> esc_html__('When the Windcave condition is enabled, form submissions will only be sent to Windcave when the condition is met. When disabled, all form submissions will be sent to Windcave.', 'gravity-forms-dps-pxpay'),
 					],
 
 				],
@@ -675,7 +675,7 @@ class AddOn extends GFPaymentAddOn {
 				// make sure that gateway credentials have been set for feed, or globally
 				$creds = new GFDpsPxPayCredentials($this, !empty($feed['meta']['useTest']));
 				if ($creds->isIncomplete()) {
-					throw new GFDpsPxPayException(__('Incomplete credentials for Payment Express PxPay payment; please tell the web master.', 'gravity-forms-dps-pxpay'));
+					throw new GFDpsPxPayException(__('Incomplete credentials for Windcave PxPay payment; please tell the web master.', 'gravity-forms-dps-pxpay'));
 				}
 			}
 		}
@@ -874,7 +874,7 @@ class AddOn extends GFPaymentAddOn {
 		$this->dpsReturnArgs = wp_unslash($args);
 		$this->dpsReturnArgs['useTest'] = strpos($request_uri['path'], ENDPOINT_RETURN_TEST) !== false;
 
-		// stop WooCommerce Payment Express Gateway from intercepting other integrations' transactions!
+		// stop WooCommerce Windcave Gateway from intercepting other integrations' transactions!
 		unset($_GET['userid']);
 		unset($_REQUEST['userid']);
 
@@ -1387,7 +1387,7 @@ class AddOn extends GFPaymentAddOn {
 	}
 
 	/**
-	* if customer has requested to retry a transaction, send them back to Payment Express
+	* if customer has requested to retry a transaction, send them back to Windcave
 	* @param array $form
 	* @param array $entry
 	* @return array

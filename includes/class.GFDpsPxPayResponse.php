@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
-* Class for dealing with a DPS Payment Express response
+* Class for dealing with a Windcave response
 */
 abstract class GFDpsPxPayResponse {
 
@@ -17,8 +17,8 @@ abstract class GFDpsPxPayResponse {
 	public $isValid;
 
 	/**
-	* load DPS PxPay response data as XML string
-	* @param string $response DPS PxPay response as a string (hopefully of XML data)
+	* load Windcave response data as XML string
+	* @param string $response Windcave response as a string (hopefully of XML data)
 	* @throws GFDpsPxPayException
 	*/
 	public function loadResponse($response) {
@@ -49,7 +49,7 @@ abstract class GFDpsPxPayResponse {
 			}
 			libxml_use_internal_errors($oldUseInternalErrors);
 
-			throw new GFDpsPxPayException(sprintf(__('Invalid response from Payment Express: %s', 'gravity-forms-dps-pxpay'), $e->getMessage()));
+			throw new GFDpsPxPayException(sprintf(__('Invalid response from Windcave: %s', 'gravity-forms-dps-pxpay'), $e->getMessage()));
 		}
 
 		if (is_null($response)) {

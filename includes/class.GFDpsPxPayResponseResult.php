@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 }
 
 /**
-* DPS PxPay payment result response
+* Windcave payment result response
 */
 class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 
@@ -79,7 +79,7 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 	public $ResponseText;
 
 	/**
-	* Payment Express billing ID generated when creating a new token
+	* Windcave billing ID generated when creating a new token
 	* @var string max. 16 characters
 	*/
 	public $DpsBillingId;
@@ -173,7 +173,7 @@ class GFDpsPxPayResponseResult extends GFDpsPxPayResponse {
 	* @return string
 	*/
 	protected function getMessageInvalid() {
-		return __('Invalid response from Payment Express for payment response', 'gravity-forms-dps-pxpay');
+		return __('Invalid response from Windcave for payment response', 'gravity-forms-dps-pxpay');
 	}
 
 	/**
