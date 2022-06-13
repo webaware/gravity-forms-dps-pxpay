@@ -1,6 +1,14 @@
 <?php
 namespace webaware\gf_dpspxpay;
 
+use GFAPI;
+use GFCommon;
+use GFFormDisplay;
+use GFFormsModel;
+use GFPaymentAddOn;
+use GFSalesforce;
+use GFZapier;
+
 if (!defined('ABSPATH')) {
 	exit;
 }
@@ -8,7 +16,7 @@ if (!defined('ABSPATH')) {
 /**
 * implement a Gravity Forms Payment Add-on instance
 */
-class AddOn extends \GFPaymentAddOn {
+class AddOn extends GFPaymentAddOn {
 
 	protected $dpsReturnArgs;							// data returned in Payment Express callback
 	protected $validationMessages;						// any validation messages picked up for the form as a whole
@@ -494,7 +502,7 @@ class AddOn extends \GFPaymentAddOn {
 		$this->feedDefaultFieldMap = [];
 
 		$form_id = rgget( 'id' );
-		$form = \GFFormsModel::get_form_meta( $form_id );
+		$form = GFFormsModel::get_form_meta( $form_id );
 
 		if (!isset($this->feedDefaultFieldMap['billingInformation_description'])) {
 			$this->feedDefaultFieldMap['billingInformation_description']			= 'form_title';
@@ -602,7 +610,7 @@ class AddOn extends \GFPaymentAddOn {
 		// manually add some supported add-ons that don't comply with delayed payment conventions
 		if (method_exists('GFZapier', 'add_paypal_post_payment_actions')) {
 			// Zapier add-on versions 1.6 - 3.1
-			$fields = \GFZapier::add_paypal_post_payment_actions($fields, $this);
+			$fields = GFZapier::add_paypal_post_payment_actions($fields, $this);
 		}
 
 		// manually add the old free Salesforce integration if installed, for backwards compatibility
@@ -707,7 +715,7 @@ class AddOn extends \GFPaymentAddOn {
 
 			if ($response->isValid && !empty($response->URI)) {
 				$this->urlPaymentForm = $response->URI;
-				\GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
+				GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
 				$entry['payment_status']	= 'Processing';
 			}
 			else {
@@ -732,7 +740,7 @@ class AddOn extends \GFPaymentAddOn {
 			$this->log_error(__FUNCTION__ . ': exception = ' . $e->getMessage());
 
 			// record payment failure, and set hook for displaying error message
-			\GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Failed');
+			GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Failed');
 			$this->error_msg = $e->getMessage();
 			add_filter('gform_confirmation', [$this, 'displayPaymentFailure'], 1000, 4);
 		}
@@ -750,7 +758,7 @@ class AddOn extends \GFPaymentAddOn {
 	*/
 	public function displayPaymentFailure($confirmation, $form, $entry, $ajax) {
 		// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-		gform_update_meta($entry['id'], META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
+		gform_update_meta($entry['id'], META_UNIQUE_ID, GFFormsModel::get_form_unique_id($form['id']));
 
 		// create a "confirmation message" in which to display the error
 		$anchor = get_form_confirmation_anchor($form);
@@ -787,7 +795,7 @@ class AddOn extends \GFPaymentAddOn {
 		$capture = (rgar($feed['meta'], 'paymentMethod', 'capture') !== 'authorize');
 
 		$paymentReq->amount					= $formData['payment_amount'];
-		$paymentReq->currency				= \GFCommon::get_currency();
+		$paymentReq->currency				= GFCommon::get_currency();
 		$paymentReq->transactionNumber		= $transactionID;
 		$paymentReq->invoiceReference		= $formData['description'];
 		$paymentReq->txnType				= $capture ? GFDpsPxPayAPI::TXN_TYPE_CAPTURE : GFDpsPxPayAPI::TXN_TYPE_AUTHORISE;
@@ -834,7 +842,7 @@ class AddOn extends \GFPaymentAddOn {
 	public function redirect_url($feed, $submission_data, $form, $entry) {
 		if ($this->urlPaymentForm) {
 			// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
-			gform_update_meta($entry['id'], META_UNIQUE_ID, \GFFormsModel::get_form_unique_id($form['id']));
+			gform_update_meta($entry['id'], META_UNIQUE_ID, GFFormsModel::get_form_unique_id($form['id']));
 		}
 
 		return $this->urlPaymentForm;
@@ -912,7 +920,7 @@ class AddOn extends \GFPaymentAddOn {
 					],
 				],
 			];
-			$entries = \GFAPI::get_entries(0, $search);
+			$entries = GFAPI::get_entries(0, $search);
 
 			// must have an entry, or nothing to do
 			if (empty($entries)) {
@@ -921,7 +929,7 @@ class AddOn extends \GFPaymentAddOn {
 			$entry = $entries[0];
 			$lead_id = rgar($entry, 'id');
 
-			$form = \GFFormsModel::get_form_meta($entry['form_id']);
+			$form = GFFormsModel::get_form_meta($entry['form_id']);
 			$feed = $this->getFeed($lead_id);
 
 			// capture current state of lead
@@ -967,7 +975,7 @@ class AddOn extends \GFPaymentAddOn {
 
 					if (!$entry_was_locked) {
 						// fail_payment() below doesn't update whole entry, so we need to do it here
-						\GFAPI::update_entry($entry);
+						GFAPI::update_entry($entry);
 
 						$note = $this->getFailureNote($capture, $response->getProcessingMessages());
 
@@ -998,7 +1006,7 @@ class AddOn extends \GFPaymentAddOn {
 				// on failure, redirect to failure page if set
 				// after first replacing any merge tags in the redirect URL
 				$redirect_url = $feed['meta']['cancelURL'];
-				$redirect_url = \GFCommon::replace_variables( trim( $redirect_url ), $form, $entry, false, true, true, 'text' );
+				$redirect_url = GFCommon::replace_variables( trim( $redirect_url ), $form, $entry, false, true, true, 'text' );
 				$redirect_url = esc_url_raw($redirect_url);
 			}
 			else {
@@ -1207,7 +1215,7 @@ class AddOn extends \GFPaymentAddOn {
 		if (!empty($feed['meta']['delayPost'])) {
 			if (apply_filters('gfdpspxpay_delayed_post_create', $execute_delayed, $entry, $form, $feed)) {
 				$this->log_debug(sprintf('executing delayed post creation; form id %s, lead id %s', $form['id'], $entry['id']));
-				\GFFormsModel::create_post($form, $entry);
+				GFFormsModel::create_post($form, $entry);
 			}
 		}
 
@@ -1237,7 +1245,7 @@ class AddOn extends \GFPaymentAddOn {
 	public function maybeExecuteSalesforce($feed, $entry, $form) {
 		if (!empty($feed['meta']['delay_gravity-forms-salesforce']) && method_exists('GFSalesforce', 'export')) {
 			$this->log_debug(sprintf('executing delayed gravity-forms-salesforce feed: form id %s, entry id %s', $form['id'], $entry['id']));
-			\GFSalesforce::export($entry, $form);
+			GFSalesforce::export($entry, $form);
 		}
 	}
 
@@ -1269,7 +1277,7 @@ class AddOn extends \GFPaymentAddOn {
 		// make sure we have permission
 		check_admin_referer('gforms_save_entry', 'gforms_save_entry');
 
-		$entry = \GFFormsModel::get_lead($entry_id);
+		$entry = GFFormsModel::get_lead($entry_id);
 
 		// make sure that we're editing the entry and are allowed to change it
 		if (!$this->canEditPaymentDetails($entry, 'update')) {
@@ -1292,10 +1300,10 @@ class AddOn extends \GFPaymentAddOn {
 		}
 
 
-		\GFAPI::update_entry($entry);
+		GFAPI::update_entry($entry);
 
 		$user = wp_get_current_user();
-		\GFFormsModel::add_note($entry['id'], $user->ID, $user->display_name, esc_html($note));
+		GFFormsModel::add_note($entry['id'], $user->ID, $user->display_name, esc_html($note));
 	}
 
 	/**
@@ -1312,15 +1320,15 @@ class AddOn extends \GFPaymentAddOn {
 			// make sure we have a match
 			if ($query) {
 				// load form and lead data
-				$form = \GFFormsModel::get_form_meta($query['form_id']);
-				$lead = \GFFormsModel::get_lead($query['lead_id']);
+				$form = GFFormsModel::get_form_meta($query['form_id']);
+				$lead = GFFormsModel::get_lead($query['lead_id']);
 				$this->current_feed = $this->getFeed($lead['id']);
 
 				do_action('gfdpspxpay_process_confirmation_parsed', $lead, $form);
 
 				// ensure that we can set up the confirmation page
 				if (!class_exists('GFFormDisplay', false)) {
-					require_once(\GFCommon::get_base_path() . '/form_display.php');
+					require_once(GFCommon::get_base_path() . '/form_display.php');
 				}
 
 				// check for failed payment (error / cancellation) that can be retried
@@ -1333,11 +1341,11 @@ class AddOn extends \GFPaymentAddOn {
 				}
 				else {
 					// regular confirmation as configured for the form
-					$confirmation = \GFFormDisplay::handle_confirmation($form, $lead, false);
+					$confirmation = GFFormDisplay::handle_confirmation($form, $lead, false);
 				}
 
 				// preload the GF submission, ready for processing the confirmation message
-				\GFFormDisplay::$submission[$form['id']] = [
+				GFFormDisplay::$submission[$form['id']] = [
 					'is_confirmation'		=> true,
 					'confirmation_message'	=> $confirmation,
 					'form'					=> $form,
@@ -1405,7 +1413,7 @@ class AddOn extends \GFPaymentAddOn {
 	*/
 	protected function getRetryConfirmationMesssage($form, $entry, $was_cancelled) {
 		$submission_data	= $this->get_submission_data($this->current_feed, $form, $entry);
-		$payment_amount		= \GFCommon::to_money($submission_data['payment_amount']);
+		$payment_amount		= GFCommon::to_money($submission_data['payment_amount']);
 
 		$retry_link			= add_query_arg(array_merge($_GET, ['retry_payment'  => '1']), $entry['source_url']);
 		$cancel_link		= add_query_arg(array_merge($_GET, ['cancel_payment' => '1']), $entry['source_url']);
@@ -1559,14 +1567,14 @@ class AddOn extends \GFPaymentAddOn {
 
 			// format payment amount as currency
 			if (isset($entry['payment_amount'])) {
-				$payment_amount = \GFCommon::format_number($entry['payment_amount'], 'currency', rgar($entry, 'currency', ''));
+				$payment_amount = GFCommon::format_number($entry['payment_amount'], 'currency', rgar($entry, 'currency', ''));
 			}
 			else {
 				$payment_amount = '';
 			}
 
 			// format surcharge amount as currency
-			$surcharge = empty($surcharge) ? '' : \GFCommon::format_number($surcharge, 'currency', rgar($entry, 'currency', ''));
+			$surcharge = empty($surcharge) ? '' : GFCommon::format_number($surcharge, 'currency', rgar($entry, 'currency', ''));
 
 			$tags = [
 				'{transaction_id}',
@@ -1581,8 +1589,8 @@ class AddOn extends \GFPaymentAddOn {
 				rgar($entry, 'payment_status', ''),
 				$payment_amount,
 				$surcharge ?: '',
-				!empty($authCode) ? $authCode : '',
-				\GFCommon::format_date(rgar($entry, 'date_created'), false, '', false),
+				$authCode ?: '',
+				GFCommon::format_date(rgar($entry, 'date_created'), false, '', false),
 			];
 
 			// maybe encode the results
@@ -1624,7 +1632,11 @@ class AddOn extends \GFPaymentAddOn {
 	public function gformPaymentDetails($form_id, $entry) {
 		$payment_gateway = gform_get_meta($entry['id'], 'payment_gateway');
 		if ($payment_gateway === $this->_slug) {
-			$authCode		= gform_get_meta($entry['id'], META_AUTHCODE);
+			$authCode	= gform_get_meta($entry['id'], META_AUTHCODE);
+			$surcharge	= gform_get_meta($entry['id'], META_SURCHARGE);
+
+			// format surcharge amount as currency
+			$surcharge = empty($surcharge) ? '' : GFCommon::format_number($surcharge, 'currency', rgar($entry, 'currency', ''));
 
 			require GFDPSPXPAY_PLUGIN_ROOT . 'views/admin-entry-payment-details.php';
 		}
@@ -1672,7 +1684,7 @@ class AddOn extends \GFPaymentAddOn {
 			$message = esc_html__('Payment has been authorized successfully. Amount: %1$s. Transaction ID: %2$s.', 'gravity-forms-dps-pxpay');
 		}
 
-		$amount = \GFCommon::to_money($results['amount'], $results['currency']);
+		$amount = GFCommon::to_money($results['amount'], $results['currency']);
 
 		$note = sprintf($message, $amount, $results['transaction_id']);
 		if (!empty($messages)) {
