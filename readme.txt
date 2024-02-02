@@ -7,9 +7,9 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, windcave, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
 Requires at least: 4.9
-Tested up to: 6.0
-Stable tag: 2.4.0
-Requires PHP: 5.6
+Tested up to: 6.4
+Stable tag: 2.5.0
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -149,17 +149,18 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.4.0
+### 2.5.0
 
-supports transactions with surcharges levied by the hosted payment page; plugin is now called GF Windcave Free
+minimum required PHP version is now 7.4; replace deprecated paymentexpress.com endpoints with windcave.com endpoints; added filter hook for timeout option
 
 ## Changelog
 
 [The full changelog can be found on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.4.0
+### 2.5.0
 
-Released 2022-06-13
+Released 2024-02-02
 
-* added: support for transactions with surcharges levied by the hosted payment page
-* changed: the plugin is now called GF Windcave Free
+* changed: minimum required PHP version is now 7.4; recommended version is PHP 8.1 or higher
+* fixed: replace deprecated paymentexpress.com endpoints with windcave.com endpoints
+* added: filter `gfdpspxpay_options` for setting timeout for hosted page
