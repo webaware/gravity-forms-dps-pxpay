@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.5.0, 2024-02-02
+
+* changed: minimum required PHP version is now 7.4; recommended version is PHP 8.1 or higher
+
 ### 2.4.0, 2022-06-13
 
 * added: support for transactions with surcharges levied by the hosted payment page

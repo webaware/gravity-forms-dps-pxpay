@@ -1,6 +1,6 @@
 {
 	"name": "gravity-forms-dps-pxpay",
-	"version": "2.4.0",
+	"version": "2.5.0",
 	"description": "GF Windcave Free",
 	"homepage": "https://shop.webaware.com.au/downloads/gravity-forms-dps-pxpay/",
 	"browserslist": [
@@ -8,11 +8,11 @@
 		"not dead"
 	],
 	"devDependencies": {
-		"@babel/cli": "^7.17.10",
-		"@babel/core": "^7.18.2",
-		"@babel/preset-env": "^7.18.2",
-		"eslint": "^8.17.0",
-		"uglify-js": "^3.15.5"
+		"@babel/cli": "^7.23.9",
+		"@babel/core": "^7.23.9",
+		"@babel/preset-env": "^7.23.9",
+		"eslint": "^8.56.0",
+		"uglify-js": "^3.17.4"
 	},
 	"repository": {
 		"type": "git",

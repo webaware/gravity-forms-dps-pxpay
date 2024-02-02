@@ -1613,7 +1613,7 @@ class AddOn extends GFPaymentAddOn {
 	* @return array
 	*/
 	protected function getFeed($lead_id) {
-		if ($this->feed !== false && (empty($this->feed['lead_id']) || $this->feed['lead_id'] != $lead_id)) {
+		if ($this->feed !== false && (empty($this->feed['lead_id']) || intval($this->feed['lead_id']) !== intval($lead_id))) {
 			$form = gform_get_meta($lead_id, META_FEED_ID);
 			$this->feed = $this->get_feed($form);
 			if ($this->feed) {
