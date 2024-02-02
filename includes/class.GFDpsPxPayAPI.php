@@ -129,6 +129,12 @@ class GFDpsPxPayAPI {
 	*/
 	public $transactionNumber;
 
+	/**
+	* options, essentially for specifying the hosted page timeout
+	* @var string max. 64 characters
+	*/
+	public $options;
+
 	#endregion // "payment specific members"
 
 	#region "result specific members"
@@ -268,6 +274,10 @@ class GFDpsPxPayAPI {
 
 		if (!empty($this->txn_data3)) {
 			$xml->writeElement('TxnData3',			substr($this->txn_data3, 0, 255));
+		}
+
+		if (!empty($this->options)) {
+			$xml->writeElement('Opt',				substr($this->options, 0, 64));
 		}
 
 		$xml->endElement();		// GenerateRequest

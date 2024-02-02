@@ -813,6 +813,7 @@ class AddOn extends GFPaymentAddOn {
 		$paymentReq->txn_data1			= apply_filters('gfdpspxpay_invoice_txndata1', $paymentReq->txn_data1, $form);
 		$paymentReq->txn_data2			= apply_filters('gfdpspxpay_invoice_txndata2', $paymentReq->txn_data2, $form);
 		$paymentReq->txn_data3			= apply_filters('gfdpspxpay_invoice_txndata3', $paymentReq->txn_data3, $form);
+		$paymentReq->options			= apply_filters('gfdpspxpay_options', null, $form);
 
 		return $paymentReq;
 	}

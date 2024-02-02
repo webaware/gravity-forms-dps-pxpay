@@ -6,6 +6,7 @@
 
 * changed: minimum required PHP version is now 7.4; recommended version is PHP 8.1 or higher
 * fixed: replace deprecated paymentexpress.com endpoints with windcave.com endpoints
+* added: filter `gfdpspxpay_options` for setting timeout for hosted page
 
 ### 2.4.0, 2022-06-13
 
