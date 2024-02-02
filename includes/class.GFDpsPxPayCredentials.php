@@ -14,8 +14,8 @@ class GFDpsPxPayCredentials {
 	public $userKey;
 	public $endpoint;
 
-	const PXPAY_APIV2_URL			= 'https://sec.paymentexpress.com/pxaccess/pxpay.aspx';
-	const PXPAY_APIV2_TEST_URL		= 'https://uat.paymentexpress.com/pxaccess/pxpay.aspx';
+	const PXPAY_APIV2_URL			= 'https://sec.windcave.com/pxaccess/pxpay.aspx';
+	const PXPAY_APIV2_TEST_URL		= 'https://uat.windcave.com/pxaccess/pxpay.aspx';
 
 	/**
 	* set gateway credentials for selected feed
