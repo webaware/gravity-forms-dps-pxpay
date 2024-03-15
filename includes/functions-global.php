@@ -23,7 +23,7 @@ function gf_dpspxpay_can_show_admin_notices() {
 	global $pagenow;
 
 	// only on specific pages
-	$is_gf_page = class_exists('GFForms', false) ? !!(GFForms::get_page()) : false;
+	$is_gf_page = class_exists('GFForms', false) ? (bool) GFForms::get_page() : false;
 	if ($pagenow !== 'plugins.php' && !$is_gf_page) {
 		return false;
 	}
