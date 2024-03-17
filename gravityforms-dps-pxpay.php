@@ -3,7 +3,7 @@
 Plugin Name: GF Windcave Free
 Plugin URI: https://wordpress.org/plugins/gravity-forms-dps-pxpay/
 Description: Easily create online payment forms with Gravity Forms and Windcave (DPS Payment Express) PxPay
-Version: 2.5.1
+Version: 2.5.1-dev
 Author: WebAware
 Author URI: https://shop.webaware.com.au/
 Text Domain: gravity-forms-dps-pxpay
@@ -36,7 +36,7 @@ define('GFDPSPXPAY_PLUGIN_ROOT', dirname(__FILE__) . '/');
 define('GFDPSPXPAY_PLUGIN_NAME', basename(dirname(__FILE__)) . '/' . basename(__FILE__));
 define('GFDPSPXPAY_PLUGIN_FILE', __FILE__);
 define('GFDPSPXPAY_PLUGIN_MIN_PHP', '7.4');
-define('GFDPSPXPAY_PLUGIN_VERSION', '2.5.1');
+define('GFDPSPXPAY_PLUGIN_VERSION', '2.5.1-dev');
 
 require GFDPSPXPAY_PLUGIN_ROOT . 'includes/functions-global.php';
 
