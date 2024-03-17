@@ -910,7 +910,13 @@ class AddOn extends GFPaymentAddOn {
 				update_option($lock_id, time());
 			}
 			else {
-				$this->log_debug("transaction $transactionNumber was locked");
+				$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+				$this->log_debug("transaction $transactionNumber was locked, user agent = $user_agent");
+
+				// if it's the Windcave FPRN callback, just exit now, otherwise continue to page redirect
+				if ($user_agent === 'PXL1') {
+					exit;
+				}
 			}
 
 			$search = [
@@ -938,7 +944,7 @@ class AddOn extends GFPaymentAddOn {
 
 			$capture = (rgar($feed['meta'], 'paymentMethod', 'capture') !== 'authorize');
 
-			if (rgar($entry, 'payment_status') === 'Processing') {
+			if (!$entry_was_locked && $initial_status === 'Processing') {
 				// update lead entry, with success/fail details
 				if ($response->Success) {
 					$action = [
@@ -957,9 +963,7 @@ class AddOn extends GFPaymentAddOn {
 						$entry[META_SURCHARGE]			=  $response->AmountSurcharge;
 					}
 
-					if (!$entry_was_locked) {
-						$this->complete_payment($entry, $action);
-					}
+					$this->complete_payment($entry, $action);
 
 					$this->log_debug(sprintf('%s: success, date = %s, id = %s, status = %s, amount = %s',
 						__FUNCTION__, $entry['payment_date'], $entry['transaction_id'], $entry['payment_status'], $entry['payment_amount']));
@@ -974,33 +978,29 @@ class AddOn extends GFPaymentAddOn {
 					// record empty bank authorisation code, so that we can test for it
 					$entry[META_AUTHCODE]			=  '';
 
-					if (!$entry_was_locked) {
-						// fail_payment() below doesn't update whole entry, so we need to do it here
-						GFAPI::update_entry($entry);
+					// fail_payment() below doesn't update whole entry, so we need to do it here
+					GFAPI::update_entry($entry);
 
-						$note = $this->getFailureNote($capture, $response->getProcessingMessages());
+					$note = $this->getFailureNote($capture, $response->getProcessingMessages());
 
-						$action = [
-							'type'							=> 'fail_payment',
-							'payment_status'				=> 'Failed',
-							'note'							=> $note,
-						];
-						$this->fail_payment($entry, $action);
-					}
+					$action = [
+						'type'							=> 'fail_payment',
+						'payment_status'				=> 'Failed',
+						'note'							=> $note,
+					];
+					$this->fail_payment($entry, $action);
 
 					$this->log_debug(sprintf('%s: failed; %s', __FUNCTION__, $this->getErrorsForLog($response->getProcessingMessages())));
 				}
 
 				// if order hasn't been fulfilled, process any deferred actions
-				if (!$entry_was_locked && $initial_status === 'Processing') {
-					$this->log_debug('processing deferred actions');
+				$this->log_debug('processing deferred actions');
 
-					$this->processDelayed($feed, $entry, $form);
+				$this->processDelayed($feed, $entry, $form);
 
-					// allow hookers to trigger their own actions
-					$hook_status = $response->Success ? 'approved' : 'failed';
-					do_action("gfdpspxpay_process_{$hook_status}", $entry, $form, $feed);
-				}
+				// allow hookers to trigger their own actions
+				$hook_status = $response->Success ? 'approved' : 'failed';
+				do_action("gfdpspxpay_process_{$hook_status}", $entry, $form, $feed);
 			}
 
 			if ($entry['payment_status'] === 'Failed' && $feed['meta']['cancelURL']) {
