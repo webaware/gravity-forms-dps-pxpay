@@ -5,10 +5,10 @@ Plugin URI: https://wordpress.org/plugins/gravity-forms-dps-pxpay/
 Author: WebAware
 Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
-Tags: gravity forms, windcave, dps, payment express, pxpay, donations, payment, payment gateway, ecommerce
+Tags: gravity forms, windcave, payment express, pxpay, ecommerce
 Requires at least: 4.9
-Tested up to: 6.4
-Stable tag: 2.5.0
+Tested up to: 6.7
+Stable tag: 2.6.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,18 +149,18 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.5.0
+### 2.6.0
 
-minimum required PHP version is now 7.4; replace deprecated paymentexpress.com endpoints with windcave.com endpoints; added filter hook for timeout option
+fixed duplicate record of transaction completion in Gravity Forms; new feed maps email field by default; feeds will be duplicated when form is duplicated
 
 ## Changelog
 
 [The full changelog can be found on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.5.0
+### 2.6.0
 
-Released 2024-02-02
+Released 2024-11-13
 
-* changed: minimum required PHP version is now 7.4; recommended version is PHP 8.1 or higher
-* fixed: replace deprecated paymentexpress.com endpoints with windcave.com endpoints
-* added: filter `gfdpspxpay_options` for setting timeout for hosted page
+* fixed: duplicate record of transaction completion in Gravity Forms
+* fixed: new feed stopped mapping email field by default
+* added: feeds will be duplicated when form is duplicated

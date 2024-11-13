@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.6.0, soon...
+### 2.6.0, 2024-11-13
 
 * fixed: duplicate record of transaction completion in Gravity Forms
 * fixed: new feed stopped mapping email field by default
