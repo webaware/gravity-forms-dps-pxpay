@@ -5,6 +5,7 @@
 ### 2.6.0, soon...
 
 * fixed: duplicate record of transaction completion in Gravity Forms
+* added: feeds will be duplicated when form is duplicated
 
 ### 2.5.0, 2024-02-02
 

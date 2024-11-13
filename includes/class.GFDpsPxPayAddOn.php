@@ -106,6 +106,15 @@ class AddOn extends GFPaymentAddOn {
 	}
 
 	/**
+	 * enable feed duplication
+	 * @param int|array $feed_id
+	 * @return bool
+	 */
+	public function can_duplicate_feed($feed_id) {
+		return true;
+	}
+
+	/**
 	* null the add-on framework load of text domain, because we already did it, thanks.
 	*/
 	public function load_text_domain() {
