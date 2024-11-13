@@ -567,20 +567,14 @@ class AddOn extends GFPaymentAddOn {
 			],
 		];
 
-		return $fields;
-	}
-
-	/**
-	* override to set default mapped field selections from first occurring field of type
-	* @param  array $field
-	* @return string|null
-	*/
-	public function get_default_field_select_field($field) {
-		if (!empty($this->feedDefaultFieldMap[$field['name']])) {
-			return $this->feedDefaultFieldMap[$field['name']];
+		foreach ($fields as &$field) {
+			$name = 'billingInformation_' . $field['name'];
+			if (!empty($this->feedDefaultFieldMap[$name])) {
+				$field['default_value'] =  $this->feedDefaultFieldMap[$name];
+			}
 		}
 
-		return parent::get_default_field_select_field($field);
+		return $fields;
 	}
 
 	/**
