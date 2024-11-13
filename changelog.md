@@ -2,7 +2,7 @@
 
 ## Changelog
 
-### 2.5.1, soon...
+### 2.6.0, soon...
 
 * fixed: duplicate record of transaction completion in Gravity Forms
 
