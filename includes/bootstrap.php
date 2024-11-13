@@ -20,6 +20,7 @@ add_action('plugins_loaded', function() {
 */
 spl_autoload_register(function($class_name) {
 	static $classMap = [
+		'EntryLockFactory'						=> 'includes/class.EntryLockFactory.php',
 		'GFDpsPxPayAPI'							=> 'includes/class.GFDpsPxPayAPI.php',
 		'GFDpsPxPayCredentials'					=> 'includes/class.GFDpsPxPayCredentials.php',
 		'GFDpsPxPayResponse'					=> 'includes/class.GFDpsPxPayResponse.php',

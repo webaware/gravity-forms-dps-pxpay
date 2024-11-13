@@ -888,8 +888,7 @@ class AddOn extends GFPaymentAddOn {
 	public function callback() {
 		$this->log_debug('========= processing transaction result');
 
-		$lock_id = false;
-		$entry_was_locked = false;
+		$lock = false;
 
 		try {
 			$creds				= new GFDpsPxPayCredentials($this, rgar($this->dpsReturnArgs, 'useTest', false));
@@ -904,12 +903,8 @@ class AddOn extends GFPaymentAddOn {
 			$transactionNumber = $response->TxnId;
 
 			// attempt to lock entry
-			$lock_id = 'gfdpspxpay_elock_' . $transactionNumber;
-			$entry_was_locked = get_option($lock_id);
-			if (!$entry_was_locked) {
-				update_option($lock_id, time());
-			}
-			else {
+			$lock = EntryLockFactory::create($transactionNumber);
+			if (!$lock->acquire()) {
 				$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 				$this->log_debug("transaction $transactionNumber was locked, user agent = $user_agent");
 
@@ -944,7 +939,7 @@ class AddOn extends GFPaymentAddOn {
 
 			$capture = (rgar($feed['meta'], 'paymentMethod', 'capture') !== 'authorize');
 
-			if (!$entry_was_locked && $initial_status === 'Processing') {
+			if ($lock->is_acquired() && $initial_status === 'Processing') {
 				// update lead entry, with success/fail details
 				if ($response->Success) {
 					$action = [
@@ -1023,10 +1018,7 @@ class AddOn extends GFPaymentAddOn {
 				$redirect_url = esc_url_raw(add_query_arg(ENDPOINT_CONFIRMATION, $query, $entry['source_url']));
 			}
 
-			// clear lock if we set one
-			if (!$entry_was_locked) {
-				delete_option($lock_id);
-			}
+			$lock->release();
 
 			wp_safe_redirect($redirect_url);
 			exit;
@@ -1037,8 +1029,8 @@ class AddOn extends GFPaymentAddOn {
 			$this->log_error(__FUNCTION__ . ': ' . $e->getMessage());
 
 			// clear lock if we set one
-			if ($lock_id && !$entry_was_locked) {
-				delete_option($lock_id);
+			if ($lock) {
+				$lock->release();
 			}
 			exit;
 		}
