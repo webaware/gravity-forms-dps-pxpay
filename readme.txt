@@ -7,8 +7,8 @@ Author URI: https://shop.webaware.com.au/
 Donate link: https://shop.webaware.com.au/donations/?donation_for=Gravity+Forms+DPS+PxPay
 Tags: gravity forms, windcave, payment express, pxpay, ecommerce
 Requires at least: 4.9
-Tested up to: 6.7
-Stable tag: 2.6.0
+Tested up to: 6.8
+Stable tag: 2.6.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -149,18 +149,16 @@ Developers can run processes on these actions (e.g. load classes required to han
 
 ## Upgrade Notice
 
-### 2.6.0
+### 2.6.1
 
-fixed duplicate record of transaction completion in Gravity Forms; new feed maps email field by default; feeds will be duplicated when form is duplicated
+fixed deferred actions not being deferred in Gravity Forms 2.9.20
 
 ## Changelog
 
 [The full changelog can be found on GitHub](https://github.com/webaware/gravity-forms-dps-pxpay/blob/master/changelog.md). Recent entries:
 
-### 2.6.0
+### 2.6.1
 
-Released 2024-11-13
+Released 2025-10-27
 
-* fixed: duplicate record of transaction completion in Gravity Forms
-* fixed: new feed stopped mapping email field by default
-* added: feeds will be duplicated when form is duplicated
+* fixed: deferred actions not being deferred in Gravity Forms 2.9.20
