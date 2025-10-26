@@ -718,7 +718,6 @@ class AddOn extends GFPaymentAddOn {
 
 			if ($response->isValid && !empty($response->URI)) {
 				$this->urlPaymentForm = $response->URI;
-				GFFormsModel::update_lead_property($entry['id'], 'payment_status', 'Processing');
 				$entry['payment_status']	= 'Processing';
 			}
 			else {
@@ -848,6 +847,9 @@ class AddOn extends GFPaymentAddOn {
 			// record entry's unique ID in database, to signify that it has been processed so don't attempt another payment!
 			gform_update_meta($entry['id'], META_UNIQUE_ID, GFFormsModel::get_form_unique_id($form['id']));
 		}
+
+		// mark entry as processing
+		GFAPI::update_entry_property($entry['id'], 'payment_status', 'Processing');
 
 		return $this->urlPaymentForm;
 	}
@@ -1136,7 +1138,8 @@ class AddOn extends GFPaymentAddOn {
 
 						case 'success':		// delay if there is something to charge, and execute if transaction was successful
 						case 'always':		// delay if there is something to charge, and then always execute
-							$is_delayed = $entry['payment_status'] === 'Processing' && !empty($feed['meta']['delay_' . $addon_slug]);
+							$payment_status = rgar($entry, 'payment_status') ?: 'Processing';
+							$is_delayed = $payment_status === 'Processing' && !empty($feed['meta']['delay_' . $addon_slug]);
 							break;
 
 						default:
@@ -1392,6 +1395,9 @@ class AddOn extends GFPaymentAddOn {
 		if (!empty($_GET['retry_payment'])) {
 			$entry = $this->requestRedirectUrl($entry, $form);
 			if ($entry['payment_status'] === 'Processing') {
+				// mark entry as processing in the database, where it will currently be Failed
+				GFAPI::update_entry_property($entry['id'], 'payment_status', 'Processing');
+
 				wp_redirect($this->urlPaymentForm);
 				exit;
 			}

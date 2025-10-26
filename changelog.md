@@ -2,6 +2,10 @@
 
 ## Changelog
 
+### 2.6.1, 2025-10-27
+
+* fixed: deferred actions not being deferred in Gravity Forms 2.9.20
+
 ### 2.6.0, 2024-11-13
 
 * fixed: duplicate record of transaction completion in Gravity Forms
