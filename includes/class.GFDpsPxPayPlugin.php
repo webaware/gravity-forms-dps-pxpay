@@ -37,7 +37,6 @@ class Plugin {
 	*/
 	public function pluginStart() {
 		add_action('gform_loaded', [$this, 'addonInit']);
-		add_action('init', 'gf_dpspxpay_load_text_domain', 8);	// use priority 8 to get in before our add-on uses translated text
 		add_action('admin_notices', [$this, 'checkPrerequisites']);
 		add_filter('plugin_row_meta', [$this, 'pluginDetailsLinks'], 10, 2);
 
